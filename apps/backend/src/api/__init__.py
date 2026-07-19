@@ -1,0 +1,1 @@
+# API namespace packaging definition.

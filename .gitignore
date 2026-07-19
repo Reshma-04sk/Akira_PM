@@ -1,0 +1,38 @@
+# System overrides
+.env
+.env.*.local
+.env.local
+
+# Node build and dependencies
+node_modules/
+dist/
+build/
+.pnpm-debug.log
+
+# Python cache and environments
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Alembic temporary artifacts
+alembic.log
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db

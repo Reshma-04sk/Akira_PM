@@ -1,0 +1,33 @@
+{
+  "name": "saas-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-grade SaaS Monorepo",
+  "scripts": {
+    "prepare": "husky",
+    "lint": "pnpm --filter frontend lint && make lint-backend",
+    "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\"",
+    "test": "pnpm --filter frontend test && make test-backend"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "concurrently": "^8.2.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2"
+  },
+  "lint-staged": {
+    "apps/frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "apps/backend/src/**/*.py": [
+      "ruff check --fix",
+      "ruff format"
+    ],
+    "*.{json,md,js}": [
+      "prettier --write"
+    ]
+  }
+}

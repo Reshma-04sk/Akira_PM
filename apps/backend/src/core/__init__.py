@@ -1,0 +1,1 @@
+# Core applications settings package.

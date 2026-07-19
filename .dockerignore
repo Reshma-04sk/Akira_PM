@@ -1,0 +1,34 @@
+# Ignore local dependencies
+node_modules/
+.venv/
+venv/
+ENV/
+
+# Ignore version control and IDEs
+.git/
+.github/
+.vscode/
+.idea/
+
+# Ignore build artifacts
+dist/
+build/
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Ignore local config overrides
+.env
+.env.development
+.env.test
+.env.production
+.env.*.local
+.env.local
+
+# Ignore docs and tests
+docs/
+tests/
+Dockerfile
+docker-compose.yml
+Makefile
