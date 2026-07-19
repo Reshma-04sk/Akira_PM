@@ -65,7 +65,10 @@ class AuthService:
 
         # Check timezone-aware expiration
         now = datetime.now(timezone.utc)
-        if stored_token.expires_at < now:
+        expires_at = stored_token.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at < now:
             await self.refresh_token_repository.update(stored_token, {"revoked": True})
             raise UnauthorizedException("Expired refresh token")
 

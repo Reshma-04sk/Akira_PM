@@ -2,7 +2,7 @@ import asyncio
 from collections.abc import AsyncGenerator
 import pytest
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import pool
+from sqlalchemy.pool import StaticPool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from src.core.settings import settings
@@ -13,20 +13,22 @@ from src.dependencies.database import get_db_session
 # Assure tests isolation boundary checks
 assert settings.ENV_STATE == "testing", "ENV_STATE must be set to 'testing' to execute tests!"
 
-# Engine for the test database context
+# Use SQLite in-memory for fast and isolated test environment execution
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
 test_engine = create_async_engine(
-    settings.DATABASE_URL,
-    poolclass=pool.NullPool
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 
-# Test session factory
 test_session_maker = async_sessionmaker(
     bind=test_engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
 )
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def setup_test_db():
     """Initializes tables for test runs and drops them afterwards."""
     async with test_engine.begin() as conn:
@@ -50,8 +52,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
         yield db_session
 
     app.dependency_overrides[get_db_session] = override_get_db_session
-    
-    # Configure HTTPX async client using ASGI mapping
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac

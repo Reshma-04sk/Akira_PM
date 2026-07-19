@@ -1,23 +1,28 @@
+import uuid
+import bcrypt
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from src.core.exceptions import UnauthorizedException
 from src.core.settings import settings
-
-# Cryptography context for password hashing using bcrypt
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain password against its hashed value."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a plain password against its hashed value using bcrypt."""
+    try:
+        pwd_bytes = plain_password.encode("utf-8")
+        hash_bytes = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(pwd_bytes, hash_bytes)
+    except Exception:
+        return False
 
 def get_password_hash(password: str) -> str:
     """Generate a bcrypt hash of the plain text password."""
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode("utf-8")
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """
@@ -29,7 +34,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.BACKEND_ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    to_encode.update({"exp": expire, "type": "access"})
+    to_encode.update({"exp": expire, "jti": str(uuid.uuid4()), "type": "access"})
     return jwt.encode(to_encode, settings.BACKEND_SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_access_token(token: str) -> dict:
