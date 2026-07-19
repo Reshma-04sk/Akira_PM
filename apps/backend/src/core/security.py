@@ -1,6 +1,9 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+from jose import JWTError, jwt
 from passlib.context import CryptContext
+from src.core.exceptions import UnauthorizedException
 from src.core.settings import settings
 
 # Cryptography context for password hashing using bcrypt
@@ -18,7 +21,7 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """
-    Generate a JWT token signed with backend secret keys.
+    Generate a short-lived JWT access token signed with backend secret key.
     """
     to_encode = data.copy()
     if expires_delta:
@@ -26,5 +29,30 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.BACKEND_ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, settings.BACKEND_SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_access_token(token: str) -> dict:
+    """
+    Decodes and validates a JWT access token.
+    Raises UnauthorizedException on invalid token or expiration.
+    """
+    try:
+        payload = jwt.decode(token, settings.BACKEND_SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "access":
+            raise UnauthorizedException("Invalid token type")
+        return payload
+    except JWTError as e:
+        raise UnauthorizedException("Invalid or expired authentication token") from e
+
+def generate_refresh_token() -> str:
+    """
+    Generates a secure cryptographically random opaque refresh token string.
+    """
+    return secrets.token_urlsafe(64)
+
+def hash_refresh_token(token: str) -> str:
+    """
+    Computes SHA256 hex hash of a refresh token string for safe db storage and lookup.
+    """
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
