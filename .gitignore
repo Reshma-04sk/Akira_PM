@@ -23,6 +23,14 @@ htmlcov/
 .coverage
 .coverage.*
 
+# Python build and distribution artifacts
+*.egg-info/
+*.egg
+*.dist-info/
+sdist/
+wheels/
+*.whl
+
 # Alembic temporary artifacts
 alembic.log
 
