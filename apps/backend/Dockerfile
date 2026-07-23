@@ -3,20 +3,32 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+# Enable bytecode compilation, copy link mode, and disable automatic Python downloads
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never
 
-# Install compile dependencies
+# Install build dependencies if native extensions are needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv for rapid package downloads
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+# Copy uv binaries from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Mount pyproject.toml to install lock-free requirements
-COPY pyproject.toml ./
-RUN uv venv /opt/venv && uv pip install --no-cache -r pyproject.toml
+# Copy dependency definition files first to leverage layer caching
+COPY pyproject.toml uv.lock ./
+
+# Install project dependencies without installing the project itself
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+
+# Copy remaining source code and install project into virtual environment
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 # --- Runner Stage ---
 FROM python:3.12-slim AS runner
@@ -25,10 +37,10 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH"
 
-# Copy virtual env and code from builder
-COPY --from=builder /opt/venv /opt/venv
+# Copy virtual environment and application code from builder stage
+COPY --from=builder /app/.venv /app/.venv
 COPY . .
 
 # Run container as a dedicated non-root user

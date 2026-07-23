@@ -17,7 +17,7 @@ def get_auth_service(db: AsyncSession = Depends(get_db_session)) -> AuthService:
     refresh_repo = RefreshTokenRepository(db)
     return AuthService(user_repo, refresh_repo)
 
-@router.post("/register", response_model=APIResponse[UserResponse], status_code=status.HTTP_21_CREATED)
+@router.post("/register", response_model=APIResponse[UserResponse], status_code=status.HTTP_201_CREATED)
 async def register(
     data: UserRegister,
     auth_service: AuthService = Depends(get_auth_service),

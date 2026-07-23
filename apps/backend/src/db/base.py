@@ -7,7 +7,4 @@ class Base(DeclarativeBase):
     """
     pass
 
-# Import all models to ensure metadata registration
-from src.models.user import User  # noqa: F401, E402
-from src.models.refresh_token import RefreshToken  # noqa: F401, E402
 

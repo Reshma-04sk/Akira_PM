@@ -34,6 +34,7 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./apps/backend:/app
+      - /app/.venv
     depends_on:
       db:
         condition: service_healthy
