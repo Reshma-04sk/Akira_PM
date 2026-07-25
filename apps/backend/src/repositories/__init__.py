@@ -2,6 +2,7 @@ from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.base import BaseRepository
 from src.repositories.project_repository import ProjectRepository
 from src.repositories.refresh_token_repository import RefreshTokenRepository
+from src.repositories.task_repository import TaskRepository
 from src.repositories.user_repository import UserRepository
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "RefreshTokenRepository",
     "AuditLogRepository",
     "ProjectRepository",
+    "TaskRepository",
 ]

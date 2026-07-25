@@ -12,10 +12,11 @@ from src.db.base import Base
 if TYPE_CHECKING:
     from src.models.project import Project
     from src.models.refresh_token import RefreshToken
+    from src.models.task import Task
 
 
 
-class UserRole(str, enum.Enum):
+class UserRole(enum.StrEnum):
     ADMIN = "admin"
     USER = "user"
 
@@ -52,4 +53,7 @@ class User(Base):
     )
     projects: Mapped[list["Project"]] = relationship(
         "Project", back_populates="owner", cascade="all, delete-orphan"
+    )
+    assigned_tasks: Mapped[list["Task"]] = relationship(
+        "Task", back_populates="assignee"
     )
