@@ -19,10 +19,8 @@ depends_on: Union[str, Sequence[str], None] = ${repr(depends_on)}
 
 
 def upgrade() -> None:
-    ${upgrade_imports}
-    ${upgrade}
+    ${upgrades}
 
 
 def downgrade() -> None:
-    ${downgrade_imports}
-    ${downgrade}
+    ${downgrades}

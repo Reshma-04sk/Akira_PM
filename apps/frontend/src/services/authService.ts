@@ -1,5 +1,6 @@
 import { api } from "./api";
 import { APIResponse, LoginPayload, RegisterPayload, TokenResponse, User } from "@/types/auth";
+import { AuditLog, PaginatedAPIResponse } from "@/types/audit";
 
 export const authService = {
   async register(payload: RegisterPayload): Promise<User> {
@@ -19,5 +20,12 @@ export const authService = {
 
   async logout(refreshToken: string): Promise<void> {
     await api.post("/auth/logout", { refresh_token: refreshToken });
+  },
+
+  async getAuditLogs(page: number = 1, size: number = 10): Promise<PaginatedAPIResponse<AuditLog>> {
+    const response = await api.get<PaginatedAPIResponse<AuditLog>>("/audit-logs", {
+      params: { page, size },
+    });
+    return response.data;
   },
 };

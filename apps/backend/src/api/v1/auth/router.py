@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.dependencies.auth import get_current_active_user
 from src.dependencies.database import get_db_session
 from src.models.user import User
+from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.refresh_token_repository import RefreshTokenRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.auth import RefreshTokenRequest, TokenResponse
@@ -12,12 +14,19 @@ from src.services.auth_service import AuthService
 
 router = APIRouter()
 
+
 def get_auth_service(db: AsyncSession = Depends(get_db_session)) -> AuthService:
     user_repo = UserRepository(db)
     refresh_repo = RefreshTokenRepository(db)
-    return AuthService(user_repo, refresh_repo)
+    audit_repo = AuditLogRepository(db)
+    return AuthService(user_repo, refresh_repo, audit_repo)
 
-@router.post("/register", response_model=APIResponse[UserResponse], status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/register",
+    response_model=APIResponse[UserResponse],
+    status_code=status.HTTP_201_CREATED,
+)
 async def register(
     data: UserRegister,
     auth_service: AuthService = Depends(get_auth_service),
@@ -27,6 +36,7 @@ async def register(
     """
     user_response = await auth_service.register_user(data)
     return APIResponse(data=user_response)
+
 
 @router.post("/login", response_model=APIResponse[TokenResponse])
 async def login(
@@ -39,6 +49,7 @@ async def login(
     token_response = await auth_service.authenticate_user(data)
     return APIResponse(data=token_response)
 
+
 @router.post("/refresh", response_model=APIResponse[TokenResponse])
 async def refresh(
     data: RefreshTokenRequest,
@@ -50,6 +61,7 @@ async def refresh(
     token_response = await auth_service.refresh_tokens(data.refresh_token)
     return APIResponse(data=token_response)
 
+
 @router.post("/logout", response_model=APIResponse[dict[str, str]])
 async def logout(
     data: RefreshTokenRequest,
@@ -60,6 +72,7 @@ async def logout(
     """
     await auth_service.logout_user(data.refresh_token)
     return APIResponse(data={"message": "Logged out successfully"})
+
 
 @router.get("/me", response_model=APIResponse[UserResponse])
 async def me(

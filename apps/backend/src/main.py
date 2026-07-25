@@ -1,16 +1,16 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
-from src.core.settings import settings
-from src.core.logging import setup_logging
+from src.api.v1.router import api_router
 from src.core.exceptions import AppException
 from src.core.handlers import (
     app_exception_handler,
-    validation_exception_handler,
     general_exception_handler,
+    validation_exception_handler,
 )
-from src.api.v1.router import api_router
+from src.core.logging import setup_logging
+from src.core.settings import settings
 
 # Initialize central logging configuration
 setup_logging()

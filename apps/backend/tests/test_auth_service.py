@@ -1,10 +1,12 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.core.exceptions import UnauthorizedException, ValidationException
 from src.repositories.refresh_token_repository import RefreshTokenRepository
 from src.repositories.user_repository import UserRepository
 from src.schemas.user import UserLogin, UserRegister
 from src.services.auth_service import AuthService
+
 
 @pytest.mark.asyncio
 async def test_register_and_authenticate_user(db_session: AsyncSession) -> None:
@@ -29,6 +31,7 @@ async def test_register_and_authenticate_user(db_session: AsyncSession) -> None:
     assert token_resp.refresh_token is not None
     assert token_resp.user.email == "testuser@example.com"
 
+
 @pytest.mark.asyncio
 async def test_register_duplicate_email_fails(db_session: AsyncSession) -> None:
     user_repo = UserRepository(db_session)
@@ -45,6 +48,7 @@ async def test_register_duplicate_email_fails(db_session: AsyncSession) -> None:
     with pytest.raises(ValidationException):
         await service.register_user(register_data)
 
+
 @pytest.mark.asyncio
 async def test_refresh_token_rotation(db_session: AsyncSession) -> None:
     user_repo = UserRepository(db_session)
@@ -52,7 +56,11 @@ async def test_refresh_token_rotation(db_session: AsyncSession) -> None:
     service = AuthService(user_repo, refresh_repo)
 
     await service.register_user(
-        UserRegister(email="rotation@example.com", password="Password123!", full_name="Rotation User")
+        UserRegister(
+            email="rotation@example.com",
+            password="Password123!",
+            full_name="Rotation User",
+        )
     )
     initial_tokens = await service.authenticate_user(
         UserLogin(email="rotation@example.com", password="Password123!")
