@@ -10,6 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db.base import Base
 
 if TYPE_CHECKING:
+    from src.models.attachment import Attachment
+    from src.models.comment import Comment
     from src.models.project import Project
     from src.models.user import User
 
@@ -75,4 +77,10 @@ class Task(Base):
     project: Mapped["Project"] = relationship("Project", back_populates="tasks")
     assignee: Mapped["User | None"] = relationship(
         "User", back_populates="assigned_tasks"
+    )
+    comments: Mapped[list["Comment"]] = relationship(
+        "Comment", back_populates="task", cascade="all, delete-orphan"
+    )
+    attachments: Mapped[list["Attachment"]] = relationship(
+        "Attachment", back_populates="task", cascade="all, delete-orphan"
     )

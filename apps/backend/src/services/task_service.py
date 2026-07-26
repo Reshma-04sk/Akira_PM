@@ -87,6 +87,29 @@ class TaskService:
                 }
             )
 
+        if task.assignee_id:
+            try:
+                from src.models.notification import NotificationType
+                from src.repositories.notification_repository import (
+                    NotificationRepository,
+                )
+                n_repo = NotificationRepository(self.task_repository.session)
+                await n_repo.create(
+                    {
+                        "user_id": task.assignee_id,
+                        "type": NotificationType.TASK_ASSIGNED,
+                        "title": "Task Assigned",
+                        "message": (
+                            f"You have been assigned to the task: {task.title}"
+                        ),
+                        "is_read": False,
+                    }
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to create task assignment notification: %s", e
+                )
+
         return TaskResponse.model_validate(task)
 
     async def get_task(self, task_id: UUID, user_id: UUID) -> TaskResponse:
@@ -193,6 +216,7 @@ class TaskService:
 
         # Perform update
         if update_attrs:
+            old_assignee = task.assignee_id
             task = await self.task_repository.update(task, update_attrs)
             logger.info("Task updated successfully: %s", task.id)
 
@@ -206,6 +230,46 @@ class TaskService:
                         "details": update_attrs,
                     }
                 )
+
+            # Trigger Notification
+            try:
+                from src.models.notification import NotificationType
+                from src.repositories.notification_repository import (
+                    NotificationRepository,
+                )
+
+                n_repo = NotificationRepository(self.task_repository.session)
+
+                if (
+                    "assignee_id" in update_attrs
+                    and task.assignee_id
+                    and task.assignee_id != old_assignee
+                ):
+                    await n_repo.create(
+                        {
+                            "user_id": task.assignee_id,
+                            "type": NotificationType.TASK_ASSIGNED,
+                            "title": "Task Assigned",
+                            "message": (
+                                f"You have been assigned to the task: {task.title}"
+                            ),
+                            "is_read": False,
+                        }
+                    )
+                elif task.assignee_id and task.assignee_id != user_id:
+                    await n_repo.create(
+                        {
+                            "user_id": task.assignee_id,
+                            "type": NotificationType.TASK_UPDATED,
+                            "title": "Task Updated",
+                            "message": (
+                                f"The task '{task.title}' has been updated."
+                            ),
+                            "is_read": False,
+                        }
+                    )
+            except Exception as e:
+                logger.error("Failed to create task update notification: %s", e)
 
         return TaskResponse.model_validate(task)
 

@@ -10,7 +10,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db.base import Base
 
 if TYPE_CHECKING:
+    from src.models.attachment import Attachment
+    from src.models.comment import Comment
+    from src.models.notification import Notification
     from src.models.project import Project
+    from src.models.project_member import ProjectMember
     from src.models.refresh_token import RefreshToken
     from src.models.task import Task
 
@@ -56,4 +60,24 @@ class User(Base):
     )
     assigned_tasks: Mapped[list["Task"]] = relationship(
         "Task", back_populates="assignee"
+    )
+    project_memberships: Mapped[list["ProjectMember"]] = relationship(
+        "ProjectMember",
+        foreign_keys="ProjectMember.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    invited_members: Mapped[list["ProjectMember"]] = relationship(
+        "ProjectMember",
+        foreign_keys="ProjectMember.invited_by",
+        back_populates="inviter",
+    )
+    comments: Mapped[list["Comment"]] = relationship(
+        "Comment", back_populates="user", cascade="all, delete-orphan"
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification", back_populates="user", cascade="all, delete-orphan"
+    )
+    attachments: Mapped[list["Attachment"]] = relationship(
+        "Attachment", back_populates="uploader", cascade="all, delete-orphan"
     )

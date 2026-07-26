@@ -42,3 +42,15 @@ class AuditLogRepository(BaseRepository[AuditLog]):
         items = list(result.scalars().all())
 
         return items, total
+
+    async def get_recent_activity(
+        self, user_id: UUID, limit: int = 10
+    ) -> list[AuditLog]:
+        stmt = (
+            select(AuditLog)
+            .where(AuditLog.user_id == user_id)
+            .order_by(desc(AuditLog.created_at))
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

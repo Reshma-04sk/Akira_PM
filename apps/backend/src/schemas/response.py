@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class ErrorResponse(BaseModel):
     error: ErrorDetail
 
 
-class APIResponse(BaseModel, Generic[T]):
+class APIResponse[T](BaseModel):
     success: bool = Field(default=True)
     data: T
 
@@ -27,7 +27,7 @@ class PaginationMetadata(BaseModel):
     pages: int
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     success: bool = Field(default=True)
     data: list[T]
     pagination: PaginationMetadata

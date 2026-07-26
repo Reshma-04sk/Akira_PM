@@ -93,3 +93,102 @@ class TaskRepository(BaseRepository[Task]):
         items = list(result.scalars().all())
 
         return items, total
+
+    async def list_assigned_tasks(
+        self, user_id: UUID, limit: int = 5
+    ) -> list[Task]:
+        statement = (
+            select(Task)
+            .where(Task.assignee_id == user_id)
+            .order_by(desc(Task.created_at))
+            .limit(limit)
+        )
+        result = await self.session.execute(statement)
+        return list(result.scalars().all())
+
+    async def get_dashboard_stats(
+        self, project_ids: list[UUID]
+    ) -> dict[str, Any]:
+        if not project_ids:
+            return {
+                "total_tasks": 0,
+                "completed_tasks": 0,
+                "pending_tasks": 0,
+                "overdue_tasks": 0,
+                "by_priority": {},
+                "by_status": {},
+            }
+
+        from datetime import UTC, datetime
+
+        now = datetime.now(UTC)
+
+        # Basic counts
+        total_stmt = select(func.count(Task.id)).where(
+            Task.project_id.in_(project_ids)
+        )
+        comp_stmt = select(func.count(Task.id)).where(
+            Task.project_id.in_(project_ids), Task.status == TaskStatus.DONE
+        )
+        pend_stmt = select(func.count(Task.id)).where(
+            Task.project_id.in_(project_ids), Task.status != TaskStatus.DONE
+        )
+        over_stmt = select(func.count(Task.id)).where(
+            Task.project_id.in_(project_ids),
+            Task.status != TaskStatus.DONE,
+            Task.due_date < now,
+        )
+
+        total_tasks = (await self.session.execute(total_stmt)).scalar_one()
+        completed_tasks = (await self.session.execute(comp_stmt)).scalar_one()
+        pending_tasks = (await self.session.execute(pend_stmt)).scalar_one()
+        overdue_tasks = (await self.session.execute(over_stmt)).scalar_one()
+
+        # Grouped counts
+        priority_stmt = (
+            select(Task.priority, func.count(Task.id))
+            .where(Task.project_id.in_(project_ids))
+            .group_by(Task.priority)
+        )
+        priority_res = (await self.session.execute(priority_stmt)).all()
+        by_priority = {str(row[0]): row[1] for row in priority_res}
+
+        status_stmt = (
+            select(Task.status, func.count(Task.id))
+            .where(Task.project_id.in_(project_ids))
+            .group_by(Task.status)
+        )
+        status_res = (await self.session.execute(status_stmt)).all()
+        by_status = {str(row[0]): row[1] for row in status_res}
+
+        return {
+            "total_tasks": total_tasks,
+            "completed_tasks": completed_tasks,
+            "pending_tasks": pending_tasks,
+            "overdue_tasks": overdue_tasks,
+            "by_priority": by_priority,
+            "by_status": by_status,
+        }
+
+    async def search_involved_tasks(
+        self,
+        project_ids: list[UUID],
+        query_str: str,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> list[Task]:
+        if not project_ids:
+            return []
+        stmt = (
+            select(Task)
+            .where(Task.project_id.in_(project_ids))
+            .where(
+                Task.title.ilike(f"%{query_str.strip()}%")
+                | Task.description.ilike(f"%{query_str.strip()}%")
+            )
+            .order_by(desc(Task.created_at))
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

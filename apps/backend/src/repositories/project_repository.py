@@ -84,3 +84,76 @@ class ProjectRepository(BaseRepository[Project]):
         items = list(result.scalars().all())
 
         return items, total
+
+    async def get_user_involved_project_ids(self, user_id: UUID) -> list[UUID]:
+        from src.models.project_member import ProjectMember
+
+        stmt = (
+            select(Project.id)
+            .where(
+                (Project.owner_id == user_id)
+                | (
+                    Project.id.in_(
+                        select(ProjectMember.project_id).where(
+                            ProjectMember.user_id == user_id
+                        )
+                    )
+                )
+            )
+            .where(Project.is_archived.is_(False))
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def list_user_involved_projects(
+        self, user_id: UUID, limit: int = 5
+    ) -> list[Project]:
+        from src.models.project_member import ProjectMember
+
+        stmt = (
+            select(Project)
+            .where(
+                (Project.owner_id == user_id)
+                | (
+                    Project.id.in_(
+                        select(ProjectMember.project_id).where(
+                            ProjectMember.user_id == user_id
+                        )
+                    )
+                )
+            )
+            .where(Project.is_archived.is_(False))
+            .order_by(desc(Project.updated_at))
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def search_involved_projects(
+        self, user_id: UUID, query_str: str, limit: int = 20, offset: int = 0
+    ) -> list[Project]:
+        from src.models.project_member import ProjectMember
+
+        stmt = (
+            select(Project)
+            .where(
+                (Project.owner_id == user_id)
+                | (
+                    Project.id.in_(
+                        select(ProjectMember.project_id).where(
+                            ProjectMember.user_id == user_id
+                        )
+                    )
+                )
+            )
+            .where(Project.is_archived.is_(False))
+            .where(
+                Project.name.ilike(f"%{query_str.strip()}%")
+                | Project.description.ilike(f"%{query_str.strip()}%")
+            )
+            .order_by(desc(Project.created_at))
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
