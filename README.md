@@ -1,8 +1,8 @@
-# ForgePM
+# Akira PM
 
 > **Build. Track. Deliver.**
 
-ForgePM is a modern, enterprise-grade project management platform inspired by tools like Jira, Linear, and ClickUp. It is being built to demonstrate production-ready full-stack software engineering practices using a modern technology stack.
+Akira PM is a modern, enterprise-grade project management platform inspired by tools like Jira, Linear, and ClickUp. It is being built to demonstrate production-ready full-stack software engineering practices using a modern technology stack.
 
 ## 🚀 Features
 

@@ -1,6 +1,6 @@
-# ForgePM Frontend
+# Akira PM Frontend
 
-This is the React 19 + TypeScript + Vite frontend application for **ForgePM**, a production-grade SaaS Project Management platform.
+This is the React 19 + TypeScript + Vite frontend application for **Akira PM**, a production-grade SaaS Project Management platform.
 
 ## Folder Structure
 
