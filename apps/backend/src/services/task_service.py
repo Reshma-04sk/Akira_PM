@@ -110,7 +110,8 @@ class TaskService:
                     "Failed to create task assignment notification: %s", e
                 )
 
-        return TaskResponse.model_validate(task)
+        db_task = await self.task_repository.get_by_id(task.id)
+        return TaskResponse.model_validate(db_task)
 
     async def get_task(self, task_id: UUID, user_id: UUID) -> TaskResponse:
         task = await self.task_repository.get_by_id(task_id)
@@ -271,7 +272,8 @@ class TaskService:
             except Exception as e:
                 logger.error("Failed to create task update notification: %s", e)
 
-        return TaskResponse.model_validate(task)
+        db_task = await self.task_repository.get_by_id(task.id)
+        return TaskResponse.model_validate(db_task)
 
     async def delete_task(self, task_id: UUID, user_id: UUID) -> None:
         task = await self.task_repository.get_by_id(task_id)

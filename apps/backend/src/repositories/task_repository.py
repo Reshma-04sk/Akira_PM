@@ -3,7 +3,9 @@ from uuid import UUID
 
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
+from src.models.project import Project
 from src.models.task import Task, TaskPriority, TaskStatus
 from src.repositories.base import BaseRepository
 
@@ -13,7 +15,14 @@ class TaskRepository(BaseRepository[Task]):
         super().__init__(Task, session)
 
     async def get_by_id(self, id_val: UUID) -> Task | None:
-        statement = select(Task).where(Task.id == id_val)
+        statement = (
+            select(Task)
+            .options(
+                joinedload(Task.project).joinedload(Project.owner),
+                joinedload(Task.assignee),
+            )
+            .where(Task.id == id_val)
+        )
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
@@ -52,7 +61,10 @@ class TaskRepository(BaseRepository[Task]):
         page: int = 1,
         page_size: int = 20,
     ) -> tuple[list[Task], int]:
-        query = select(Task)
+        query = select(Task).options(
+            joinedload(Task.project).joinedload(Project.owner),
+            joinedload(Task.assignee),
+        )
         count_query = select(func.count()).select_from(Task)
 
         # Filters
@@ -99,6 +111,10 @@ class TaskRepository(BaseRepository[Task]):
     ) -> list[Task]:
         statement = (
             select(Task)
+            .options(
+                joinedload(Task.project).joinedload(Project.owner),
+                joinedload(Task.assignee),
+            )
             .where(Task.assignee_id == user_id)
             .order_by(desc(Task.created_at))
             .limit(limit)
@@ -181,6 +197,10 @@ class TaskRepository(BaseRepository[Task]):
             return []
         stmt = (
             select(Task)
+            .options(
+                joinedload(Task.project).joinedload(Project.owner),
+                joinedload(Task.assignee),
+            )
             .where(Task.project_id.in_(project_ids))
             .where(
                 Task.title.ilike(f"%{query_str.strip()}%")

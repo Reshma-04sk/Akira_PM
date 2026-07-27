@@ -57,11 +57,29 @@ class TaskUpdate(BaseModel):
     )
 
 
+class ProjectNested(BaseModel):
+    id: uuid.UUID
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserNested(BaseModel):
+    id: uuid.UUID
+    full_name: str | None = None
+    avatar_url: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class TaskResponse(TaskBase):
     id: uuid.UUID
     project_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+    project: ProjectNested
+    assignee: UserNested | None = None
+    creator: UserNested
 
     model_config = ConfigDict(from_attributes=True)
 

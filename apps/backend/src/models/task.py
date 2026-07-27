@@ -84,3 +84,8 @@ class Task(Base):
     attachments: Mapped[list["Attachment"]] = relationship(
         "Attachment", back_populates="task", cascade="all, delete-orphan"
     )
+
+    @property
+    def creator(self) -> "User":
+        return self.project.owner
+
