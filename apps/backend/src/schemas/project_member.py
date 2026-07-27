@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.models.project_member import ProjectRole
 
@@ -33,8 +34,27 @@ class ProjectMemberResponse(ProjectMemberBase):
     invited_by: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+    user_email: str | None = None
+    user_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def populate_user_info(cls, data: Any) -> Any:
+        if hasattr(data, "user") and data.user:
+            data.user_email = data.user.email
+            data.user_name = data.user.full_name
+        elif isinstance(data, dict):
+            user_data = data.get("user")
+            if user_data:
+                if isinstance(user_data, dict):
+                    data["user_email"] = user_data.get("email")
+                    data["user_name"] = user_data.get("full_name")
+                else:
+                    data["user_email"] = getattr(user_data, "email", None)
+                    data["user_name"] = getattr(user_data, "full_name", None)
+        return data
 
 
 class ProjectMemberListResponse(BaseModel):

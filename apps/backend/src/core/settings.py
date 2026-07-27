@@ -28,7 +28,7 @@ def get_env_filepath() -> str:
 
 class Settings(BaseSettings):
     ENV_STATE: str = "development"
-    APP_NAME: str = "SaaS Platform"
+    APP_NAME: str = "Akira PM"
 
     # Backend
     BACKEND_PORT: int = 8000

@@ -1,0 +1,3 @@
+#!/bin/sh
+pnpm lint
+pnpm --filter saas-frontend exec tsc --noEmit

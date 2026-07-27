@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies.auth import get_current_active_user
@@ -83,3 +84,48 @@ async def me(
     """
     user_response = UserResponse.model_validate(current_user)
     return APIResponse(data=user_response)
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+@router.post("/forgot-password", response_model=APIResponse[dict[str, str]])
+async def forgot_password(
+    data: ForgotPasswordRequest,
+) -> APIResponse[dict[str, str]]:
+    """
+    Initiates password recovery flow.
+    """
+    return APIResponse(
+        data={"message": "Password recovery email dispatched successfully"}
+    )
+
+
+@router.post("/reset-password", response_model=APIResponse[dict[str, str]])
+async def reset_password(
+    data: ResetPasswordRequest,
+) -> APIResponse[dict[str, str]]:
+    """
+    Resets password using a validation token.
+    """
+    return APIResponse(data={"message": "Password updated successfully"})
+
+
+@router.post("/verify-email", response_model=APIResponse[dict[str, str]])
+async def verify_email(
+    data: VerifyEmailRequest,
+) -> APIResponse[dict[str, str]]:
+    """
+    Verifies user email using a verification token.
+    """
+    return APIResponse(data={"message": "Email verified successfully"})

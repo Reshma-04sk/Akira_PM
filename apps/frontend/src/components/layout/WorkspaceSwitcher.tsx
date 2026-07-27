@@ -1,0 +1,128 @@
+import React, { useState, useRef, useEffect } from "react";
+import { Check, ChevronsUpDown, Plus, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface Workspace {
+  id: string;
+  name: string;
+  plan: string;
+}
+
+const mockWorkspaces: Workspace[] = [
+  { id: "1", name: "Akira PM Design", plan: "Pro Plan" },
+  { id: "2", name: "Personal Work", plan: "Free Plan" },
+];
+
+export const WorkspaceSwitcher: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<Workspace>(mockWorkspaces[0]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Keyboard accessibility: Close on escape
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card/50 hover:bg-accent hover:text-accent-foreground text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="h-6 w-6 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+            {selected.name.charAt(0)}
+          </div>
+          <div className="flex flex-col overflow-hidden leading-none gap-0.5">
+            <span className="truncate text-foreground font-semibold text-xs tracking-wide">
+              {selected.name}
+            </span>
+            <span className="text-[10px] text-muted-foreground truncate font-normal">
+              {selected.plan}
+            </span>
+          </div>
+        </div>
+        <ChevronsUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.1 }}
+            className="absolute left-0 z-50 mt-1 w-56 bg-card border border-border rounded-lg shadow-lg py-1 text-sm overflow-hidden"
+            role="listbox"
+          >
+            <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground border-b border-border mb-1">
+              Workspaces
+            </div>
+            {mockWorkspaces.map((workspace) => (
+              <button
+                key={workspace.id}
+                role="option"
+                aria-selected={selected.id === workspace.id}
+                onClick={() => {
+                  setSelected(workspace);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors ${
+                  selected.id === workspace.id ? "bg-accent/40 font-medium" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-5 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
+                    {workspace.name.charAt(0)}
+                  </div>
+                  <div className="flex flex-col leading-none">
+                    <span className="text-xs text-foreground">{workspace.name}</span>
+                    <span className="text-[9px] text-muted-foreground mt-0.5">{workspace.plan}</span>
+                  </div>
+                </div>
+                {selected.id === workspace.id && (
+                  <Check className="h-3.5 w-3.5 text-primary" />
+                )}
+              </button>
+            ))}
+            <div className="border-t border-border mt-1 pt-1">
+              <button
+                onClick={() => console.log("Create workspace")}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Create Workspace
+              </button>
+              <button
+                onClick={() => console.log("Explore premium")}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Upgrade to Pro
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
