@@ -43,3 +43,5 @@ Akira-PM is a modern, enterprise-grade project management platform inspired by t
 - Git & GitHub
 - VS Code
 - Swagger UI / OpenAPI
+Testing Git commit
+this mail 
