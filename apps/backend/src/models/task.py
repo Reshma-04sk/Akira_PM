@@ -88,4 +88,3 @@ class Task(Base):
     @property
     def creator(self) -> "User":
         return self.project.owner
-

@@ -33,9 +33,7 @@ def get_attachment_service(
     task_repo = TaskRepository(db)
     project_repo = ProjectRepository(db)
     member_repo = ProjectMemberRepository(db)
-    return AttachmentService(
-        attachment_repo, task_repo, project_repo, member_repo
-    )
+    return AttachmentService(attachment_repo, task_repo, project_repo, member_repo)
 
 
 @router.post("", response_model=APIResponse[AttachmentResponse])
@@ -85,9 +83,7 @@ async def download_attachment(
     file_path, filename, mime_type = await service.get_attachment_file(
         attachment_id, current_user.id
     )
-    return FileResponse(
-        path=file_path, filename=filename, media_type=mime_type
-    )
+    return FileResponse(path=file_path, filename=filename, media_type=mime_type)
 
 
 @router.delete("/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)

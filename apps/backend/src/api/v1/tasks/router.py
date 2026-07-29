@@ -61,9 +61,7 @@ async def list_tasks(
     priority_filter: str | None = Query(  # noqa: B008
         default=None, alias="priority", description="Filter by priority"
     ),
-    search: str | None = Query(
-        default=None, description="Search by title"
-    ),  # noqa: B008
+    search: str | None = Query(default=None, description="Search by title"),  # noqa: B008
     page: int = Query(default=1, ge=1),  # noqa: B008
     page_size: int = Query(default=20, ge=1, le=100),  # noqa: B008
     current_user: User = Depends(get_current_active_user),  # noqa: B008

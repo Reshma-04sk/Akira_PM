@@ -35,9 +35,7 @@ class ProjectMemberService:
         self.user_repository = user_repository
         self.audit_log_repository = audit_log_repository
 
-    async def _get_project_and_verify_membership(
-        self, project_id: UUID
-    ) -> Project:
+    async def _get_project_and_verify_membership(self, project_id: UUID) -> Project:
         project = await self.project_repository.get_by_id(project_id)
         if not project:
             raise NotFoundException("Project not found")
@@ -77,9 +75,7 @@ class ProjectMemberService:
 
         # Only project OWNERS can assign the OWNER role
         if data.role == ProjectRole.OWNER and actor_role != ProjectRole.OWNER:
-            raise ForbiddenException(
-                "Only project owners can assign the OWNER role"
-            )
+            raise ForbiddenException("Only project owners can assign the OWNER role")
 
         # Validate that invited users exist
         user = await self.user_repository.get_by_id(data.user_id)
@@ -87,12 +83,8 @@ class ProjectMemberService:
             raise NotFoundException("Invited user does not exist")
 
         # Prevent duplicate memberships
-        if await self.project_member_repository.exists(
-            project_id, data.user_id
-        ):
-            raise ValidationException(
-                "User is already a member of this project"
-            )
+        if await self.project_member_repository.exists(project_id, data.user_id):
+            raise ValidationException("User is already a member of this project")
 
         # Create project member record
         member_attrs = {
@@ -116,9 +108,7 @@ class ProjectMemberService:
                 NotificationRepository,
             )
 
-            n_repo = NotificationRepository(
-                self.project_member_repository.session
-            )
+            n_repo = NotificationRepository(self.project_member_repository.session)
             await n_repo.create(
                 {
                     "user_id": data.user_id,
@@ -237,9 +227,7 @@ class ProjectMemberService:
 
         # Only project OWNERS can assign or remove the OWNER role
         if data.role == ProjectRole.OWNER and actor_role != ProjectRole.OWNER:
-            raise ForbiddenException(
-                "Only project owners can assign the OWNER role"
-            )
+            raise ForbiddenException("Only project owners can assign the OWNER role")
 
         if member.role == ProjectRole.OWNER and data.role != ProjectRole.OWNER:
             if actor_role != ProjectRole.OWNER:
@@ -248,10 +236,8 @@ class ProjectMemberService:
                 )
 
             # Prevent demoting the last OWNER
-            owner_count = (
-                await self.project_member_repository.count_project_owners(
-                    project_id
-                )
+            owner_count = await self.project_member_repository.count_project_owners(
+                project_id
             )
             if owner_count <= 1:
                 raise ValidationException("Cannot demote the last owner")
@@ -261,9 +247,7 @@ class ProjectMemberService:
             update_attrs["role"] = data.role
 
         if update_attrs:
-            member = await self.project_member_repository.update(
-                member, update_attrs
-            )
+            member = await self.project_member_repository.update(member, update_attrs)
             logger.info("Project member role updated: %s", member.id)
 
             # Trigger Notification
@@ -273,9 +257,7 @@ class ProjectMemberService:
                     NotificationRepository,
                 )
 
-                n_repo = NotificationRepository(
-                    self.project_member_repository.session
-                )
+                n_repo = NotificationRepository(self.project_member_repository.session)
                 await n_repo.create(
                     {
                         "user_id": user_id,
@@ -332,19 +314,14 @@ class ProjectMemberService:
                 )
 
             # Prevent removing the last OWNER of a project
-            owner_count = (
-                await self.project_member_repository.count_project_owners(
-                    project_id
-                )
+            owner_count = await self.project_member_repository.count_project_owners(
+                project_id
             )
             if owner_count <= 1:
                 raise ValidationException("Cannot remove the last owner")
 
         # Managers cannot remove other Managers
-        if (
-            member.role == ProjectRole.MANAGER
-            and actor_role == ProjectRole.MANAGER
-        ):
+        if member.role == ProjectRole.MANAGER and actor_role == ProjectRole.MANAGER:
             if user_id != actor_id:
                 raise ForbiddenException(
                     "Managers cannot remove other managers from the project"

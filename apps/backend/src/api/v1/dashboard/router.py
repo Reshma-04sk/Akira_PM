@@ -83,7 +83,5 @@ async def get_project_dashboard(
     """
     Retrieves dashboard statistics for a specific project.
     """
-    project_overview = await service.get_project_dashboard(
-        project_id, current_user.id
-    )
+    project_overview = await service.get_project_dashboard(project_id, current_user.id)
     return APIResponse(data=project_overview)

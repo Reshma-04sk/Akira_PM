@@ -31,12 +31,9 @@ class ProjectService:
         self, data: ProjectCreate, owner_id: UUID
     ) -> ProjectResponse:
         # Check duplicate name for this owner
-        if await self.project_repository.exists_by_name_for_owner(
-            data.name, owner_id
-        ):
+        if await self.project_repository.exists_by_name_for_owner(data.name, owner_id):
             raise ValidationException(
-                f"An active project named '{data.name}' "
-                "already exists for this user"
+                f"An active project named '{data.name}' already exists for this user"
             )
 
         project_attributes = {
@@ -61,9 +58,7 @@ class ProjectService:
 
         return ProjectResponse.model_validate(project)
 
-    async def get_project(
-        self, project_id: UUID, user_id: UUID
-    ) -> ProjectResponse:
+    async def get_project(self, project_id: UUID, user_id: UUID) -> ProjectResponse:
         project = await self.project_repository.get_by_id(project_id)
         if not project:
             raise NotFoundException("Project not found")
@@ -134,9 +129,7 @@ class ProjectService:
 
         # Perform update
         if update_attrs:
-            project = await self.project_repository.update(
-                project, update_attrs
-            )
+            project = await self.project_repository.update(project, update_attrs)
             logger.info("Project updated successfully: %s", project.id)
 
             if self.audit_log_repository:

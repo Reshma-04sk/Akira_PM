@@ -42,9 +42,7 @@ async def test_search_service_and_api(
     search_service = SearchService(project_repo, task_repo, comment_repo)
 
     # 1. Setup User
-    headers = await get_auth_headers(
-        client, "search_user@example.com", "Search User"
-    )
+    headers = await get_auth_headers(client, "search_user@example.com", "Search User")
     me_res = await client.get("/api/v1/auth/me", headers=headers)
     assert me_res.status_code == 200
     user_id = UUID(me_res.json()["data"]["id"])

@@ -5,9 +5,9 @@
   "description": "Production-grade SaaS Monorepo",
   "scripts": {
     "prepare": "husky",
-    "lint": "pnpm --filter frontend lint && make lint-backend",
+    "lint": "pnpm --filter saas-frontend lint && make lint-backend",
     "format": "prettier --write \"**/*.{js,ts,tsx,json,md}\"",
-    "test": "pnpm --filter frontend test && make test-backend"
+    "test": "pnpm --filter saas-frontend test && make test-backend"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",

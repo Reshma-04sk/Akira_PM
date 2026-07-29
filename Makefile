@@ -19,7 +19,7 @@ lint-backend:
 	cd apps/backend && uv run ruff check . && uv run ruff format --check .
 
 lint-frontend:
-	pnpm --filter frontend lint
+	pnpm --filter saas-frontend lint
 
 test: test-backend test-frontend
 
@@ -27,7 +27,7 @@ test-backend:
 	cd apps/backend && uv run pytest
 
 test-frontend:
-	pnpm --filter frontend test
+	pnpm --filter saas-frontend test
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +

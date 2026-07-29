@@ -53,9 +53,7 @@ async def test_task_api_crud_flow(client: AsyncClient) -> None:
     task_id = task_data["id"]
 
     # 2. Get task details
-    get_res = await client.get(
-        f"/api/v1/tasks/{task_id}", headers=headers_owner
-    )
+    get_res = await client.get(f"/api/v1/tasks/{task_id}", headers=headers_owner)
     assert get_res.status_code == 200
     assert get_res.json()["data"]["title"] == "API Task"
 
@@ -79,9 +77,7 @@ async def test_task_api_crud_flow(client: AsyncClient) -> None:
     assert list_data["items"][0]["id"] == task_id
 
     # 5. Delete task
-    delete_res = await client.delete(
-        f"/api/v1/tasks/{task_id}", headers=headers_owner
-    )
+    delete_res = await client.delete(f"/api/v1/tasks/{task_id}", headers=headers_owner)
     assert delete_res.status_code == 204
 
     # 6. Retrieve deleted task
@@ -123,9 +119,7 @@ async def test_task_api_authorization_enforced(client: AsyncClient) -> None:
     task_id = task_res.json()["data"]["id"]
 
     # Other user attempts to get task
-    res_get = await client.get(
-        f"/api/v1/tasks/{task_id}", headers=headers_other
-    )
+    res_get = await client.get(f"/api/v1/tasks/{task_id}", headers=headers_other)
     assert res_get.status_code == 403
 
     # Other user attempts to update task
@@ -137,17 +131,13 @@ async def test_task_api_authorization_enforced(client: AsyncClient) -> None:
     assert res_patch.status_code == 403
 
     # Other user attempts to delete task
-    res_delete = await client.delete(
-        f"/api/v1/tasks/{task_id}", headers=headers_other
-    )
+    res_delete = await client.delete(f"/api/v1/tasks/{task_id}", headers=headers_other)
     assert res_delete.status_code == 403
 
 
 @pytest.mark.asyncio
 async def test_task_api_validation_checks(client: AsyncClient) -> None:
-    headers = await get_auth_headers(
-        client, "owner_task3@example.com", "Owner User"
-    )
+    headers = await get_auth_headers(client, "owner_task3@example.com", "Owner User")
 
     import uuid
 
@@ -185,9 +175,7 @@ async def test_task_api_validation_checks(client: AsyncClient) -> None:
 async def test_task_api_pagination_search_and_filters(
     client: AsyncClient,
 ) -> None:
-    headers = await get_auth_headers(
-        client, "owner_task4@example.com", "Owner User"
-    )
+    headers = await get_auth_headers(client, "owner_task4@example.com", "Owner User")
 
     # Create project
     proj_res = await client.post(

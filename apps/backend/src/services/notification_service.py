@@ -65,9 +65,7 @@ class NotificationService:
     async def mark_as_read(
         self, notification_id: UUID, user_id: UUID
     ) -> NotificationResponse:
-        notification = await self.notification_repository.get_by_id(
-            notification_id
-        )
+        notification = await self.notification_repository.get_by_id(notification_id)
         if not notification:
             raise NotFoundException("Notification not found")
 
@@ -82,12 +80,8 @@ class NotificationService:
     async def mark_all_read(self, user_id: UUID) -> None:
         await self.notification_repository.mark_all_read(user_id)
 
-    async def delete_notification(
-        self, notification_id: UUID, user_id: UUID
-    ) -> None:
-        notification = await self.notification_repository.get_by_id(
-            notification_id
-        )
+    async def delete_notification(self, notification_id: UUID, user_id: UUID) -> None:
+        notification = await self.notification_repository.get_by_id(notification_id)
         if not notification:
             raise NotFoundException("Notification not found")
 

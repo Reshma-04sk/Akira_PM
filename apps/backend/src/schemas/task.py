@@ -19,9 +19,7 @@ class TaskBase(BaseModel):
     priority: TaskPriority = Field(
         default=TaskPriority.MEDIUM, description="Priority level of the task"
     )
-    due_date: datetime | None = Field(
-        default=None, description="Due date of the task"
-    )
+    due_date: datetime | None = Field(default=None, description="Due date of the task")
     assignee_id: uuid.UUID | None = Field(
         default=None, description="ID of the user assigned to this task"
     )
@@ -49,9 +47,7 @@ class TaskUpdate(BaseModel):
     priority: TaskPriority | None = Field(
         default=None, description="Priority level of the task"
     )
-    due_date: datetime | None = Field(
-        default=None, description="Due date of the task"
-    )
+    due_date: datetime | None = Field(default=None, description="Due date of the task")
     assignee_id: uuid.UUID | None = Field(
         default=None, description="ID of the user assigned to this task"
     )

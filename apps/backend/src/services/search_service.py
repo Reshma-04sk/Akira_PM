@@ -29,10 +29,8 @@ class SearchService:
         offset = (page - 1) * page_size
 
         # Find all project IDs user is involved in
-        project_ids = (
-            await self.project_repository.get_user_involved_project_ids(
-                user_id
-            )
+        project_ids = await self.project_repository.get_user_involved_project_ids(
+            user_id
         )
 
         projects = await self.project_repository.search_involved_projects(

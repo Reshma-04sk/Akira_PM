@@ -20,12 +20,8 @@ async def get_auth_headers(
 
 @pytest.mark.asyncio
 async def test_comments_api_flow(client: AsyncClient) -> None:
-    headers_owner = await get_auth_headers(
-        client, "owner_cmt@example.com", "Owner Cmt"
-    )
-    headers_other = await get_auth_headers(
-        client, "other_cmt@example.com", "Other Cmt"
-    )
+    headers_owner = await get_auth_headers(client, "owner_cmt@example.com", "Owner Cmt")
+    headers_other = await get_auth_headers(client, "other_cmt@example.com", "Other Cmt")
 
     # 1. Create project
     proj_res = await client.post(

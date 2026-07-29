@@ -88,9 +88,7 @@ async def update_project(
     """
     Updates details of a specific project owned by the authenticated user.
     """
-    project_response = await service.update_project(
-        project_id, data, current_user.id
-    )
+    project_response = await service.update_project(project_id, data, current_user.id)
     return APIResponse(data=project_response)
 
 

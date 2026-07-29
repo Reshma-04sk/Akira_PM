@@ -30,15 +30,11 @@ async def test_project_api_auth_required(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_project_api_crud_flow(client: AsyncClient) -> None:
-    headers = await get_auth_headers(
-        client, "user1@example.com", "First User"
-    )
+    headers = await get_auth_headers(client, "user1@example.com", "First User")
 
     # 1. Create project
     payload = {"name": "API Project", "description": "API Desc"}
-    create_res = await client.post(
-        "/api/v1/projects", json=payload, headers=headers
-    )
+    create_res = await client.post("/api/v1/projects", json=payload, headers=headers)
     assert create_res.status_code == 201
     proj_data = create_res.json()["data"]
     assert proj_data["name"] == "API Project"
@@ -69,15 +65,11 @@ async def test_project_api_crud_flow(client: AsyncClient) -> None:
     assert list_data["items"][0]["id"] == proj_id
 
     # 5. Delete project (soft delete)
-    delete_res = await client.delete(
-        f"/api/v1/projects/{proj_id}", headers=headers
-    )
+    delete_res = await client.delete(f"/api/v1/projects/{proj_id}", headers=headers)
     assert delete_res.status_code == 204
 
     # 6. Retrieve deleted project
-    get_deleted_res = await client.get(
-        f"/api/v1/projects/{proj_id}", headers=headers
-    )
+    get_deleted_res = await client.get(f"/api/v1/projects/{proj_id}", headers=headers)
     assert get_deleted_res.status_code == 404
 
 
@@ -85,9 +77,7 @@ async def test_project_api_crud_flow(client: AsyncClient) -> None:
 async def test_project_api_duplicate_name_validation(
     client: AsyncClient,
 ) -> None:
-    headers = await get_auth_headers(
-        client, "user2@example.com", "Second User"
-    )
+    headers = await get_auth_headers(client, "user2@example.com", "Second User")
 
     payload = {"name": "Project Alpha"}
     res1 = await client.post("/api/v1/projects", json=payload, headers=headers)
@@ -116,9 +106,7 @@ async def test_project_api_authorization_enforced(client: AsyncClient) -> None:
     proj_id = create_res.json()["data"]["id"]
 
     # Other user attempts to get project
-    res_get = await client.get(
-        f"/api/v1/projects/{proj_id}", headers=headers_other
-    )
+    res_get = await client.get(f"/api/v1/projects/{proj_id}", headers=headers_other)
     assert res_get.status_code == 403
 
     # Other user attempts to update project
@@ -138,9 +126,7 @@ async def test_project_api_authorization_enforced(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_project_api_pagination_and_search(client: AsyncClient) -> None:
-    headers = await get_auth_headers(
-        client, "paginated@example.com", "Paging User"
-    )
+    headers = await get_auth_headers(client, "paginated@example.com", "Paging User")
 
     # Create 3 projects
     await client.post(
@@ -154,9 +140,7 @@ async def test_project_api_pagination_and_search(client: AsyncClient) -> None:
     )
 
     # Test search filter
-    search_res = await client.get(
-        "/api/v1/projects?search=Beta", headers=headers
-    )
+    search_res = await client.get("/api/v1/projects?search=Beta", headers=headers)
     assert search_res.status_code == 200
     search_data = search_res.json()["data"]
     assert search_data["total"] == 1

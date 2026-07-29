@@ -82,9 +82,7 @@ class ProjectMemberRepository(BaseRepository[ProjectMember]):
         # Filters
         if project_id:
             query = query.where(ProjectMember.project_id == project_id)
-            count_query = count_query.where(
-                ProjectMember.project_id == project_id
-            )
+            count_query = count_query.where(ProjectMember.project_id == project_id)
 
         if role:
             query = query.where(ProjectMember.role == role)

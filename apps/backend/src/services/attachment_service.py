@@ -28,9 +28,7 @@ class AttachmentService:
         self.project_repository = project_repository
         self.project_member_repository = project_member_repository
 
-    async def _verify_project_membership(
-        self, project_id: UUID, user_id: UUID
-    ) -> None:
+    async def _verify_project_membership(self, project_id: UUID, user_id: UUID) -> None:
         project = await self.project_repository.get_by_id(project_id)
         if not project:
             raise NotFoundException("Project not found")
@@ -38,9 +36,7 @@ class AttachmentService:
         if project.owner_id == user_id:
             return
 
-        is_member = await self.project_member_repository.exists(
-            project_id, user_id
-        )
+        is_member = await self.project_member_repository.exists(project_id, user_id)
         if not is_member:
             raise ForbiddenException(
                 "You do not have permission to access attachments for this project"
@@ -106,9 +102,7 @@ class AttachmentService:
 
         return attachment.file_path, attachment.filename, attachment.mime_type
 
-    async def delete_attachment(
-        self, attachment_id: UUID, user_id: UUID
-    ) -> None:
+    async def delete_attachment(self, attachment_id: UUID, user_id: UUID) -> None:
         attachment = await self.attachment_repository.get_by_id(attachment_id)
         if not attachment:
             raise NotFoundException("Attachment not found")

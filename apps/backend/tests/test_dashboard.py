@@ -47,9 +47,7 @@ async def test_dashboard_service_and_api(
     )
 
     # 1. Register/Login user via API
-    headers = await get_auth_headers(
-        client, "dash_user@example.com", "Dash User"
-    )
+    headers = await get_auth_headers(client, "dash_user@example.com", "Dash User")
     me_res = await client.get("/api/v1/auth/me", headers=headers)
     assert me_res.status_code == 200
     user_id = UUID(me_res.json()["data"]["id"])
@@ -96,9 +94,7 @@ async def test_dashboard_service_and_api(
     assert my_tasks.total == 1
     assert my_tasks.items[0].title == "Task 1"
 
-    proj_dashboard = await dashboard_service.get_project_dashboard(
-        proj1.id, user_id
-    )
+    proj_dashboard = await dashboard_service.get_project_dashboard(proj1.id, user_id)
     assert proj_dashboard.tasks_count == 1
 
     # 5. API Tests
@@ -118,9 +114,7 @@ async def test_dashboard_service_and_api(
     assert res.json()["data"]["total"] == 1
 
     # GET /dashboard/project/{id} (Authorized)
-    res = await client.get(
-        f"/api/v1/dashboard/project/{proj1.id}", headers=headers
-    )
+    res = await client.get(f"/api/v1/dashboard/project/{proj1.id}", headers=headers)
     assert res.status_code == 200
     assert res.json()["data"]["tasks_count"] == 1
 

@@ -40,9 +40,7 @@ class TaskRepository(BaseRepository[Task]):
         await self.session.delete(task)
         await self.session.flush()
 
-    async def exists_by_title_for_project(
-        self, title: str, project_id: UUID
-    ) -> bool:
+    async def exists_by_title_for_project(self, title: str, project_id: UUID) -> bool:
         statement = select(Task.id).where(
             Task.title == title.strip(),
             Task.project_id == project_id,
@@ -95,20 +93,14 @@ class TaskRepository(BaseRepository[Task]):
 
         # Pagination and ordering
         offset = (page - 1) * page_size
-        query = (
-            query.order_by(desc(Task.created_at))
-            .offset(offset)
-            .limit(page_size)
-        )
+        query = query.order_by(desc(Task.created_at)).offset(offset).limit(page_size)
 
         result = await self.session.execute(query)
         items = list(result.scalars().all())
 
         return items, total
 
-    async def list_assigned_tasks(
-        self, user_id: UUID, limit: int = 5
-    ) -> list[Task]:
+    async def list_assigned_tasks(self, user_id: UUID, limit: int = 5) -> list[Task]:
         statement = (
             select(Task)
             .options(
@@ -122,9 +114,7 @@ class TaskRepository(BaseRepository[Task]):
         result = await self.session.execute(statement)
         return list(result.scalars().all())
 
-    async def get_dashboard_stats(
-        self, project_ids: list[UUID]
-    ) -> dict[str, Any]:
+    async def get_dashboard_stats(self, project_ids: list[UUID]) -> dict[str, Any]:
         if not project_ids:
             return {
                 "total_tasks": 0,
@@ -140,9 +130,7 @@ class TaskRepository(BaseRepository[Task]):
         now = datetime.now(UTC)
 
         # Basic counts
-        total_stmt = select(func.count(Task.id)).where(
-            Task.project_id.in_(project_ids)
-        )
+        total_stmt = select(func.count(Task.id)).where(Task.project_id.in_(project_ids))
         comp_stmt = select(func.count(Task.id)).where(
             Task.project_id.in_(project_ids), Task.status == TaskStatus.DONE
         )

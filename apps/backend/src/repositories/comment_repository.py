@@ -20,9 +20,7 @@ class CommentRepository(BaseRepository[Comment]):
     async def create(self, attributes: dict[str, Any]) -> Comment:
         return await super().create(attributes)
 
-    async def update(
-        self, db_obj: Comment, attributes: dict[str, Any]
-    ) -> Comment:
+    async def update(self, db_obj: Comment, attributes: dict[str, Any]) -> Comment:
         return await super().update(db_obj, attributes)
 
     async def delete(self, db_obj: Comment) -> None:
@@ -36,9 +34,7 @@ class CommentRepository(BaseRepository[Comment]):
     ) -> tuple[list[Comment], int]:
         query = select(Comment).where(Comment.task_id == task_id)
         count_query = (
-            select(func.count())
-            .select_from(Comment)
-            .where(Comment.task_id == task_id)
+            select(func.count()).select_from(Comment).where(Comment.task_id == task_id)
         )
 
         # Count total
@@ -47,11 +43,7 @@ class CommentRepository(BaseRepository[Comment]):
 
         # Pagination and ordering
         offset = (page - 1) * page_size
-        query = (
-            query.order_by(desc(Comment.created_at))
-            .offset(offset)
-            .limit(page_size)
-        )
+        query = query.order_by(desc(Comment.created_at)).offset(offset).limit(page_size)
 
         result = await self.session.execute(query)
         items = list(result.scalars().all())

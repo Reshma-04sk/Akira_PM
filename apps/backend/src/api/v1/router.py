@@ -27,9 +27,7 @@ api_router.include_router(comments_router, prefix="/comments", tags=["Comments"]
 api_router.include_router(
     notifications_router, prefix="/notifications", tags=["Notifications"]
 )
-api_router.include_router(
-    dashboard_router, prefix="/dashboard", tags=["Dashboard"]
-)
+api_router.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(search_router, prefix="/search", tags=["Search"])
 api_router.include_router(
     attachments_router, prefix="/attachments", tags=["Attachments"]

@@ -75,9 +75,7 @@ async def mark_as_read(
     """
     Marks a specific notification as read.
     """
-    notification_response = await service.mark_as_read(
-        notification_id, current_user.id
-    )
+    notification_response = await service.mark_as_read(notification_id, current_user.id)
     return APIResponse(data=notification_response)
 
 

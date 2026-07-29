@@ -37,13 +37,9 @@ async def test_add_and_get_member(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Proj", "owner_id": owner.id})
 
-    create_data = ProjectMemberCreate(
-        user_id=user.id, role=ProjectRole.DEVELOPER
-    )
+    create_data = ProjectMemberCreate(user_id=user.id, role=ProjectRole.DEVELOPER)
     member = await service.add_member(project.id, create_data, owner.id)
     assert member.user_id == user.id
     assert member.role == ProjectRole.DEVELOPER
@@ -75,13 +71,9 @@ async def test_add_duplicate_member_fails(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Proj", "owner_id": owner.id})
 
-    create_data = ProjectMemberCreate(
-        user_id=user.id, role=ProjectRole.DEVELOPER
-    )
+    create_data = ProjectMemberCreate(user_id=user.id, role=ProjectRole.DEVELOPER)
     await service.add_member(project.id, create_data, owner.id)
 
     with pytest.raises(ValidationException):
@@ -111,9 +103,7 @@ async def test_last_owner_protection(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Proj", "owner_id": owner.id})
 
     # Add user as OWNER
     await service.add_member(
@@ -169,9 +159,7 @@ async def test_owner_and_manager_restrictions(
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Proj", "owner_id": owner.id})
 
     # Add manager
     await service.add_member(

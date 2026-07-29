@@ -43,9 +43,7 @@ async def test_attachment_service_and_api(
     task_service = TaskService(task_repo, project_repo, user_repo)
 
     # 1. Setup users
-    headers = await get_auth_headers(
-        client, "attach_user@example.com", "Attach User"
-    )
+    headers = await get_auth_headers(client, "attach_user@example.com", "Attach User")
     me_res = await client.get("/api/v1/auth/me", headers=headers)
     assert me_res.status_code == 200
     user_id = UUID(me_res.json()["data"]["id"])
@@ -55,9 +53,7 @@ async def test_attachment_service_and_api(
     )
 
     # 2. Setup project & task
-    project = await project_repo.create(
-        {"name": "Attach Proj", "owner_id": user_id}
-    )
+    project = await project_repo.create({"name": "Attach Proj", "owner_id": user_id})
     task = await task_service.create_task(
         TaskCreate(
             title="Attach Task",
@@ -93,9 +89,7 @@ async def test_attachment_service_and_api(
     assert res.status_code == 403
 
     # 5. Test API list
-    res = await client.get(
-        f"/api/v1/attachments?task_id={task.id}", headers=headers
-    )
+    res = await client.get(f"/api/v1/attachments?task_id={task.id}", headers=headers)
     assert res.status_code == 200
     assert len(res.json()["data"]) == 1
 
@@ -106,9 +100,7 @@ async def test_attachment_service_and_api(
     assert res.status_code == 403
 
     # 7. Test API download
-    res = await client.get(
-        f"/api/v1/attachments/{attachment_id}", headers=headers
-    )
+    res = await client.get(f"/api/v1/attachments/{attachment_id}", headers=headers)
     assert res.status_code == 200
     assert res.content == file_content
 
@@ -125,13 +117,9 @@ async def test_attachment_service_and_api(
     assert res.status_code == 403
 
     # 10. Test API delete
-    res = await client.delete(
-        f"/api/v1/attachments/{attachment_id}", headers=headers
-    )
+    res = await client.delete(f"/api/v1/attachments/{attachment_id}", headers=headers)
     assert res.status_code == 204
 
     # Verify deleted
-    res = await client.get(
-        f"/api/v1/attachments?task_id={task.id}", headers=headers
-    )
+    res = await client.get(f"/api/v1/attachments?task_id={task.id}", headers=headers)
     assert len(res.json()["data"]) == 0

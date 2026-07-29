@@ -31,9 +31,7 @@ async def test_create_and_get_task(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Project 1", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
 
     create_data = TaskCreate(
         title="Test Task",
@@ -94,9 +92,7 @@ async def test_create_task_not_owner_fails(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Project 1", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
 
     create_data = TaskCreate(title="Task", project_id=project.id)
     with pytest.raises(ForbiddenException):
@@ -120,9 +116,7 @@ async def test_create_duplicate_task_title_fails(
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Project 1", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
 
     create_data = TaskCreate(title="Duplicate Title", project_id=project.id)
     await service.create_task(create_data, owner.id)
@@ -148,9 +142,7 @@ async def test_create_task_assignee_validation(
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Project 1", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
 
     import uuid
 
@@ -178,9 +170,7 @@ async def test_update_and_delete_task(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Project 1", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
 
     task = await service.create_task(
         TaskCreate(title="Original Title", project_id=project.id), owner.id

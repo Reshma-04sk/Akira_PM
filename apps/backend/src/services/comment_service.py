@@ -87,9 +87,7 @@ class CommentService:
                         "user_id": task.assignee_id,
                         "type": NotificationType.COMMENT_ADDED,
                         "title": "New Comment",
-                        "message": (
-                            f"A new comment was added to task '{task.title}'"
-                        ),
+                        "message": (f"A new comment was added to task '{task.title}'"),
                         "is_read": False,
                     }
                 )
@@ -121,9 +119,7 @@ class CommentService:
 
         # Business Rule: Comment owner may edit
         if comment.user_id != user_id:
-            raise ForbiddenException(
-                "Only the comment owner can edit this comment"
-            )
+            raise ForbiddenException("Only the comment owner can edit this comment")
 
         # Ensure still project member
         task = await self.task_repository.get_by_id(comment.task_id)
@@ -162,10 +158,10 @@ class CommentService:
         # Business Rule: Manager, Owner and comment owner may delete any comment
         role = await self._verify_project_membership(task.project_id, user_id)
 
-        is_allowed = (
-            comment.user_id == user_id
-            or role in [ProjectRole.OWNER, ProjectRole.MANAGER]
-        )
+        is_allowed = comment.user_id == user_id or role in [
+            ProjectRole.OWNER,
+            ProjectRole.MANAGER,
+        ]
         if not is_allowed:
             raise ForbiddenException(
                 "You do not have permission to delete this comment"

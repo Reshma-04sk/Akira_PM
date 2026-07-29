@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from src.models.task import Task
 
 
-
 class UserRole(enum.StrEnum):
     ADMIN = "admin"
     USER = "user"

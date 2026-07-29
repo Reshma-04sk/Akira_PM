@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from "vitest";
 import { authStorage } from "./auth-storage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./auth-constants";

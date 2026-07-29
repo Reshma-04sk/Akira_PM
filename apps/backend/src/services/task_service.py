@@ -33,9 +33,7 @@ class TaskService:
         self.user_repository = user_repository
         self.audit_log_repository = audit_log_repository
 
-    async def create_task(
-        self, data: TaskCreate, user_id: UUID
-    ) -> TaskResponse:
+    async def create_task(self, data: TaskCreate, user_id: UUID) -> TaskResponse:
         # A task must belong to an existing project
         project = await self.project_repository.get_by_id(data.project_id)
         if not project:
@@ -93,6 +91,7 @@ class TaskService:
                 from src.repositories.notification_repository import (
                     NotificationRepository,
                 )
+
                 n_repo = NotificationRepository(self.task_repository.session)
                 await n_repo.create(
                     {
@@ -106,9 +105,7 @@ class TaskService:
                     }
                 )
             except Exception as e:
-                logger.error(
-                    "Failed to create task assignment notification: %s", e
-                )
+                logger.error("Failed to create task assignment notification: %s", e)
 
         db_task = await self.task_repository.get_by_id(task.id)
         return TaskResponse.model_validate(db_task)
@@ -121,9 +118,7 @@ class TaskService:
         # Only project owner can access tasks
         project = await self.project_repository.get_by_id(task.project_id)
         if not project or project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to access this task"
-            )
+            raise ForbiddenException("You do not have permission to access this task")
 
         return TaskResponse.model_validate(task)
 
@@ -175,9 +170,7 @@ class TaskService:
 
         project = await self.project_repository.get_by_id(task.project_id)
         if not project or project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to update this task"
-            )
+            raise ForbiddenException("You do not have permission to update this task")
 
         update_attrs = {}
 
@@ -189,8 +182,7 @@ class TaskService:
                     new_title, task.project_id
                 ):
                     raise ValidationException(
-                        f"A task titled '{new_title}' "
-                        "already exists in this project"
+                        f"A task titled '{new_title}' already exists in this project"
                     )
                 update_attrs["title"] = new_title
 
@@ -208,9 +200,7 @@ class TaskService:
 
         if data.assignee_id is not None:
             if data.assignee_id:
-                assignee = await self.user_repository.get_by_id(
-                    data.assignee_id
-                )
+                assignee = await self.user_repository.get_by_id(data.assignee_id)
                 if not assignee:
                     raise ValidationException("Assignee user does not exist")
             update_attrs["assignee_id"] = data.assignee_id
@@ -263,9 +253,7 @@ class TaskService:
                             "user_id": task.assignee_id,
                             "type": NotificationType.TASK_UPDATED,
                             "title": "Task Updated",
-                            "message": (
-                                f"The task '{task.title}' has been updated."
-                            ),
+                            "message": (f"The task '{task.title}' has been updated."),
                             "is_read": False,
                         }
                     )
@@ -282,9 +270,7 @@ class TaskService:
 
         project = await self.project_repository.get_by_id(task.project_id)
         if not project or project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to delete this task"
-            )
+            raise ForbiddenException("You do not have permission to delete this task")
 
         await self.task_repository.soft_delete(task)
         logger.info("Task deleted successfully: %s", task.id)

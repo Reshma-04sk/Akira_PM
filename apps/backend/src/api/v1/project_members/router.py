@@ -30,9 +30,7 @@ def get_project_member_service(
     project_repo = ProjectRepository(db)
     user_repo = UserRepository(db)
     audit_repo = AuditLogRepository(db)
-    return ProjectMemberService(
-        member_repo, project_repo, user_repo, audit_repo
-    )
+    return ProjectMemberService(member_repo, project_repo, user_repo, audit_repo)
 
 
 @router.post(
@@ -51,9 +49,7 @@ async def add_member(
     """
     Adds a new member to a project.
     """
-    member_response = await service.add_member(
-        project_id, data, current_user.id
-    )
+    member_response = await service.add_member(project_id, data, current_user.id)
     return APIResponse(data=member_response)
 
 
@@ -95,9 +91,7 @@ async def get_member(
     """
     Retrieves project membership details of a specific user.
     """
-    member_response = await service.get_member(
-        project_id, user_id, current_user.id
-    )
+    member_response = await service.get_member(project_id, user_id, current_user.id)
     return APIResponse(data=member_response)
 
 

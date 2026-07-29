@@ -30,9 +30,7 @@ async def test_create_and_get_project(db_session: AsyncSession) -> None:
     )
 
     # Create project
-    create_data = ProjectCreate(
-        name="Test Project", description="Test Description"
-    )
+    create_data = ProjectCreate(name="Test Project", description="Test Description")
     proj = await service.create_project(create_data, owner.id)
     assert proj.name == "Test Project"
     assert proj.description == "Test Description"

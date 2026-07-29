@@ -22,9 +22,7 @@ async def test_create_and_get_comment(db_session: AsyncSession) -> None:
     member_repo = ProjectMemberRepository(db_session)
     task_repo = TaskRepository(db_session)
     comment_repo = CommentRepository(db_session)
-    service = CommentService(
-        comment_repo, task_repo, project_repo, member_repo
-    )
+    service = CommentService(comment_repo, task_repo, project_repo, member_repo)
 
     owner = await user_repo.create(
         {
@@ -34,12 +32,8 @@ async def test_create_and_get_comment(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj 1", "owner_id": owner.id}
-    )
-    task = await task_repo.create(
-        {"title": "Task 1", "project_id": project.id}
-    )
+    project = await project_repo.create({"name": "Proj 1", "owner_id": owner.id})
+    task = await task_repo.create({"title": "Task 1", "project_id": project.id})
 
     create_data = CommentCreate(task_id=task.id, content="This is a comment")
     comment = await service.create_comment(create_data, owner.id)
@@ -59,9 +53,7 @@ async def test_non_member_cannot_comment(db_session: AsyncSession) -> None:
     member_repo = ProjectMemberRepository(db_session)
     task_repo = TaskRepository(db_session)
     comment_repo = CommentRepository(db_session)
-    service = CommentService(
-        comment_repo, task_repo, project_repo, member_repo
-    )
+    service = CommentService(comment_repo, task_repo, project_repo, member_repo)
 
     owner = await user_repo.create(
         {
@@ -79,12 +71,8 @@ async def test_non_member_cannot_comment(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj 1", "owner_id": owner.id}
-    )
-    task = await task_repo.create(
-        {"title": "Task 1", "project_id": project.id}
-    )
+    project = await project_repo.create({"name": "Proj 1", "owner_id": owner.id})
+    task = await task_repo.create({"title": "Task 1", "project_id": project.id})
 
     create_data = CommentCreate(task_id=task.id, content="Spam")
     with pytest.raises(ForbiddenException):
@@ -98,9 +86,7 @@ async def test_update_and_delete_comment(db_session: AsyncSession) -> None:
     member_repo = ProjectMemberRepository(db_session)
     task_repo = TaskRepository(db_session)
     comment_repo = CommentRepository(db_session)
-    service = CommentService(
-        comment_repo, task_repo, project_repo, member_repo
-    )
+    service = CommentService(comment_repo, task_repo, project_repo, member_repo)
 
     owner = await user_repo.create(
         {
@@ -110,12 +96,8 @@ async def test_update_and_delete_comment(db_session: AsyncSession) -> None:
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Proj 1", "owner_id": owner.id}
-    )
-    task = await task_repo.create(
-        {"title": "Task 1", "project_id": project.id}
-    )
+    project = await project_repo.create({"name": "Proj 1", "owner_id": owner.id})
+    task = await task_repo.create({"title": "Task 1", "project_id": project.id})
 
     comment = await service.create_comment(
         CommentCreate(task_id=task.id, content="Original"), owner.id

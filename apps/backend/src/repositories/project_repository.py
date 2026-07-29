@@ -74,11 +74,7 @@ class ProjectRepository(BaseRepository[Project]):
 
         # Pagination and ordering
         offset = (page - 1) * page_size
-        query = (
-            query.order_by(desc(Project.created_at))
-            .offset(offset)
-            .limit(page_size)
-        )
+        query = query.order_by(desc(Project.created_at)).offset(offset).limit(page_size)
 
         result = await self.session.execute(query)
         items = list(result.scalars().all())

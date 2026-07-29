@@ -31,9 +31,7 @@ class DashboardService:
         self.project_member_repository = project_member_repository
         self.audit_log_repository = audit_log_repository
 
-    async def _verify_project_membership(
-        self, project_id: UUID, user_id: UUID
-    ) -> None:
+    async def _verify_project_membership(self, project_id: UUID, user_id: UUID) -> None:
         project = await self.project_repository.get_by_id(project_id)
         if not project:
             raise NotFoundException("Project not found")
@@ -41,17 +39,13 @@ class DashboardService:
         if project.owner_id == user_id:
             return
 
-        is_member = await self.project_member_repository.exists(
-            project_id, user_id
-        )
+        is_member = await self.project_member_repository.exists(project_id, user_id)
         if not is_member:
             raise ForbiddenException("You do not have access to this project")
 
     async def get_overview(self, user_id: UUID) -> DashboardOverviewResponse:
-        project_ids = (
-            await self.project_repository.get_user_involved_project_ids(
-                user_id
-            )
+        project_ids = await self.project_repository.get_user_involved_project_ids(
+            user_id
         )
         stats = await self.task_repository.get_dashboard_stats(project_ids)
 
@@ -68,13 +62,9 @@ class DashboardService:
     async def get_activity(
         self, user_id: UUID, limit: int = 10
     ) -> DashboardActivityResponse:
-        activities = await self.audit_log_repository.get_recent_activity(
-            user_id, limit
-        )
+        activities = await self.audit_log_repository.get_recent_activity(user_id, limit)
         return DashboardActivityResponse(
-            activities=[
-                AuditLogResponse.model_validate(act) for act in activities
-            ]
+            activities=[AuditLogResponse.model_validate(act) for act in activities]
         )
 
     async def get_my_tasks(

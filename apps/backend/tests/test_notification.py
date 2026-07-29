@@ -51,9 +51,7 @@ async def test_notification_triggers_and_api(
     notification_service = NotificationService(notification_repo)
 
     # Test API endpoints login
-    headers = await get_auth_headers(
-        client, "assignee_notif@example.com", "Assignee"
-    )
+    headers = await get_auth_headers(client, "assignee_notif@example.com", "Assignee")
     me_res = await client.get("/api/v1/auth/me", headers=headers)
     assert me_res.status_code == 200
     assignee_id = UUID(me_res.json()["data"]["id"])
@@ -67,9 +65,7 @@ async def test_notification_triggers_and_api(
             "role": UserRole.USER,
         }
     )
-    project = await project_repo.create(
-        {"name": "Notif Proj", "owner_id": owner.id}
-    )
+    project = await project_repo.create({"name": "Notif Proj", "owner_id": owner.id})
 
     # 2. Trigger PROJECT_INVITE notification
     await member_service.add_member(
@@ -115,9 +111,7 @@ async def test_notification_triggers_and_api(
     notif_id = data["items"][0]["id"]
 
     # PATCH /notifications/{id}/read
-    res = await client.patch(
-        f"/api/v1/notifications/{notif_id}/read", headers=headers
-    )
+    res = await client.patch(f"/api/v1/notifications/{notif_id}/read", headers=headers)
     assert res.status_code == 200
     assert res.json()["data"]["is_read"] is True
 
@@ -126,7 +120,5 @@ async def test_notification_triggers_and_api(
     assert res.status_code == 200
 
     # DELETE /notifications/{id}
-    res = await client.delete(
-        f"/api/v1/notifications/{notif_id}", headers=headers
-    )
+    res = await client.delete(f"/api/v1/notifications/{notif_id}", headers=headers)
     assert res.status_code == 204

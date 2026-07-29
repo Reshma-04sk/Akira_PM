@@ -83,9 +83,7 @@ async def update_comment(
     """
     Updates the content of an existing comment.
     """
-    comment_response = await service.update_comment(
-        comment_id, data, current_user.id
-    )
+    comment_response = await service.update_comment(comment_id, data, current_user.id)
     return APIResponse(data=comment_response)
 
 

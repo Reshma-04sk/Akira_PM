@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.models.project_member import ProjectRole
@@ -15,9 +15,7 @@ class ProjectMemberBase(BaseModel):
 
 
 class ProjectMemberCreate(ProjectMemberBase):
-    user_id: uuid.UUID = Field(
-        ..., description="The ID of the user to add as a member"
-    )
+    user_id: uuid.UUID = Field(..., description="The ID of the user to add as a member")
 
 
 class ProjectMemberUpdate(BaseModel):

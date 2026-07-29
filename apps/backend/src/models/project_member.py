@@ -60,9 +60,7 @@ class ProjectMember(Base):
         DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
     )
 
-    project: Mapped["Project"] = relationship(
-        "Project", back_populates="members"
-    )
+    project: Mapped["Project"] = relationship("Project", back_populates="members")
     user: Mapped["User"] = relationship(
         "User", foreign_keys=[user_id], back_populates="project_memberships"
     )
