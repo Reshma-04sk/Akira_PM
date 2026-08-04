@@ -1,247 +1,169 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, Environment, Sparkles, ContactShadows, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
-export const InteractiveBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+const SceneContents: React.FC = () => {
+  const { camera } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  const capsuleRef = useRef<THREE.Group>(null);
+  const cylinderRef = useRef<THREE.Mesh>(null);
+  const torusRef = useRef<THREE.Mesh>(null);
+  const torusRingRef = useRef<THREE.Mesh>(null);
+
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    // 1. Setup Scene, Camera & Renderer
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      42,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      100
-    );
-    camera.position.set(0, 0, 9);
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x000000, 0);
-
-    // 2. Lights
-    scene.add(new THREE.AmbientLight(0x1a1408, 1.1));
-
-    const goldLight = new THREE.DirectionalLight(0xffcf7a, 1.4);
-    goldLight.position.set(4, 6, 5);
-    scene.add(goldLight);
-
-    const frontLight = new THREE.PointLight(0xfff6e6, 1.1, 30);
-    frontLight.position.set(-3, 1, 6);
-    scene.add(frontLight);
-
-    const rimLight = new THREE.PointLight(0xd4af37, 0.8, 30);
-    rimLight.position.set(3, -2, -4);
-    scene.add(rimLight);
-
-    const group = new THREE.Group();
-    scene.add(group);
-
-    // 3. Materials
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xfff6e0,
-      transparent: true,
-      opacity: 0.22,
-      roughness: 0.06,
-      metalness: 0.05,
-      clearcoat: 1,
-      clearcoatRoughness: 0.08,
-      side: THREE.DoubleSide,
-    });
-
-    const glassMat2 = new THREE.MeshPhysicalMaterial({
-      color: 0xd9c48a,
-      transparent: true,
-      opacity: 0.16,
-      roughness: 0.1,
-      metalness: 0.05,
-      clearcoat: 1,
-      clearcoatRoughness: 0.1,
-      side: THREE.DoubleSide,
-    });
-
-    const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 1,
-      roughness: 0.28,
-      emissive: 0x3a2b06,
-      emissiveIntensity: 0.12,
-    });
-
-    // 4. Geometries & Meshes
-    // Capsule builder
-    const geometriesToDispose: THREE.BufferGeometry[] = [];
-    const materialsToDispose: THREE.Material[] = [glassMat, glassMat2, goldMat];
-
-    const buildCapsule = (radius: number, cylHeight: number, mat: THREE.Material) => {
-      const g = new THREE.Group();
-      
-      const cylGeo = new THREE.CylinderGeometry(radius, radius, cylHeight, 48, 1, true);
-      geometriesToDispose.push(cylGeo);
-      const cyl = new THREE.Mesh(cylGeo, mat);
-      g.add(cyl);
-
-      const topCapGeo = new THREE.SphereGeometry(radius, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2);
-      geometriesToDispose.push(topCapGeo);
-      const topCap = new THREE.Mesh(topCapGeo, mat);
-      topCap.position.y = cylHeight / 2;
-      g.add(topCap);
-
-      const botCapGeo = new THREE.SphereGeometry(radius, 48, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-      geometriesToDispose.push(botCapGeo);
-      const botCap = new THREE.Mesh(botCapGeo, mat);
-      botCap.position.y = -cylHeight / 2;
-      g.add(botCap);
-
-      return g;
+    const handleMouseMove = (e: MouseEvent) => {
+      setMouse({
+        x: e.clientX / window.innerWidth - 0.5,
+        y: e.clientY / window.innerHeight - 0.5,
+      });
     };
-
-    const capsule = buildCapsule(1.05, 2.3, glassMat);
-    capsule.rotation.z = 0.15;
-    group.add(capsule);
-
-    const bandGeo = new THREE.TorusGeometry(1.08, 0.09, 20, 64);
-    geometriesToDispose.push(bandGeo);
-    const band = new THREE.Mesh(bandGeo, goldMat);
-    band.rotation.x = Math.PI / 2;
-    band.rotation.z = 0.15;
-    capsule.add(band);
-
-    // Gold cylinder (left)
-    const cylLeftGeo = new THREE.CylinderGeometry(0.55, 0.55, 2.1, 48);
-    geometriesToDispose.push(cylLeftGeo);
-    const cylinder = new THREE.Mesh(cylLeftGeo, goldMat);
-    cylinder.position.set(-3.4, 1.1, -1.5);
-    cylinder.rotation.set(0.5, 0.3, 0.6);
-    group.add(cylinder);
-
-    // Glass torus (right)
-    const torusGeo = new THREE.TorusGeometry(1.15, 0.32, 32, 96);
-    geometriesToDispose.push(torusGeo);
-    const torus = new THREE.Mesh(torusGeo, glassMat2);
-    torus.position.set(3.2, -0.9, -1.2);
-    torus.rotation.set(1.1, 0.4, 0);
-    group.add(torus);
-
-    const torusRingGeo = new THREE.TorusGeometry(1.15, 0.03, 16, 96);
-    geometriesToDispose.push(torusRingGeo);
-    const torusRing = new THREE.Mesh(torusRingGeo, goldMat);
-    torusRing.position.copy(torus.position);
-    torusRing.rotation.copy(torus.rotation);
-    group.add(torusRing);
-
-    // Particles (stars)
-    const pGeo = new THREE.BufferGeometry();
-    geometriesToDispose.push(pGeo);
-    const count = 140;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 16;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 3;
-    }
-    pGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     
-    const pMat = new THREE.PointsMaterial({
-      color: 0xd4af37,
-      size: 0.03,
-      transparent: true,
-      opacity: 0.5,
-      blending: THREE.AdditiveBlending,
-    });
-    materialsToDispose.push(pMat);
-
-    const particles = new THREE.Points(pGeo, pMat);
-    group.add(particles);
-
-    // 5. Interactivity Listeners
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetRotY = 0;
-    let targetRotX = 0;
-
-    const onMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX / window.innerWidth - 0.5;
-      mouseY = e.clientY / window.innerHeight - 0.5;
-      targetRotY = mouseX * 0.5;
-      targetRotX = mouseY * 0.25;
+    const handleScroll = () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      setScrollY(progress);
     };
 
-    let scrollT = 0;
-    const onScroll = () => {
-      scrollT = window.scrollY / container.clientHeight;
-    };
-
-    const onResize = () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("scroll", onScroll);
-    window.addEventListener("resize", onResize);
-
-    // 6. Animation Loop
-    const clock = new THREE.Clock();
-    let animationFrameId: number;
-
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      capsule.rotation.y = t * 0.25;
-      capsule.position.y = Math.sin(t * 0.6) * 0.18;
-
-      cylinder.rotation.y -= 0.008;
-      cylinder.rotation.x += 0.002;
-
-      torus.rotation.z = t * 0.2;
-      torusRing.rotation.z = t * 0.2;
-
-      particles.rotation.y = t * 0.02;
-
-      group.rotation.y += (targetRotY - group.rotation.y) * 0.04;
-      group.rotation.x += (targetRotX - group.rotation.x) * 0.04;
-
-      group.position.y = -scrollT * 2.2;
-      camera.position.z = 9 - scrollT * 1.5;
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    // 7. Component Unmount Cleanup
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll);
+    
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-
-      geometriesToDispose.forEach((g) => g.dispose());
-      materialsToDispose.forEach((m) => m.dispose());
-      renderer.dispose();
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+
+    // Rotate meshes
+    if (capsuleRef.current) {
+      capsuleRef.current.rotation.y = t * 0.25;
+      capsuleRef.current.position.y = Math.sin(t * 0.6) * 0.18;
+    }
+
+    if (cylinderRef.current) {
+      cylinderRef.current.rotation.y -= 0.008;
+      cylinderRef.current.rotation.x += 0.002;
+    }
+
+    if (torusRef.current && torusRingRef.current) {
+      torusRef.current.rotation.z = t * 0.2;
+      torusRingRef.current.rotation.z = t * 0.2;
+    }
+
+    // Parallax mouse movements
+    if (groupRef.current) {
+      groupRef.current.rotation.y += (mouse.x * 0.5 - groupRef.current.rotation.y) * 0.04;
+      groupRef.current.rotation.x += (mouse.y * 0.25 - groupRef.current.rotation.x) * 0.04;
+
+      // Parallax scroll position y shift
+      groupRef.current.position.y = -scrollY * 5.5;
+    }
+
+    // Parallax scroll camera zoom z shift
+    camera.position.z = 9 - scrollY * 2.8;
+  });
+
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 -z-10 w-full h-full overflow-hidden pointer-events-none bg-black"
-    >
-      <canvas ref={canvasRef} className="block w-full h-full" />
+    <group ref={groupRef}>
+      {/* 1. Floating Capsule (with golden band) inside Float helper */}
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
+        <group ref={capsuleRef}>
+          {/* Glass Outer Capsule */}
+          <mesh rotation-z={0.15}>
+            <capsuleGeometry args={[1.05, 2.3, 16, 32]} />
+            <MeshTransmissionMaterial
+              backside
+              backsideThickness={0.2}
+              transmission={1.0}
+              thickness={1.2}
+              roughness={0.06}
+              anisotropy={1.0}
+              distortion={0.1}
+              color="#fff6e0"
+            />
+          </mesh>
+
+          {/* Golden Center Torus Band */}
+          <mesh rotation-x={Math.PI / 2} rotation-z={0.15}>
+            <torusGeometry args={[1.08, 0.09, 20, 64]} />
+            <meshStandardMaterial
+              color="#d4af37"
+              metalness={1.0}
+              roughness={0.28}
+              emissive="#3a2b06"
+              emissiveIntensity={0.12}
+            />
+          </mesh>
+        </group>
+      </Float>
+
+      {/* 2. Floating Gold Cylinder (left) */}
+      <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.4}>
+        <mesh ref={cylinderRef} position={[-3.4, 1.1, -1.5]} rotation={[0.5, 0.3, 0.6]}>
+          <cylinderGeometry args={[0.55, 0.55, 2.1, 48]} />
+          <meshStandardMaterial
+            color="#d4af37"
+            metalness={1.0}
+            roughness={0.28}
+            emissive="#3a2b06"
+            emissiveIntensity={0.12}
+          />
+        </mesh>
+      </Float>
+
+      {/* 3. Floating Glass Torus (right) */}
+      <Float speed={1.3} rotationIntensity={0.3} floatIntensity={0.3}>
+        <group>
+          {/* Translucent Glass Torus */}
+          <mesh ref={torusRef} position={[3.2, -0.9, -1.2]} rotation={[1.1, 0.4, 0]}>
+            <torusGeometry args={[1.15, 0.32, 32, 96]} />
+            <MeshTransmissionMaterial
+              backside
+              transmission={1.0}
+              thickness={0.8}
+              roughness={0.1}
+              color="#d9c48a"
+            />
+          </mesh>
+          
+          {/* Gold Torus Ring Outline */}
+          <mesh ref={torusRingRef} position={[3.2, -0.9, -1.2]} rotation={[1.1, 0.4, 0]}>
+            <torusGeometry args={[1.15, 0.03, 16, 96]} />
+            <meshStandardMaterial
+              color="#d4af37"
+              metalness={1.0}
+              roughness={0.28}
+            />
+          </mesh>
+        </group>
+      </Float>
+
+      {/* 4. Subtle Particles */}
+      <Sparkles count={140} scale={15} size={1.5} speed={0.2} color="#d4af37" />
+
+      {/* 5. Soft shadows */}
+      <ContactShadows position={[0, -3.5, 0]} opacity={0.65} scale={20} blur={2.5} far={4} />
+    </group>
+  );
+};
+
+export const InteractiveBackground: React.FC = () => {
+  return (
+    <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden pointer-events-none bg-[#07060a]">
+      <Canvas camera={{ position: [0, 0, 9], fov: 42 }} gl={{ antialias: true, alpha: true }}>
+        <ambientLight intensity={1.1} color="#1a1408" />
+        <directionalLight position={[4, 6, 5]} intensity={1.4} color="#ffcf7a" />
+        <pointLight position={[-3, 1, 6]} intensity={1.1} distance={30} color="#fff6e6" />
+        <pointLight position={[3, -2, -4]} intensity={0.8} distance={30} color="#d4af37" />
+        <Environment preset="sunset" />
+        <SceneContents />
+      </Canvas>
     </div>
   );
 };
