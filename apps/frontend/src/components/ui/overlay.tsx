@@ -48,7 +48,7 @@ export const Dialog: React.FC<DialogProps> = ({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              "relative bg-card border border-border rounded-xl shadow-lg w-full max-w-md p-6 overflow-hidden text-sm",
+              "relative glass-modal rounded-2xl w-full max-w-md p-6 overflow-hidden text-sm",
               className
             )}
             role="dialog"
@@ -117,10 +117,10 @@ export const Drawer: React.FC<DrawerProps> = ({
             exit={directions}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={cn(
-              "absolute bg-card border-border flex flex-col p-6 shadow-xl",
-              position === "left" && "border-r",
-              position === "right" && "border-l",
-              position === "bottom" && "border-t rounded-t-xl",
+              "absolute glass-panel flex flex-col p-6",
+              position === "left" && "border-r border-[#d4af37]/10",
+              position === "right" && "border-l border-[#d4af37]/10",
+              position === "bottom" && "border-t border-[#d4af37]/10 rounded-t-2xl",
               positioning,
               className
             )}
@@ -191,7 +191,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
             className={cn(
-              "absolute z-50 mt-1.5 w-48 bg-card border border-border rounded-lg shadow-lg py-1 text-xs overflow-hidden",
+              "absolute z-50 mt-1.5 w-48 glass-modal rounded-xl py-1 text-xs overflow-hidden",
               align === "right" ? "right-0" : "left-0",
               className
             )}
@@ -252,7 +252,7 @@ export const Popover: React.FC<PopoverProps> = ({ trigger, children, className }
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className={cn("absolute z-50 mt-1.5 p-4 bg-card border border-border rounded-lg shadow-lg text-xs w-64", className)}
+            className={cn("absolute z-50 mt-1.5 p-4 glass-modal rounded-xl text-xs w-64", className)}
           >
             {children}
           </motion.div>

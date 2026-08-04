@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 
 
@@ -19,13 +18,16 @@ class AIConfigResponse(BaseModel):
 
 class AIHealthResponse(BaseModel):
     openai: str = Field(
-        ..., description="Health status of OpenAI ('healthy', 'unconfigured', 'unhealthy')."
+        ...,
+        description="Health status of OpenAI ('healthy', 'unconfigured', 'unhealthy').",
     )
     gemini: str = Field(
-        ..., description="Health status of Gemini ('healthy', 'unconfigured', 'unhealthy')."
+        ...,
+        description="Health status of Gemini ('healthy', 'unconfigured', 'unhealthy').",
     )
     anthropic: str = Field(
-        ..., description="Health status of Anthropic ('healthy', 'unconfigured', 'unhealthy')."
+        ...,
+        description="Health status of Anthropic ('healthy', 'unconfigured', 'unhealthy').",
     )
 
 

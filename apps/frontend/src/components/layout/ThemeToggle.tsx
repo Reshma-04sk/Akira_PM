@@ -6,13 +6,13 @@ export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border">
+    <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
       <button
         onClick={() => setTheme("light")}
-        className={`p-1.5 rounded-md transition-all hover:text-foreground ${
+        className={`p-1.5 rounded-md transition-all hover:text-white ${
           theme === "light"
-            ? "bg-background shadow text-foreground"
-            : "text-muted-foreground"
+            ? "bg-[#d4af37]/15 text-[#d4af37] border border-[#d4af37]/20 shadow-[0_0_8px_rgba(212,175,55,0.15)] font-bold"
+            : "text-muted-foreground border border-transparent"
         }`}
         aria-label="Light theme"
       >
@@ -20,10 +20,10 @@ export const ThemeToggle: React.FC = () => {
       </button>
       <button
         onClick={() => setTheme("dark")}
-        className={`p-1.5 rounded-md transition-all hover:text-foreground ${
+        className={`p-1.5 rounded-md transition-all hover:text-white ${
           theme === "dark"
-            ? "bg-background shadow text-foreground"
-            : "text-muted-foreground"
+            ? "bg-[#d4af37]/15 text-[#d4af37] border border-[#d4af37]/20 shadow-[0_0_8px_rgba(212,175,55,0.15)] font-bold"
+            : "text-muted-foreground border border-transparent"
         }`}
         aria-label="Dark theme"
       >
@@ -31,10 +31,10 @@ export const ThemeToggle: React.FC = () => {
       </button>
       <button
         onClick={() => setTheme("system")}
-        className={`p-1.5 rounded-md transition-all hover:text-foreground ${
+        className={`p-1.5 rounded-md transition-all hover:text-white ${
           theme === "system"
-            ? "bg-background shadow text-foreground"
-            : "text-muted-foreground"
+            ? "bg-[#d4af37]/15 text-[#d4af37] border border-[#d4af37]/20 shadow-[0_0_8px_rgba(212,175,55,0.15)] font-bold"
+            : "text-muted-foreground border border-transparent"
         }`}
         aria-label="System theme"
       >

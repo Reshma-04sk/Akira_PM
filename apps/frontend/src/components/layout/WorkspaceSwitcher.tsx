@@ -47,10 +47,10 @@ export const WorkspaceSwitcher: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-border bg-card/50 hover:bg-accent hover:text-accent-foreground text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-[#d4af37]/15 bg-black/45 hover:bg-[#d4af37]/5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37]"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <div className="h-6 w-6 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+          <div className="h-6 w-6 rounded bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-bold text-xs shrink-0">
             {selected.name.charAt(0)}
           </div>
           <div className="flex flex-col overflow-hidden leading-none gap-0.5">
@@ -64,7 +64,7 @@ export const WorkspaceSwitcher: React.FC = () => {
         </div>
         <ChevronsUpDown className="h-4 w-4 text-muted-foreground shrink-0" />
       </button>
-
+ 
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -72,10 +72,10 @@ export const WorkspaceSwitcher: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className="absolute left-0 z-50 mt-1 w-56 bg-card border border-border rounded-lg shadow-lg py-1 text-sm overflow-hidden"
+            className="absolute left-0 z-50 mt-1 w-56 bg-black border border-[#d4af37]/20 rounded-lg shadow-2xl py-1 text-sm overflow-hidden backdrop-blur-xl"
             role="listbox"
           >
-            <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground border-b border-border mb-1">
+            <div className="px-3 py-1.5 text-xs font-medium text-[#d4af37]/75 border-b border-border mb-1">
               Workspaces
             </div>
             {mockWorkspaces.map((workspace) => (
@@ -87,12 +87,12 @@ export const WorkspaceSwitcher: React.FC = () => {
                   setSelected(workspace);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors ${
-                  selected.id === workspace.id ? "bg-accent/40 font-medium" : ""
+                className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-colors ${
+                  selected.id === workspace.id ? "bg-[#d4af37]/5 font-semibold text-[#d4af37]" : ""
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
+                  <div className="h-5 w-5 rounded bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-bold text-[10px]">
                     {workspace.name.charAt(0)}
                   </div>
                   <div className="flex flex-col leading-none">

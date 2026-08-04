@@ -34,8 +34,12 @@ export interface ProjectMemberUpdatePayload {
 }
 
 export const projectMembersApi = {
-  list(projectId: string, config?: RequestConfig): Promise<ApiResponse<ProjectMemberListResponse>> {
-    return apiClient.get<ProjectMemberListResponse>(ENDPOINTS.PROJECT_MEMBERS.LIST(projectId), config);
+  async list(projectId: string, config?: RequestConfig): Promise<ApiResponse<ProjectMember[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.PROJECT_MEMBERS.LIST(projectId), config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   add(projectId: string, payload: ProjectMemberCreatePayload, config?: RequestConfig): Promise<ApiResponse<ProjectMember>> {

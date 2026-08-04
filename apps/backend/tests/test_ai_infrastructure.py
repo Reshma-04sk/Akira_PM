@@ -102,22 +102,27 @@ async def test_api_config_endpoint(client: AsyncClient):
 async def test_api_health_endpoint(client: AsyncClient):
     headers = await get_auth_headers(client, "ai_health@example.com", "AI User")
 
-    with patch(
-        "src.ai.providers.openai.OpenAIProvider.health", new_callable=AsyncMock
-    ) as mock_oa_health, patch(
-        "src.ai.providers.gemini.GeminiProvider.health", new_callable=AsyncMock
-    ) as mock_gem_health, patch(
-        "src.ai.providers.anthropic.AnthropicProvider.health", new_callable=AsyncMock
-    ) as mock_ant_health:
-
+    with (
+        patch(
+            "src.ai.providers.openai.OpenAIProvider.health", new_callable=AsyncMock
+        ) as mock_oa_health,
+        patch(
+            "src.ai.providers.gemini.GeminiProvider.health", new_callable=AsyncMock
+        ) as mock_gem_health,
+        patch(
+            "src.ai.providers.anthropic.AnthropicProvider.health",
+            new_callable=AsyncMock,
+        ) as mock_ant_health,
+    ):
         mock_oa_health.return_value = True
         mock_gem_health.return_value = False
         mock_ant_health.return_value = True
 
-        with patch("src.core.settings.settings.OPENAI_API_KEY", "mock-key"), patch(
-            "src.core.settings.settings.GEMINI_API_KEY", "mock-key"
-        ), patch("src.core.settings.settings.ANTHROPIC_API_KEY", "mock-key"):
-
+        with (
+            patch("src.core.settings.settings.OPENAI_API_KEY", "mock-key"),
+            patch("src.core.settings.settings.GEMINI_API_KEY", "mock-key"),
+            patch("src.core.settings.settings.ANTHROPIC_API_KEY", "mock-key"),
+        ):
             response = await client.get("/api/v1/ai/health", headers=headers)
             assert response.status_code == 200
             data = response.json()
@@ -128,9 +133,7 @@ async def test_api_health_endpoint(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_api_test_endpoint(client: AsyncClient):
-    headers = await get_auth_headers(
-        client, "ai_generate_test@example.com", "AI User"
-    )
+    headers = await get_auth_headers(client, "ai_generate_test@example.com", "AI User")
 
     mock_response = {
         "text": "Hello test generation",
@@ -138,7 +141,9 @@ async def test_api_test_endpoint(client: AsyncClient):
         "raw_response": {},
     }
 
-    with patch("src.ai.services.ai.AIService.generate", new_callable=AsyncMock) as mock_service_gen:
+    with patch(
+        "src.ai.services.ai.AIService.generate", new_callable=AsyncMock
+    ) as mock_service_gen:
         mock_service_gen.return_value = mock_response
 
         test_payload = {"prompt": "Test connection prompt", "provider": "gemini"}

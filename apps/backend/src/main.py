@@ -70,9 +70,16 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Content-Security-Policy"] = (
-        "default-src 'none'; frame-ancestors 'none'; sandbox;"
-    )
+    if not any(
+        request.url.path.startswith(p) for p in ["/docs", "/redoc", "/openapi.json"]
+    ):
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; sandbox;"
+        )
+    else:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com;"
+        )
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Permissions-Policy"] = (
         "accelerometer=(), camera=(), gyroscope=(), microphone=(), "

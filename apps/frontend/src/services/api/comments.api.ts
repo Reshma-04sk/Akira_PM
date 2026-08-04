@@ -25,8 +25,12 @@ export interface CreateCommentPayload {
 }
 
 export const commentsApi = {
-  list(taskId: string, config?: RequestConfig): Promise<ApiResponse<CommentListResponse>> {
-    return apiClient.get<CommentListResponse>(ENDPOINTS.COMMENTS.LIST(taskId), config);
+  async list(taskId: string, config?: RequestConfig): Promise<ApiResponse<Comment[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.COMMENTS.LIST(taskId), config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   create(payload: CreateCommentPayload, config?: RequestConfig): Promise<ApiResponse<Comment>> {

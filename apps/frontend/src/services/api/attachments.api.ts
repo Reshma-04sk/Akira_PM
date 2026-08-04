@@ -15,8 +15,12 @@ export interface Attachment {
 }
 
 export const attachmentsApi = {
-  list(taskId: string, config?: RequestConfig): Promise<ApiResponse<Attachment[]>> {
-    return apiClient.get<Attachment[]>(ENDPOINTS.ATTACHMENTS.LIST(taskId), config);
+  async list(taskId: string, config?: RequestConfig): Promise<ApiResponse<Attachment[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.ATTACHMENTS.LIST(taskId), config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   upload(taskId: string, file: File, config?: RequestConfig): Promise<ApiResponse<Attachment>> {

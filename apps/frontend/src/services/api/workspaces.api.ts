@@ -43,8 +43,12 @@ export interface InviteMemberPayload {
 }
 
 export const workspacesApi = {
-  list(config?: RequestConfig): Promise<ApiResponse<WorkspaceListResponse>> {
-    return apiClient.get<WorkspaceListResponse>(ENDPOINTS.WORKSPACES.LIST, config);
+  async list(config?: RequestConfig): Promise<ApiResponse<Workspace[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.WORKSPACES.LIST, config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   create(payload: CreateWorkspacePayload, config?: RequestConfig): Promise<ApiResponse<Workspace>> {

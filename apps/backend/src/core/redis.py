@@ -82,4 +82,3 @@ async def invalidate_dashboard_cache(
                 await client.delete(*keys_to_delete)
     except Exception as e:
         logger.warning("Error invalidating dashboard cache: %s", e)
-

@@ -44,11 +44,15 @@ export const TaskAttachments: React.FC<TaskAttachmentsProps> = ({ taskId }) => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   // Query - attachments
-  const { data: attachments, isLoading, error } = useQuery({
+  const { data: attachmentsData, isLoading, error } = useQuery({
     queryKey: ["attachments", "list", taskId],
     queryFn: () => attachmentsApi.list(taskId).then((res) => res.data),
     enabled: !!taskId,
   });
+
+  const attachments: Attachment[] = Array.isArray(attachmentsData) 
+    ? attachmentsData 
+    : ((attachmentsData as any)?.items ? (attachmentsData as any).items : []);
 
   // Mutations - Upload Attachment
   const uploadMutation = useMutation({

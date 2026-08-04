@@ -70,7 +70,7 @@ const ProjectGridCard: React.FC<{
   const totalTasks = stats?.tasks_count ?? 0;
   const completedTasks = stats?.completed_tasks ?? 0;
   const progressVal = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  const membersCount = membersResponse?.total ?? 0;
+  const membersCount = membersResponse?.length ?? 0;
 
   const showLoading = statsLoading || membersLoading;
 
@@ -200,10 +200,14 @@ export const ProjectsListPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Queries
-  const { data: projects, isLoading, error } = useQuery({
+  const { data: projectsData, isLoading, error } = useQuery({
     queryKey: ["projects", "list"],
     queryFn: () => projectsApi.list().then((res) => res.data),
   });
+
+  const projects: Project[] = Array.isArray(projectsData) 
+    ? projectsData 
+    : ((projectsData as any)?.items ? (projectsData as any).items : []);
 
   // React Hook Form for creation
   const createForm = useForm<ProjectFormValues>({

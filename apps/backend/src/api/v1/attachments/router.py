@@ -50,6 +50,7 @@ async def upload_attachment(
     content = await file.read()
     if len(content) > max_file_size:
         from src.core.exceptions import ValidationException
+
         raise ValidationException("File size exceeds the maximum limit of 10MB")
 
     attachment = await service.upload_attachment(

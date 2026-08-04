@@ -163,10 +163,10 @@ export const ReportsPage: React.FC = () => {
   // Custom SVG donut chart calculations for priority
   const totalPriorityCount = Object.values(priorityCounts).reduce((a: number, b: number) => a + b, 0);
   const donutColors = {
-    critical: "#ef4444", // red
-    high: "#f59e0b",     // amber
-    medium: "#3b82f6",   // blue
-    low: "#6b7280",      // gray
+    critical: "#d4af37", // radiant gold
+    high: "#f5d061",     // soft champagne
+    medium: "#ab8836",   // deep bronze
+    low: "#5a4d2e",      // muted dark gold
   };
 
   let accumulatedPercent = 0;
@@ -213,7 +213,7 @@ export const ReportsPage: React.FC = () => {
 
       <div id="print-area" className="space-y-6">
         {/* Reports Header & Selection */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card/45 border border-border/80 backdrop-blur rounded-xl p-4 no-print">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 glass-card rounded-xl p-4 no-print">
           <div className="w-60">
             <Select
               value={selectedProjectId}
@@ -224,21 +224,21 @@ export const ReportsPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleExportCSV}
               disabled={showLoader || tasks.length === 0}
-              className="h-8 gap-1.5 text-[11px] font-semibold"
+              className="h-8 gap-1.5 text-[11px] font-semibold cursor-pointer"
             >
               <Download className="h-3.5 w-3.5" />
               Export CSV
             </Button>
             <Button
-              variant="outline"
+              variant="primary"
               size="sm"
               onClick={handlePrintPDF}
               disabled={showLoader}
-              className="h-8 gap-1.5 text-[11px] font-semibold"
+              className="h-8 gap-1.5 text-[11px] font-semibold cursor-pointer text-black"
             >
               <Printer className="h-3.5 w-3.5" />
               Export PDF / Print
@@ -347,12 +347,12 @@ export const ReportsPage: React.FC = () => {
 
                         return (
                           <div key={status} className="flex flex-col items-center gap-2 w-16 group">
-                            <div className="w-8 bg-muted rounded-t-lg relative h-32 flex items-end border border-border/30 overflow-hidden">
+                            <div className="w-8 bg-white/5 rounded-t-lg relative h-32 flex items-end border border-white/5 overflow-hidden">
                               <div
                                 style={{ height: `${heightPercent}%` }}
-                                className="w-full bg-primary rounded-t-md transition-all duration-500 ease-out group-hover:bg-primary/95"
+                                className="w-full bg-gradient-to-t from-[#ab8836] via-[#d4af37] to-[#f5d061] rounded-t-md transition-all duration-500 ease-out group-hover:opacity-90 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                               />
-                              <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                              <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-[#d4af37] opacity-0 group-hover:opacity-100 transition-opacity">
                                 {count}
                               </span>
                             </div>

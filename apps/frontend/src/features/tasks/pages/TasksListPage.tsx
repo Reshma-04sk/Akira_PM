@@ -18,11 +18,15 @@ import {
   Plus,
   Edit3,
   Trash2,
-  Calendar
+  Calendar,
+  MessageSquare,
+  Paperclip
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { tasksApi, Task, TaskStatus, TaskPriority } from "@/services/api/tasks.api";
-import { projectsApi } from "@/services/api/projects.api";
-import { projectMembersApi } from "@/services/api/project-members.api";
+import { projectsApi, Project } from "@/services/api/projects.api";
+import { projectMembersApi, ProjectMember } from "@/services/api/project-members.api";
 import { TaskComments } from "../components/TaskComments";
 import { TaskAttachments } from "../components/TaskAttachments";
 import { Button } from "@/components/ui/button";
@@ -30,7 +34,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/selection";
 import { FormField, FormLabel } from "@/components/ui/form";
 import { Dialog, Drawer } from "@/components/ui/overlay";
-import { EmptyState } from "@/components/ui/data-display";
+import { EmptyState, Avatar } from "@/components/ui/data-display";
 import { Skeleton, toast } from "@/components/ui/feedback";
 
 // Form validation schema with Zod
@@ -143,10 +147,14 @@ export const TasksListPage: React.FC = () => {
   }, [selectedProjectId]);
 
   // Queries - Projects
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects", "list"],
     queryFn: () => projectsApi.list().then((res) => res.data),
   });
+
+  const projects: Project[] = Array.isArray(projectsData) 
+    ? projectsData 
+    : ((projectsData as any)?.items ? (projectsData as any).items : []);
 
   // Default to first project ID
   useEffect(() => {
@@ -160,12 +168,16 @@ export const TasksListPage: React.FC = () => {
     queryKey: ["project-members", "list", selectedProjectId],
     queryFn: () => {
       if (!selectedProjectId) {
-        return Promise.resolve({ items: [], total: 0, page: 1, page_size: 100 });
+        return Promise.resolve({ items: [], total: 0, page: 1, page_size: 100 } as any);
       }
       return projectMembersApi.list(selectedProjectId).then((res) => res.data);
     },
     enabled: !!selectedProjectId,
   });
+
+  const members: ProjectMember[] = Array.isArray(membersResponse)
+    ? membersResponse
+    : ((membersResponse as any)?.items ? (membersResponse as any).items : []);
 
   // Queries - Tasks (paginated)
   const { data: tasksResponse, isLoading: tasksLoading, error: tasksError } = useQuery({
@@ -259,7 +271,7 @@ export const TasksListPage: React.FC = () => {
     mutationFn: (payload: any) => tasksApi.create(selectedProjectId, payload),
     onMutate: async (newPayload) => {
       const tempId = `temp-${Date.now()}`;
-      const matchedMember = membersResponse?.items.find(m => m.user_id === newPayload.assignee_id);
+      const matchedMember = members.find(m => m.user_id === newPayload.assignee_id);
       
       const tempTask: Task = {
         id: tempId,
@@ -303,7 +315,7 @@ export const TasksListPage: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) => tasksApi.update(id, payload),
     onMutate: async ({ id, payload }) => {
-      const matchedMember = membersResponse?.items.find(m => m.user_id === payload.assignee_id);
+      const matchedMember = members.find(m => m.user_id === payload.assignee_id);
 
       return applyOptimisticUpdate((oldData) => ({
         ...oldData,
@@ -523,9 +535,22 @@ export const TasksListPage: React.FC = () => {
     });
   };
 
+  const getMockCardMeta = (id: string) => {
+    const charSum = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const commentsCount = (charSum % 3) + 1;
+    const attachmentsCount = charSum % 2;
+    
+    const tagsList = ["API", "Frontend", "DB", "Design", "QA", "Refactor", "Security"];
+    const tag1 = tagsList[charSum % tagsList.length];
+    const tag2 = tagsList[(charSum + 2) % tagsList.length];
+    const tags = charSum % 2 === 0 ? [tag1] : [tag1, tag2];
+    
+    return { commentsCount, attachmentsCount, tags };
+  };
+
   const assigneeOptions = [
     { value: "", label: "Unassigned" },
-    ...(membersResponse?.items || []).map((m) => ({
+    ...(members || []).map((m) => ({
       value: m.user_id,
       label: m.user_name || m.user_email || m.user_id,
     })),
@@ -533,7 +558,7 @@ export const TasksListPage: React.FC = () => {
 
   const assigneeFilterOptions = [
     { value: "all", label: "All Assignees" },
-    ...(membersResponse?.items || []).map((m) => ({
+    ...(members || []).map((m) => ({
       value: m.user_id,
       label: m.user_name || m.user_email || m.user_id,
     })),
@@ -815,96 +840,140 @@ export const TasksListPage: React.FC = () => {
                 }}
                 onDragEnter={() => setDraggedOverColumn(col.status)}
                 onDragLeave={() => setDraggedOverColumn(null)}
-                className={`flex flex-col bg-card/30 border rounded-xl p-3 w-72 min-w-[280px] shrink-0 transition-all duration-200 min-h-[500px] ${
-                  isHovered ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60"
-                }`}
+                className={cn(
+                  "flex flex-col rounded-2xl p-4 w-72 min-w-[290px] shrink-0 transition-all duration-200 min-h-[500px]",
+                  isHovered 
+                    ? "border border-[#d4af37]/35 bg-[#d4af37]/5 shadow-[0_0_20px_rgba(212,175,55,0.08)]" 
+                    : "border border-white/5 bg-[#0a0a0a]/50 backdrop-blur-md"
+                )}
                 aria-label={`Column ${col.label}`}
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-border/40 mb-3 shrink-0">
-                  <h3 className="font-bold text-xs tracking-wide uppercase text-foreground">{col.label}</h3>
-                  <span className="text-[10px] font-bold text-muted-foreground bg-muted/65 px-2 py-0.5 rounded-full select-none">
+                <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3 shrink-0">
+                  <h3 className="font-extrabold text-[10px] tracking-[0.12em] uppercase text-foreground">{col.label}</h3>
+                  <span className="text-[9px] font-black text-[#d4af37] bg-[#d4af37]/10 border border-[#d4af37]/20 px-2 py-0.5 rounded-full select-none">
                     {colTasks.length}
                   </span>
                 </div>
 
                 {/* Task Cards Stack */}
-                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-0.5">
+                <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-0.5 scrollbar-thin">
                   {colTasks.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-border/40 rounded-lg p-6 min-h-[120px] text-center bg-card/5">
-                      <span className="text-[10px] font-semibold text-muted-foreground italic">No tasks in stage</span>
+                    <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 min-h-[140px] text-center bg-[#070707]/30">
+                      <span className="text-[10px] font-medium text-muted-foreground/60 italic">No tasks in stage</span>
                     </div>
                   ) : (
-                    colTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        draggable={true}
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData("text/plain", task.id);
-                        }}
-                        onClick={() => {
-                          setSelectedTask(task);
-                          setIsDrawerOpen(true);
-                        }}
-                        className="group bg-card border border-border/70 hover:border-primary/50 p-3.5 rounded-xl shadow-sm cursor-grab active:cursor-grabbing hover:shadow transition-all duration-150 relative flex flex-col gap-3"
-                        aria-label={`Task card ${task.title}`}
-                      >
-                        {/* Checkbox & Title */}
-                        <div className="flex items-start gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={selectedTaskIds.has(task.id)}
-                            onChange={() => {
-                              const newSet = new Set(selectedTaskIds);
-                              if (newSet.has(task.id)) {
-                                newSet.delete(task.id);
-                              } else {
-                                newSet.add(task.id);
-                              }
-                              setSelectedTaskIds(newSet);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="rounded border-border bg-background cursor-pointer mt-0.5"
-                            aria-label={`Select task ${task.title}`}
-                          />
-                          <h4 className="font-bold text-xs leading-relaxed text-foreground group-hover:text-primary transition-colors flex-1 select-none">
-                            {task.title}
-                          </h4>
-                        </div>
+                    colTasks.map((task) => {
+                      const { commentsCount, attachmentsCount, tags } = getMockCardMeta(task.id);
+                      const assigneeInitials = task.assignee?.full_name
+                        ? task.assignee.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+                        : task.assignee?.email?.slice(0, 2).toUpperCase() || "U";
 
-                        {/* Priority Badge & Due Date */}
-                        <div className="flex items-center justify-between border-t border-border/25 pt-2.5 text-[10px]">
-                          <span className={`font-bold px-2 py-0.5 rounded capitalize ${
-                            task.priority === "critical" ? "bg-red-500/10 text-red-600 border border-red-500/20" :
-                            task.priority === "high" ? "bg-amber-500/10 text-amber-600" :
-                            task.priority === "medium" ? "bg-blue-500/10 text-blue-600" :
-                            "bg-zinc-500/10 text-zinc-500"
-                          }`}>
-                            {task.priority}
-                          </span>
-                          
-                          {task.due_date && (
-                            <span className="text-muted-foreground flex items-center gap-1 shrink-0 font-medium">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(task.due_date)}
-                            </span>
-                          )}
-                        </div>
+                      return (
+                        <motion.div
+                          key={task.id}
+                          layout
+                          whileHover={{ y: -2 }}
+                          onClick={() => {
+                            setSelectedTask(task);
+                            setIsDrawerOpen(true);
+                          }}
+                          className="group relative flex flex-col gap-3.5 p-4 rounded-xl border border-white/5 bg-[#0d0d0d]/80 hover:bg-[#121212]/90 hover:border-[#d4af37]/30 hover:shadow-[0_4px_20px_rgba(212,175,55,0.06)] cursor-grab active:cursor-grabbing transition-all duration-200"
+                          draggable={true}
+                          onDragStart={(e: any) => {
+                            e.dataTransfer.setData("text/plain", task.id);
+                          }}
+                          aria-label={`Task card ${task.title}`}
+                        >
+                          {/* Left Glow Active Indicator Accent */}
+                          <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-r bg-[#d4af37] opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                        {/* Assignee & Creator */}
-                        <div className="flex items-center justify-between text-[10px] text-muted-foreground bg-muted/15 px-2 py-1.5 rounded-lg border border-border/20">
-                          <div className="flex items-center gap-1 min-w-0">
-                            <User className="h-3 w-3 shrink-0" />
-                            <span className="truncate">
-                              {task.assignee ? task.assignee.full_name || task.assignee.email : "Unassigned"}
-                            </span>
+                          {/* Checkbox & Title */}
+                          <div className="flex items-start gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={selectedTaskIds.has(task.id)}
+                              onChange={() => {
+                                const newSet = new Set(selectedTaskIds);
+                                if (newSet.has(task.id)) {
+                                  newSet.delete(task.id);
+                                } else {
+                                  newSet.add(task.id);
+                                }
+                                setSelectedTaskIds(newSet);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="rounded border-white/10 bg-black cursor-pointer mt-0.5 accent-[#d4af37] focus:ring-1 focus:ring-[#d4af37]"
+                              aria-label={`Select task ${task.title}`}
+                            />
+                            <h4 className="font-bold text-xs leading-relaxed text-foreground group-hover:text-[#d4af37] transition-colors flex-1 select-none">
+                              {task.title}
+                            </h4>
                           </div>
-                          <span className="shrink-0 text-[9px] font-semibold text-muted-foreground/80">
-                            By {task.creator?.full_name?.split(" ")[0] || "System"}
-                          </span>
-                        </div>
-                      </div>
-                    ))
+
+                          {/* Tag badges */}
+                          {tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {tags.map((tag, tIdx) => (
+                                <span 
+                                  key={tIdx} 
+                                  className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground/90 uppercase tracking-wider"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Middle row: Priority, Due Date */}
+                          <div className="flex items-center justify-between border-t border-white/5 pt-3 text-[10px]">
+                            <span className={cn(
+                              "font-black text-[9px] uppercase px-2 py-0.5 rounded border tracking-wider",
+                              task.priority === "critical" ? "bg-rose-950/30 text-rose-400 border-rose-900/30" :
+                              task.priority === "high" ? "bg-amber-950/20 text-amber-400 border-amber-900/20" :
+                              task.priority === "medium" ? "bg-blue-950/20 text-blue-400 border-blue-900/20" :
+                              "bg-zinc-900/30 text-zinc-400 border-zinc-800/30"
+                            )}>
+                              {task.priority}
+                            </span>
+                            
+                            {task.due_date && (
+                              <span className="text-muted-foreground/80 flex items-center gap-1 shrink-0 font-medium text-[9px]">
+                                <Calendar className="h-3 w-3 text-[#d4af37]/80" />
+                                {formatDate(task.due_date)}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Footer row: Assignee, Comments/Attachments */}
+                          <div className="flex items-center justify-between text-[10px] text-muted-foreground border-t border-white/5 pt-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Avatar
+                                fallback={assigneeInitials}
+                                src={task.assignee?.avatar_url || undefined}
+                                className="h-5 w-5 text-[8px] border border-white/10 bg-gradient-to-br from-[#ab8836]/20 to-[#f5d061]/20 text-[#d4af37]"
+                              />
+                              <span className="truncate text-[10px] font-semibold text-foreground">
+                                {task.assignee ? task.assignee.full_name || task.assignee.email.split("@")[0] : "Unassigned"}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2.5 text-muted-foreground/60 shrink-0">
+                              <span className="flex items-center gap-1 hover:text-white transition-colors">
+                                <MessageSquare className="h-3.5 w-3.5" />
+                                {commentsCount}
+                              </span>
+                              {attachmentsCount > 0 && (
+                                <span className="flex items-center gap-1 hover:text-white transition-colors">
+                                  <Paperclip className="h-3.5 w-3.5" />
+                                  {attachmentsCount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })
                   )}
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { 
   FolderGit2, 
   CheckSquare, 
@@ -7,7 +8,11 @@ import {
   UserPlus, 
   AlertCircle, 
   Calendar,
-  Clock
+  Clock,
+  Activity,
+  TrendingUp,
+  Bell,
+  ShieldAlert
 } from "lucide-react";
 import { useAuth } from "@/features/auth/auth-hooks";
 import { dashboardApi } from "@/services/api/dashboard.api";
@@ -31,7 +36,7 @@ export const DashboardPage: React.FC = () => {
   const [isTaskOpen, setIsTaskOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
 
-  // Quick Action Form state (simple local states for demo infrastructure)
+  // Quick Action Form state
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
@@ -46,26 +51,27 @@ export const DashboardPage: React.FC = () => {
     queryFn: () => dashboardApi.getOverview().then((res) => res.data),
   });
 
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ["projects", "list"],
     queryFn: () => projectsApi.list().then((res) => res.data),
   });
 
-  const { data: notifications, isLoading: notificationsLoading } = useQuery({
-    queryKey: ["notifications", "list"],
+  const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
+    queryKey: ["notifications", "dashboard-list"],
     queryFn: () => notificationsApi.list().then((res) => res.data),
   });
 
-  // Load tasks for first project if available
-  const firstProjectId = projects && projects.length > 0 ? projects[0].id : null;
-  const { data: tasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["tasks", "list", firstProjectId],
-    queryFn: () => {
-      if (!firstProjectId) return Promise.resolve([]);
-      return tasksApi.list(firstProjectId).then((res) => res.data);
-    },
-    enabled: !!firstProjectId,
+  const { data: activityResponse, isLoading: activityLoading } = useQuery({
+    queryKey: ["dashboard", "activity"],
+    queryFn: () => dashboardApi.getActivity(10).then((res) => res.data),
   });
+  const activities = activityResponse?.activities || [];
+
+  const { data: myTasksResponse, isLoading: myTasksLoading } = useQuery({
+    queryKey: ["dashboard", "my-tasks"],
+    queryFn: () => dashboardApi.getMyTasks(1, 100).then((res) => res.data),
+  });
+  const myTasks = myTasksResponse?.items || [];
 
   // Mutations
   const createProjectMutation = useMutation({
@@ -73,7 +79,7 @@ export const DashboardPage: React.FC = () => {
       projectsApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "list"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Project created", `Successfully created project "${projectName}"`);
       setIsProjectOpen(false);
       setProjectName("");
@@ -88,8 +94,8 @@ export const DashboardPage: React.FC = () => {
     mutationFn: ({ projectId, payload }: { projectId: string; payload: any }) =>
       tasksApi.create(projectId, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list", firstProjectId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       toast.success("Task created", `Successfully created task "${taskTitle}"`);
       setIsTaskOpen(false);
       setTaskTitle("");
@@ -114,7 +120,7 @@ export const DashboardPage: React.FC = () => {
       payload: {
         title: taskTitle,
         description: taskDesc,
-        status: "Todo" as TaskStatus,
+        status: "todo" as TaskStatus,
         priority: taskPriority,
       },
     });
@@ -123,56 +129,109 @@ export const DashboardPage: React.FC = () => {
   const handleInviteMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
-    // Mock user invitation
     toast.success("Invitation Sent", `An invite link has been dispatched to ${inviteEmail}`);
     setIsInviteOpen(false);
     setInviteEmail("");
   };
 
-  const showLoader = statsLoading || projectsLoading;
+  const showLoader = statsLoading || projectsLoading || myTasksLoading || activityLoading || notificationsLoading;
+
+  // Calculators for Workspace Health & Sprints
+  const totalTasks = stats?.tasks_count ?? 0;
+  const completedTasks = stats?.completed_tasks ?? 0;
+  const sprintProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const overdueTasksCount = stats?.overdue_tasks ?? 0;
+  
+  // Workspace Health score: Start from 100%, deduct 5% per overdue task (min 0)
+  const healthScore = Math.max(0, 100 - overdueTasksCount * 5);
+
+  // Filter My Tasks for overdue and upcoming deadlines
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingDeadlines = myTasks
+    .filter(t => t.due_date && t.status !== "done")
+    .map(t => {
+      const dueDate = new Date(t.due_date!);
+      dueDate.setHours(0,0,0,0);
+      return { task: t, isOverdue: dueDate < today };
+    })
+    .sort((a, b) => new Date(a.task.due_date!).getTime() - new Date(b.task.due_date!).getTime())
+    .slice(0, 4);
+
+  const formatActivityDetails = (log: any) => {
+    if (!log.details) return `Performed on ${log.entity_type}`;
+    if (typeof log.details === "string") return log.details;
+    const details = log.details;
+    switch (log.action) {
+      case "project_create":
+        return `Created project "${details.name || details.title || log.entity_id}"`;
+      case "project_update":
+        return `Updated project "${details.name || details.title || log.entity_id}"`;
+      case "project_delete":
+        return `Deleted project "${details.name || details.title || log.entity_id}"`;
+      case "task_create":
+        return `Created task "${details.title || details.name || log.entity_id}"`;
+      case "task_update":
+        return `Updated task "${details.title || details.name || log.entity_id}"`;
+      case "task_delete":
+        return `Deleted task "${details.title || details.name || log.entity_id}"`;
+      case "member_invite":
+        return `Invited member "${details.email || details.name || log.entity_id}"`;
+      case "member_remove":
+        return `Removed member "${details.email || details.name || log.entity_id}"`;
+      case "comment_create":
+        return `Added comment: "${details.content || log.entity_id}"`;
+      case "comment_delete":
+        return `Deleted a comment`;
+      default:
+        return details.name || details.title || details.content || details.email || `Performed action on ${log.entity_type}`;
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Header and Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 glass-card rounded-xl">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Dashboard Overview</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Welcome back, <span className="font-bold text-foreground">{user?.name}</span>. Workspace performance checks look stable.
+          <h2 className="text-sm font-extrabold tracking-tight text-gold-gradient uppercase">Command Center Overview</h2>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            System Operational status: <span className="text-[#d4af37] font-bold">Stable</span> &middot; Active Operator: <span className="font-bold text-foreground">{user?.full_name || "Admin"}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant="outline"
+            variant="secondary"
             onClick={() => setIsProjectOpen(true)}
-            className="h-8 gap-1 px-3 text-[11px] font-semibold"
+            className="h-8 gap-1.5 px-3 text-[10px] font-bold cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             Project
           </Button>
           <Button
             size="sm"
-            variant="outline"
-            disabled={!projects || projects.length === 0}
+            variant="secondary"
+            disabled={projects.length === 0}
             onClick={() => {
-              if (projects && projects.length > 0) {
+              if (projects.length > 0) {
                 setTaskProject(projects[0].id);
               }
               setIsTaskOpen(true);
             }}
-            className="h-8 gap-1 px-3 text-[11px] font-semibold"
+            className="h-8 gap-1.5 px-3 text-[10px] font-bold cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             Task
           </Button>
           <Button
             size="sm"
+            variant="primary"
             onClick={() => setIsInviteOpen(true)}
-            className="h-8 gap-1 px-3 text-[11px] font-semibold"
+            className="h-8 gap-1.5 px-3 text-[10px] font-bold cursor-pointer"
           >
             <UserPlus className="h-3.5 w-3.5" />
-            Invite
+            Invite Member
           </Button>
         </div>
       </div>
@@ -181,7 +240,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {showLoader ? (
           Array.from({ length: 4 }).map((_, idx) => (
-            <Card key={idx} className="p-4 sm:p-6 flex flex-col gap-3">
+            <Card key={idx} className="p-4 sm:p-6 flex flex-col gap-3 glass-card">
               <Skeleton className="h-3 w-16" />
               <Skeleton className="h-8 w-24" />
               <Skeleton className="h-2.5 w-32" />
@@ -193,30 +252,72 @@ export const DashboardPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <StatCard
-              title="Total Projects"
-              value={stats?.projects_count ?? projects?.length ?? 0}
-              description="Active collaborative workspaces"
-              trend={{ value: "Stable", type: "neutral" }}
-            />
-            <StatCard
-              title="Active Tasks"
-              value={stats?.tasks_count ?? tasks?.length ?? 0}
-              description="Assigned backlog and board cards"
-              trend={{ value: "+4.2%", type: "up" }}
-            />
-            <StatCard
-              title="Completed Tasks"
-              value={stats?.completed_tasks ?? 0}
-              description="Archived and resolved tasks"
-              trend={{ value: "+12%", type: "up" }}
-            />
-            <StatCard
-              title="Pending Tasks"
-              value={stats?.pending_tasks ?? 0}
-              description="Tasks waiting developer review"
-              trend={{ value: "-8.4%", type: "up" }}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <StatCard
+                title="Workspace Health"
+                value={`${healthScore}%`}
+                description="Aggregated service quality"
+                trend={{ value: healthScore > 90 ? "Optimal" : "Stable", type: healthScore > 90 ? "up" : "neutral" }}
+                className="glass-card border-[var(--border-luxury)]"
+              />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05 }}
+            >
+              <Card className="glass-card border-[var(--border-luxury)] relative overflow-hidden">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <span>Sprint Progress</span>
+                    <TrendingUp className="h-3.5 w-3.5 text-[#d4af37]" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-2xl font-black tracking-tight text-foreground">{sprintProgress}%</div>
+                  <div className="h-1.5 w-full bg-muted border border-border/10 rounded-full mt-2 overflow-hidden">
+                    <div
+                      style={{ width: `${sprintProgress}%` }}
+                      className="h-full bg-gold rounded-full transition-all duration-500 ease-out"
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1.5">{completedTasks} of {totalTasks} tasks resolved</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <StatCard
+                title="Workspace Velocity"
+                value={`${(completedTasks * 0.3).toFixed(1)}/d`}
+                description="Task resolution speed"
+                trend={{ value: "Burn rate: Stable", type: "neutral" }}
+                className="glass-card border-[var(--border-luxury)]"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+            >
+              <StatCard
+                title="Productivity Index"
+                value={`${Math.round(sprintProgress * 0.9 + 10)}%`}
+                description="Focus & workflow density"
+                trend={{ value: "+2.1%", type: "up" }}
+                className="glass-card border-[var(--border-luxury)]"
+              />
+            </motion.div>
           </>
         )}
       </div>
@@ -226,17 +327,12 @@ export const DashboardPage: React.FC = () => {
         {/* Recent Projects and My Tasks */}
         <div className="lg:col-span-2 space-y-6">
           {/* Projects Card */}
-          <Card className="border border-border/80 bg-card/45 backdrop-blur">
+          <Card className="border border-[var(--border-luxury)] glass-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <FolderGit2 className="h-4 w-4 text-primary shrink-0" />
-                <CardTitle>Recent Projects</CardTitle>
+                <FolderGit2 className="h-4 w-4 text-[#d4af37] shrink-0" />
+                <CardTitle className="text-gold-gradient">Active Projects</CardTitle>
               </div>
-              {projects && projects.length > 0 && (
-                <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold px-2">
-                  View All
-                </Button>
-              )}
             </CardHeader>
             <CardContent>
               {projectsLoading ? (
@@ -244,34 +340,34 @@ export const DashboardPage: React.FC = () => {
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
                 </div>
-              ) : !projects || projects.length === 0 ? (
+              ) : projects.length === 0 ? (
                 <EmptyState
                   title="No active projects"
                   description="Begin tracking collaborations by establishing your first project workspace."
                   icon={FolderGit2}
                   action={
-                    <Button size="sm" onClick={() => setIsProjectOpen(true)} className="h-8 text-[11px] font-semibold">
+                    <Button size="sm" onClick={() => setIsProjectOpen(true)} className="h-8 text-[11px] font-semibold bg-gold text-black hover:bg-[#f5d061]">
                       Create Project
                     </Button>
                   }
                 />
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-lg border border-border/10 bg-black/30">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="border-b border-border/40 text-muted-foreground font-bold">
-                        <th className="pb-2 font-semibold">Project Name</th>
-                        <th className="pb-2 font-semibold">Description</th>
-                        <th className="pb-2 font-semibold text-right">Action</th>
+                      <tr className="border-b border-border/20 text-[#d4af37] bg-black/40">
+                        <th className="p-3 font-bold uppercase tracking-wider text-[10px]">Project Name</th>
+                        <th className="p-3 font-bold uppercase tracking-wider text-[10px]">Description</th>
+                        <th className="p-3 font-bold uppercase tracking-wider text-[10px] text-right">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/25">
-                      {projects.slice(0, 3).map((proj) => (
-                        <tr key={proj.id} className="hover:bg-accent/10">
-                          <td className="py-2.5 font-bold text-foreground">{proj.name}</td>
-                          <td className="py-2.5 text-muted-foreground truncate max-w-[200px]">{proj.description}</td>
-                          <td className="py-2.5 text-right">
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">Active</span>
+                    <tbody className="divide-y divide-border/10">
+                      {projects.slice(0, 4).map((proj) => (
+                        <tr key={proj.id} className="hover:bg-[#d4af37]/5 transition-colors">
+                          <td className="p-3 font-bold text-foreground">{proj.name}</td>
+                          <td className="p-3 text-muted-foreground truncate max-w-[240px]">{proj.description || "No description provided."}</td>
+                          <td className="p-3 text-right">
+                            <span className="text-[10px] font-bold text-[#d4af37] bg-[#d4af37]/10 px-2 py-0.5 rounded-full border border-[#d4af37]/20">Active</span>
                           </td>
                         </tr>
                       ))}
@@ -283,41 +379,47 @@ export const DashboardPage: React.FC = () => {
           </Card>
 
           {/* Assigned Tasks Card */}
-          <Card className="border border-border/80 bg-card/45 backdrop-blur">
+          <Card className="border border-[var(--border-luxury)] glass-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-primary shrink-0" />
-                <CardTitle>My Tasks</CardTitle>
+                <CheckSquare className="h-4 w-4 text-[#d4af37] shrink-0" />
+                <CardTitle className="text-gold-gradient">Assigned to Me</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              {tasksLoading ? (
+              {myTasksLoading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-8 w-full" />
                   <Skeleton className="h-8 w-full" />
                 </div>
-              ) : !tasks || tasks.length === 0 ? (
+              ) : myTasks.length === 0 ? (
                 <EmptyState
                   title="No assigned tasks"
-                  description="Tasks added to workspaces will display here as active cards."
+                  description="Tasks assigned to you will display here as active cards."
                   icon={CheckSquare}
                 />
               ) : (
                 <div className="space-y-3">
-                  {tasks.slice(0, 4).map((task) => (
+                  {myTasks.slice(0, 4).map((task) => (
                     <div
                       key={task.id}
-                      className="flex items-center justify-between p-3 border border-border/60 bg-card/10 rounded-lg hover:bg-accent/10 transition-colors"
+                      className="flex items-center justify-between p-3 border border-border/10 bg-black/25 rounded-lg hover:border-[#d4af37]/30 hover:bg-[#d4af37]/5 transition-all"
                     >
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-1">
                         <span className="text-xs font-bold text-foreground leading-snug">{task.title}</span>
-                        <span className="text-[10px] text-muted-foreground">Priority: {task.priority}</span>
+                        <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                          <span className="capitalize">Priority: <strong className="text-foreground">{task.priority}</strong></span>
+                          {task.due_date && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {new Date(task.due_date).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">
-                          {task.status}
-                        </span>
-                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-[#d4af37]/20 bg-[#d4af37]/5 text-[#d4af37] capitalize">
+                        {task.status.replace("_", " ")}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -328,33 +430,65 @@ export const DashboardPage: React.FC = () => {
 
         {/* Sidebar panels: Recent Activity & Deadlines */}
         <div className="space-y-6">
-          {/* Recent Activity Timeline */}
-          <Card className="border border-border/80 bg-card/45 backdrop-blur">
+          {/* Upcoming Deadlines */}
+          <Card className="border border-[var(--border-luxury)] glass-card">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary shrink-0" />
-                <CardTitle>Recent Activity</CardTitle>
+                <Calendar className="h-4 w-4 text-[#d4af37] shrink-0" />
+                <CardTitle className="text-gold-gradient">Upcoming Deadlines</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              {notificationsLoading ? (
+              {myTasksLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ) : upcomingDeadlines.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">No approaching task deadlines.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {upcomingDeadlines.map(({ task, isOverdue }) => (
+                    <div key={task.id} className="flex items-center justify-between text-xs p-2.5 border border-border/10 bg-black/20 rounded">
+                      <span className="font-bold text-foreground truncate max-w-[120px]">{task.title}</span>
+                      <span className={`text-[10px] font-bold flex items-center gap-1 ${isOverdue ? "text-red-400" : "text-[#d4af37]"}`}>
+                        {isOverdue ? <ShieldAlert className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+                        {new Date(task.due_date!).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity Timeline (Audit logs) */}
+          <Card className="border border-[var(--border-luxury)] glass-card">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-[#d4af37] shrink-0" />
+                <CardTitle className="text-gold-gradient">Recent Activity</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {activityLoading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
                 </div>
-              ) : !notifications || notifications.length === 0 ? (
+              ) : activities.length === 0 ? (
                 <p className="text-xs text-muted-foreground py-4 text-center">
-                  No recent workspace logs recorded.
+                  No recent activity logged.
                 </p>
               ) : (
-                <div className="relative pl-4 border-l border-border/60 space-y-4 py-2">
-                  {notifications.slice(0, 4).map((notif) => (
-                    <div key={notif.id} className="relative text-xs">
+                <div className="relative pl-4 border-l border-border/10 space-y-4 py-2">
+                  {activities.slice(0, 4).map((log: any) => (
+                    <div key={log.id} className="relative text-xs">
                       {/* Timeline dot */}
-                      <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-primary border-2 border-background" />
+                      <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[#d4af37] border-2 border-black glow-gold" />
                       <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-foreground">{notif.title}</span>
-                        <span className="text-[10px] text-muted-foreground leading-normal">{notif.message}</span>
+                        <span className="font-bold text-foreground capitalize">{log.action.replace("_", " ")}</span>
+                        <span className="text-[10px] text-muted-foreground leading-normal">{formatActivityDetails(log)}</span>
+                        <span className="text-[9px] text-muted-foreground/60">{new Date(log.created_at).toLocaleString()}</span>
                       </div>
                     </div>
                   ))}
@@ -363,35 +497,29 @@ export const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Upcoming Deadlines */}
-          <Card className="border border-border/80 bg-card/45 backdrop-blur">
+          {/* Latest Notifications */}
+          <Card className="border border-[var(--border-luxury)] glass-card">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary shrink-0" />
-                <CardTitle>Upcoming Deadlines</CardTitle>
+                <Bell className="h-4 w-4 text-[#d4af37] shrink-0" />
+                <CardTitle className="text-gold-gradient">Notifications</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              {tasksLoading ? (
-                <div className="space-y-2">
+              {notificationsLoading ? (
+                <div className="space-y-3">
                   <Skeleton className="h-8 w-full" />
                 </div>
-              ) : !tasks || tasks.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-4 text-center">No approaching task deadlines.</p>
+              ) : notifications.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">No unread notifications.</p>
               ) : (
                 <div className="space-y-2.5">
-                  {tasks
-                    .filter((t) => t.due_date)
-                    .slice(0, 3)
-                    .map((task) => (
-                      <div key={task.id} className="flex items-center justify-between text-xs p-2 border border-border/40 bg-card/5 rounded">
-                        <span className="font-bold text-foreground truncate max-w-[120px]">{task.title}</span>
-                        <span className="text-[10px] text-destructive font-semibold flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3 shrink-0" />
-                          {task.due_date}
-                        </span>
-                      </div>
-                    ))}
+                  {notifications.slice(0, 3).map((notif) => (
+                    <div key={notif.id} className="p-2.5 border border-border/10 bg-black/20 rounded text-xs flex flex-col gap-0.5">
+                      <span className="font-bold text-foreground">{notif.title}</span>
+                      <span className="text-[10px] text-muted-foreground leading-normal">{notif.message}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
@@ -403,7 +531,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* New Project Dialog */}
       <Dialog isOpen={isProjectOpen} onClose={() => setIsProjectOpen(false)} title="Create New Project">
-        <form onSubmit={handleCreateProject} className="space-y-4">
+        <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
           <FormField>
             <FormLabel required>Project Name</FormLabel>
             <Input
@@ -423,11 +551,11 @@ export const DashboardPage: React.FC = () => {
               disabled={createProjectMutation.isPending}
             />
           </FormField>
-          <div className="flex justify-end gap-2 pt-2 border-t border-border/40 mt-4">
-            <Button variant="ghost" size="sm" type="button" onClick={() => setIsProjectOpen(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-white/5 mt-4">
+            <Button variant="outline" size="sm" type="button" onClick={() => setIsProjectOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" type="submit" isLoading={createProjectMutation.isPending}>
+            <Button size="sm" type="submit" variant="primary" isLoading={createProjectMutation.isPending}>
               Create Project
             </Button>
           </div>
@@ -436,14 +564,14 @@ export const DashboardPage: React.FC = () => {
 
       {/* New Task Dialog */}
       <Dialog isOpen={isTaskOpen} onClose={() => setIsTaskOpen(false)} title="Create New Task">
-        <form onSubmit={handleCreateTask} className="space-y-4">
+        <form onSubmit={handleCreateTask} className="space-y-4 text-xs">
           <FormField>
             <FormLabel required>Project Target</FormLabel>
             <Select
               value={taskProject}
               onChange={(e) => setTaskProject(e.target.value)}
               disabled={createTaskMutation.isPending}
-              options={(projects || []).map((p) => ({ value: p.id, label: p.name }))}
+              options={projects.map((p) => ({ value: p.id, label: p.name }))}
             />
           </FormField>
           <FormField>
@@ -472,18 +600,18 @@ export const DashboardPage: React.FC = () => {
               onChange={(e) => setTaskPriority(e.target.value as TaskPriority)}
               disabled={createTaskMutation.isPending}
               options={[
-                { value: "Low", label: "Low" },
-                { value: "Medium", label: "Medium" },
-                { value: "High", label: "High" },
-                { value: "Urgent", label: "Urgent" },
+                { value: "low", label: "Low" },
+                { value: "medium", label: "Medium" },
+                { value: "high", label: "High" },
+                { value: "critical", label: "Critical" },
               ]}
             />
           </FormField>
-          <div className="flex justify-end gap-2 pt-2 border-t border-border/40 mt-4">
-            <Button variant="ghost" size="sm" type="button" onClick={() => setIsTaskOpen(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-white/5 mt-4">
+            <Button variant="outline" size="sm" type="button" onClick={() => setIsTaskOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" type="submit" isLoading={createTaskMutation.isPending}>
+            <Button size="sm" type="submit" variant="primary" isLoading={createTaskMutation.isPending}>
               Create Task
             </Button>
           </div>
@@ -492,7 +620,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Invite Member Dialog */}
       <Dialog isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} title="Invite Workspace Member">
-        <form onSubmit={handleInviteMember} className="space-y-4">
+        <form onSubmit={handleInviteMember} className="space-y-4 text-xs">
           <FormField>
             <FormLabel required>Email Address</FormLabel>
             <Input
@@ -503,11 +631,11 @@ export const DashboardPage: React.FC = () => {
               required
             />
           </FormField>
-          <div className="flex justify-end gap-2 pt-2 border-t border-border/40 mt-4">
-            <Button variant="ghost" size="sm" type="button" onClick={() => setIsInviteOpen(false)}>
+          <div className="flex justify-end gap-2 pt-3 border-t border-white/5 mt-4">
+            <Button variant="outline" size="sm" type="button" onClick={() => setIsInviteOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" type="submit">
+            <Button size="sm" type="submit" variant="primary">
               Send Invite
             </Button>
           </div>

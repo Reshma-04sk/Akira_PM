@@ -132,9 +132,18 @@ class TaskRepository(BaseRepository[Task]):
         # Consolidated counts query using CASE WHEN
         counts_stmt = select(
             func.count(Task.id).label("total"),
-            func.sum(case((Task.status == TaskStatus.DONE, 1), else_=0)).label("completed"),
-            func.sum(case((Task.status != TaskStatus.DONE, 1), else_=0)).label("pending"),
-            func.sum(case(((Task.status != TaskStatus.DONE) & (Task.due_date < now), 1), else_=0)).label("overdue"),
+            func.sum(case((Task.status == TaskStatus.DONE, 1), else_=0)).label(
+                "completed"
+            ),
+            func.sum(case((Task.status != TaskStatus.DONE, 1), else_=0)).label(
+                "pending"
+            ),
+            func.sum(
+                case(
+                    ((Task.status != TaskStatus.DONE) & (Task.due_date < now), 1),
+                    else_=0,
+                )
+            ).label("overdue"),
         ).where(Task.project_id.in_(project_ids))
 
         counts_res = (await self.session.execute(counts_stmt)).one()

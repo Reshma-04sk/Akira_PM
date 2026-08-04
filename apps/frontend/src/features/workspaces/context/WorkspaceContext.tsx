@@ -27,7 +27,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setIsLoading(true);
     try {
       const res = await workspacesApi.list();
-      const list = res.data.items;
+      const list: Workspace[] = Array.isArray(res.data) 
+        ? res.data 
+        : ((res.data as any)?.items ? (res.data as any).items : []);
       setWorkspaces(list);
 
       if (list.length > 0) {

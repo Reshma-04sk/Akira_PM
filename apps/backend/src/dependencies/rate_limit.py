@@ -19,8 +19,10 @@ def rate_limit(limit: int = 5, window_seconds: int = 60):
     Tracks requests by client IP address. Uses Redis if available,
     falling back to in-memory sliding window tracking.
     """
+
     async def dependency(request: Request) -> None:
         from src.core.settings import settings
+
         if settings.ENV_STATE == "testing":
             return
 
@@ -53,7 +55,9 @@ def rate_limit(limit: int = 5, window_seconds: int = 60):
         # Thread-safe in-memory sliding window fallback
         now = time.time()
         # Keep only timestamps within the window
-        history = [t for t in _in_memory_timestamps[identifier] if now - t < window_seconds]
+        history = [
+            t for t in _in_memory_timestamps[identifier] if now - t < window_seconds
+        ]
 
         if len(history) >= limit:
             _in_memory_timestamps[identifier] = history
@@ -67,9 +71,12 @@ def rate_limit(limit: int = 5, window_seconds: int = 60):
 
         # Periodically prune empty/expired keys to prevent memory leaks (5% chance per request)
         import random
+
         if random.random() < 0.05:
             for key in list(_in_memory_timestamps.keys()):
-                active = [t for t in _in_memory_timestamps[key] if now - t < window_seconds]
+                active = [
+                    t for t in _in_memory_timestamps[key] if now - t < window_seconds
+                ]
                 if not active:
                     _in_memory_timestamps.pop(key, None)
                 else:

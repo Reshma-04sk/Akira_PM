@@ -36,7 +36,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export const Card: React.FC<CardProps> = ({ className, ...props }) => (
-  <div className={cn("rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden", className)} {...props} />
+  <div className={cn("glass-card rounded-xl text-card-foreground overflow-hidden", className)} {...props} />
 );
 
 export const CardHeader: React.FC<CardProps> = ({ className, ...props }) => (
@@ -44,11 +44,11 @@ export const CardHeader: React.FC<CardProps> = ({ className, ...props }) => (
 );
 
 export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({ className, ...props }) => (
-  <h3 className={cn("text-sm font-bold tracking-tight text-foreground leading-none", className)} {...props} />
+  <h3 className={cn("text-xs font-black uppercase tracking-wider text-gold-gradient", className)} {...props} />
 );
 
 export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = ({ className, ...props }) => (
-  <p className={cn("text-xs text-muted-foreground", className)} {...props} />
+  <p className={cn("text-[10px] text-muted-foreground", className)} {...props} />
 );
 
 export const CardContent: React.FC<CardProps> = ({ className, ...props }) => (
@@ -56,7 +56,7 @@ export const CardContent: React.FC<CardProps> = ({ className, ...props }) => (
 );
 
 export const CardFooter: React.FC<CardProps> = ({ className, ...props }) => (
-  <div className={cn("flex items-center p-4 sm:p-6 pt-0 sm:pt-0 border-t border-border/40 mt-4", className)} {...props} />
+  <div className={cn("flex items-center p-4 sm:p-6 pt-0 sm:pt-0 border-t border-white/5 mt-4", className)} {...props} />
 );
 
 // Empty State
@@ -78,18 +78,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center p-8 border border-dashed border-border rounded-xl bg-muted/20 min-h-[220px]",
+        "flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#d4af37]/25 rounded-2xl bg-[#0c0c0c]/30 backdrop-blur-sm min-h-[220px] shadow-lg",
         className
       )}
       {...props}
     >
       {Icon && (
-        <div className="h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center mb-4 text-muted-foreground shrink-0">
+        <div className="h-12 w-12 rounded-full bg-[#d4af37]/10 border border-[#d4af37]/25 flex items-center justify-center mb-4 text-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.08)] shrink-0">
           <Icon className="h-5 w-5" />
         </div>
       )}
-      <h3 className="text-xs font-bold text-foreground mb-1">{title}</h3>
-      <p className="text-xs text-muted-foreground max-w-sm mb-6 leading-relaxed">{description}</p>
+      <h3 className="text-xs font-bold text-foreground mb-1.5 tracking-tight">{title}</h3>
+      <p className="text-[10px] text-muted-foreground max-w-sm mb-5 leading-relaxed">{description}</p>
       {action && <div>{action}</div>}
     </div>
   );

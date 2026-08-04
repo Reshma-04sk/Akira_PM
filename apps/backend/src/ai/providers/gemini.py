@@ -125,9 +125,9 @@ class GeminiProvider(BaseLLMProvider):
                             line = line[:-1]
                         try:
                             data = json.loads(line)
-                            part_text = data["candidates"][0]["content"]["parts"][
-                                0
-                            ]["text"]
+                            part_text = data["candidates"][0]["content"]["parts"][0][
+                                "text"
+                            ]
                             if part_text:
                                 yield part_text
                         except Exception:

@@ -21,12 +21,12 @@ export interface NotificationListResponse {
 }
 
 export const notificationsApi = {
-  list(config?: RequestConfig): Promise<ApiResponse<Notification[]>> {
-    return apiClient.get<NotificationListResponse>(ENDPOINTS.NOTIFICATIONS.LIST, config)
-      .then((res) => ({
-        data: res.data.items,
-        status: res.status,
-      }));
+  async list(config?: RequestConfig): Promise<ApiResponse<Notification[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.NOTIFICATIONS.LIST, config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   listPaginated(config?: RequestConfig): Promise<ApiResponse<NotificationListResponse>> {

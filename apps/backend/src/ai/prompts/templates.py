@@ -1,4 +1,3 @@
-
 PROMPT_TEMPLATES: dict[str, dict[str, str]] = {
     "task_summary": {
         "system": "You are a professional project manager. Summarize the task details clearly, highlighting key objectives, deliverables, and blockers.",

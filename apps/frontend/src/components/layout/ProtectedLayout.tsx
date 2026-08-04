@@ -74,7 +74,7 @@ export const ProtectedLayout: React.FC = () => {
                 <Sidebar
                   isCollapsed={false}
                   setIsCollapsed={() => {}}
-                  className="w-full h-full border-r border-border"
+                  className="w-full h-full"
                 />
               </div>
             </motion.div>
@@ -86,7 +86,7 @@ export const ProtectedLayout: React.FC = () => {
       <Sidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
-        className="hidden md:flex"
+        className="hidden md:flex my-4 ml-4 h-[calc(100vh-2rem)] rounded-2xl border border-[#d4af37]/15 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
       />
 
       {/* Main content wrapper */}

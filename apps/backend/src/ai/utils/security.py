@@ -69,7 +69,9 @@ async def check_rate_limit(
         except AppException:
             raise
         except Exception as e:
-            logger.warning("Redis rate limit fetch failed, falling back to memory: %s", e)
+            logger.warning(
+                "Redis rate limit fetch failed, falling back to memory: %s", e
+            )
 
     # In-memory sliding window fallback
     now = time.time()

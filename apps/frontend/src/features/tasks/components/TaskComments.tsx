@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Send, Edit3, Trash2, X, Check, User } from "lucide-react";
 import { commentsApi, Comment } from "@/services/api/comments.api";
 import { usersApi } from "@/services/api/users.api";
-import { projectMembersApi } from "@/services/api/project-members.api";
+import { projectMembersApi, ProjectMember } from "@/services/api/project-members.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton, toast } from "@/components/ui/feedback";
@@ -48,6 +48,10 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectId })
     enabled: !!projectId,
   });
 
+  const members: ProjectMember[] = Array.isArray(membersResponse)
+    ? membersResponse
+    : ((membersResponse as any)?.items ? (membersResponse as any).items : []);
+
   // Query - comments
   const { data: commentsResponse, isLoading, error } = useQuery({
     queryKey: ["comments", "list", taskId],
@@ -55,10 +59,12 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectId })
     enabled: !!taskId,
   });
 
-  const comments = commentsResponse?.items || [];
+  const comments: Comment[] = Array.isArray(commentsResponse)
+    ? commentsResponse
+    : ((commentsResponse as any)?.items ? (commentsResponse as any).items : []);
 
   const getCommenterProfile = (userId: string) => {
-    const member = membersResponse?.items.find((m) => m.user_id === userId);
+    const member = members.find((m) => m.user_id === userId);
     const fullName = member?.user_name || "System User";
     const email = member?.user_email || "";
     

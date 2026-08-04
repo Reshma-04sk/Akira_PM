@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Users, 
-  Clock, 
+import {
+  Users,
+  Clock,
   ArrowLeft,
   Calendar,
   FileText
 } from "lucide-react";
 import { projectsApi } from "@/services/api/projects.api";
-import { tasksApi } from "@/services/api/tasks.api";
-import { notificationsApi } from "@/services/api/notifications.api";
-import { projectMembersApi } from "@/services/api/project-members.api";
+import { tasksApi, Task } from "@/services/api/tasks.api";
+import { notificationsApi, Notification } from "@/services/api/notifications.api";
+import { projectMembersApi, ProjectMember } from "@/services/api/project-members.api";
 import { Button } from "@/components/ui/button";
 import { StatCard, Card, CardHeader, CardTitle, CardContent, EmptyState } from "@/components/ui/data-display";
 import { Skeleton } from "@/components/ui/feedback";
@@ -28,22 +28,34 @@ export const ProjectDetailsPage: React.FC = () => {
     enabled: !!id,
   });
 
-  const { data: tasks, isLoading: tasksLoading } = useQuery({
+  const { data: tasksData, isLoading: tasksLoading } = useQuery({
     queryKey: ["tasks", "list", id],
     queryFn: () => tasksApi.list(id || "").then((res) => res.data),
     enabled: !!id,
   });
 
-  const { data: notifications, isLoading: notificationsLoading } = useQuery({
-    queryKey: ["notifications", "list"],
+  const tasks: Task[] = Array.isArray(tasksData)
+    ? tasksData
+    : ((tasksData as any)?.items ? (tasksData as any).items : []);
+
+  const { data: notificationsData, isLoading: notificationsLoading } = useQuery({
+    queryKey: ["notifications", "project-list"],
     queryFn: () => notificationsApi.list().then((res) => res.data),
   });
+
+  const notifications: Notification[] = Array.isArray(notificationsData)
+    ? notificationsData
+    : ((notificationsData as any)?.items ? (notificationsData as any).items : []);
 
   const { data: membersResponse, isLoading: membersLoading, error: membersError } = useQuery({
     queryKey: ["project-members", "list", id],
     queryFn: () => projectMembersApi.list(id || "").then((res) => res.data),
     enabled: !!id,
   });
+
+  const members: ProjectMember[] = Array.isArray(membersResponse)
+    ? membersResponse
+    : ((membersResponse as any)?.items ? (membersResponse as any).items : []);
 
   if (!id) {
     return (
@@ -255,14 +267,14 @@ export const ProjectDetailsPage: React.FC = () => {
               <div className="text-center py-4 text-xs text-destructive font-semibold">
                 Failed to load team members.
               </div>
-            ) : !membersResponse || membersResponse.items.length === 0 ? (
+            ) : !members || members.length === 0 ? (
               <EmptyState
                 title="No members found"
                 description="There are no members associated with this project workspace."
                 icon={Users}
               />
             ) : (
-              membersResponse.items.map((member) => {
+              members.map((member) => {
                 const name = member.user_name || "Workspace Member";
                 const email = member.user_email || "No email provided";
                 const roleLabel = member.role.toUpperCase();
@@ -279,9 +291,8 @@ export const ProjectDetailsPage: React.FC = () => {
                         <span className="text-[10px] text-muted-foreground">{email}</span>
                       </div>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted border border-border text-muted-foreground"
-                    }`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted border border-border text-muted-foreground"
+                      }`}>
                       {roleLabel}
                     </span>
                   </div>

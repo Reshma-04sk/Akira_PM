@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import { ENDPOINTS } from "./endpoints";
 import { RequestConfig } from "./request";
 import { ApiResponse } from "./response";
+import { Task } from "./tasks.api";
 
 export interface DashboardOverview {
   projects_count: number;
@@ -22,6 +23,17 @@ export interface DashboardProjectOverview {
   tasks_by_status: Record<string, number>;
 }
 
+export interface DashboardActivity {
+  activities: any[];
+}
+
+export interface DashboardMyTasks {
+  items: Task[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 export const dashboardApi = {
   getOverview(config?: RequestConfig): Promise<ApiResponse<DashboardOverview>> {
     return apiClient.get<DashboardOverview>(ENDPOINTS.DASHBOARD.OVERVIEW, config);
@@ -29,5 +41,18 @@ export const dashboardApi = {
 
   getProjectStats(projectId: string, config?: RequestConfig): Promise<ApiResponse<DashboardProjectOverview>> {
     return apiClient.get<DashboardProjectOverview>(ENDPOINTS.DASHBOARD.PROJECT(projectId), config);
+  },
+
+  getActivity(limit?: number, config?: RequestConfig): Promise<ApiResponse<DashboardActivity>> {
+    const url = limit ? `${ENDPOINTS.DASHBOARD.ACTIVITY}?limit=${limit}` : ENDPOINTS.DASHBOARD.ACTIVITY;
+    return apiClient.get<DashboardActivity>(url, config);
+  },
+
+  getMyTasks(page?: number, pageSize?: number, config?: RequestConfig): Promise<ApiResponse<DashboardMyTasks>> {
+    const params = new URLSearchParams();
+    if (page) params.append("page", String(page));
+    if (pageSize) params.append("page_size", String(pageSize));
+    const url = params.toString() ? `${ENDPOINTS.DASHBOARD.MY_TASKS}?${params.toString()}` : ENDPOINTS.DASHBOARD.MY_TASKS;
+    return apiClient.get<DashboardMyTasks>(url, config);
   },
 };

@@ -23,8 +23,12 @@ export interface UpdateProjectPayload {
 }
 
 export const projectsApi = {
-  list(config?: RequestConfig): Promise<ApiResponse<Project[]>> {
-    return apiClient.get<Project[]>(ENDPOINTS.PROJECTS.LIST, config);
+  async list(config?: RequestConfig): Promise<ApiResponse<Project[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.PROJECTS.LIST, config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   create(payload: CreateProjectPayload, config?: RequestConfig): Promise<ApiResponse<Project>> {

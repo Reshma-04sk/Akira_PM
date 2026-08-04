@@ -111,7 +111,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ className, size = "md", ...pro
 
 // Skeleton Component
 export const Skeleton: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => {
-  return <div className={cn("animate-pulse rounded-md bg-muted/60", className)} {...props} />;
+  return <div className={cn("shimmer min-h-[1em] w-full", className)} {...props} />;
 };
 
 // Toast Helpers

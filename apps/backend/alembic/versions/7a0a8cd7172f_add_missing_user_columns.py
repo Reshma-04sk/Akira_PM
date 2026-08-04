@@ -21,9 +21,13 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     # Add avatar_url to users
-    op.add_column("users", sa.Column("avatar_url", sa.String(length=512), nullable=True))
+    op.add_column(
+        "users", sa.Column("avatar_url", sa.String(length=512), nullable=True)
+    )
     # Add notification_preferences to users
-    op.add_column("users", sa.Column("notification_preferences", sa.JSON(), nullable=True))
+    op.add_column(
+        "users", sa.Column("notification_preferences", sa.JSON(), nullable=True)
+    )
 
 
 def downgrade() -> None:

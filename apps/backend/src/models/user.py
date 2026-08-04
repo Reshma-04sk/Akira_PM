@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from src.models.workspace import Workspace
     from src.models.workspace_member import WorkspaceMember
 
+
 class UserRole(enum.StrEnum):
     ADMIN = "admin"
     USER = "user"

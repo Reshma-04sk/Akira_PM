@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useWorkspace } from "@/features/workspaces/context/WorkspaceContext";
 import { useAuth } from "@/features/auth/auth-hooks";
-import { workspacesApi } from "@/services/api/workspaces.api";
+import { workspacesApi, WorkspaceMember } from "@/services/api/workspaces.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/data-display";
@@ -51,11 +51,15 @@ export const TeamsPage: React.FC = () => {
   const [editWsDesc, setEditWsDesc] = useState("");
 
   // Load Workspace Members
-  const { data: members = [], isLoading: membersLoading, refetch: refetchMembers } = useQuery({
+  const { data: membersData, isLoading: membersLoading, refetch: refetchMembers } = useQuery({
     queryKey: ["workspaces", activeWorkspace?.id, "members"],
     queryFn: () => workspacesApi.getMembers(activeWorkspace!.id).then((res) => res.data),
     enabled: !!activeWorkspace,
   });
+
+  const members: WorkspaceMember[] = Array.isArray(membersData) 
+    ? membersData 
+    : ((membersData as any)?.items ? (membersData as any).items : []);
 
   // Check if current user is Workspace Owner/Admin
   const isOwner = userRole === "owner";

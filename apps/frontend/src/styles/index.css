@@ -4,77 +4,242 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 224 71.4% 4.1%;
+    --background: 0 0% 0%;
+    --foreground: 45 10% 96%;
     
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card: 0 0% 3%;
+    --card-foreground: 45 10% 96%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 45 10% 96%;
     
-    --primary: 263 70% 50%;
-    --primary-foreground: 210 20% 98%;
+    --primary: 43 80% 54%;
+    --primary-foreground: 0 0% 0%;
     
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
+    --secondary: 45 15% 12%;
+    --secondary-foreground: 43 80% 54%;
     
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 45 10% 65%;
     
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
+    --accent: 43 80% 54%;
+    --accent-foreground: 0 0% 0%;
     
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 343 80% 45%;
+    --destructive-foreground: 0 0% 98%;
     
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 263 70% 50%;
+    --border: 45 20% 12%;
+    --input: 45 20% 12%;
+    --ring: 43 80% 54%;
     
     --radius: 0.75rem;
+
+    /* Semantic Tokens */
+    --surface: #050505;
+    --surface-secondary: #0d0d0d;
+    --glass: rgba(10, 10, 10, 0.65);
+    --gold: 43 80% 54%;
+    --gold-light: 45 90% 70%;
+    --gold-dark: 36 70% 40%;
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    --background: 0 0% 0%;
+    --foreground: 45 10% 96%;
     
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
+    --card: 0 0% 3%;
+    --card-foreground: 45 10% 96%;
     
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 45 10% 96%;
     
-    --primary: 263 70% 50%;
-    --primary-foreground: 210 20% 98%;
+    --primary: 43 80% 54%;
+    --primary-foreground: 0 0% 0%;
     
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 45 15% 12%;
+    --secondary-foreground: 43 80% 54%;
     
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 45 10% 65%;
     
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 43 80% 54%;
+    --accent-foreground: 0 0% 0%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 343 80% 45%;
+    --destructive-foreground: 0 0% 98%;
     
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 263 70% 50%;
+    --border: 45 20% 12%;
+    --input: 45 20% 12%;
+    --ring: 43 80% 54%;
   }
 }
 
 html {
   scroll-behavior: smooth;
+  background-color: #000000;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #000000;
+  color: #f7f7f7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.02em;
+  line-height: 1.6;
 }
+
+/* Premium Gold Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #ab8836;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+@layer utilities {
+  /* Glassmorphism Containers */
+  .glass-panel {
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.80);
+  }
+
+  .glass-card {
+    background: rgba(12, 12, 12, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(212, 175, 55, 0.25);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.08), 0 0 15px rgba(212, 175, 55, 0.04);
+  }
+
+  .glass-navbar {
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+  }
+
+  .glass-sidebar {
+    background: rgba(5, 5, 5, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(212, 175, 55, 0.12);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.8);
+  }
+
+  .glass-modal {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+  }
+
+  .accent-gold {
+    color: #d4af37;
+  }
+  
+  .bg-gold {
+    background-color: #d4af37;
+  }
+
+  .border-gold {
+    border-color: rgba(212, 175, 55, 0.15);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #f5d061 0%, #d4af37 50%, #ab8836 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, rgba(20, 20, 20, 0.5) 25%, rgba(40, 40, 40, 0.7) 50%, rgba(20, 20, 20, 0.5) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+    border-radius: 6px;
+  }
+}
+
+/* Sonner Luxury Glass Toast Overrides */
+[data-sonner-toast] {
+  background: rgba(10, 10, 10, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95) !important;
+  color: #ffffff !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  padding: 12px 16px !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.1) !important;
+}
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #d4af37 !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border: 1px solid rgba(225, 29, 72, 0.35) !important;
+  box-shadow: 0 0 15px rgba(225, 29, 72, 0.1) !important;
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #fb7185 !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #fbbf24 !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #60a5fa !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  color: #ffffff !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-size: 9px !important;
+  color: #a3a3a3 !important;
+}
+

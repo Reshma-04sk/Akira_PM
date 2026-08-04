@@ -4,6 +4,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { BlankLayout } from "@/components/layout/BlankLayout";
 import { NotFound } from "@/components/common/NotFound";
+import { RouteErrorBoundary } from "@/components/common/ErrorBoundary";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
 
 import { ProtectedRoute, PublicRoute } from "@/features/auth/auth-guards";
@@ -73,6 +74,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <PublicLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
@@ -107,6 +109,7 @@ export const router = createBrowserRouter([
   // Auth routes (Blank layout, wrapped with PublicRoute)
   {
     element: <PublicRoute><BlankLayout /></PublicRoute>,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         path: "login",
@@ -133,6 +136,7 @@ export const router = createBrowserRouter([
   // Protected routes (wrapped with ProtectedRoute)
   {
     element: <ProtectedRoute><ProtectedLayout /></ProtectedRoute>,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         path: "dashboard",

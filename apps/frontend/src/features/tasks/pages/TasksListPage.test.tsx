@@ -61,24 +61,19 @@ const renderWithClient = (ui: React.ReactElement) => {
 describe("TasksListPage", () => {
   const mockProjects = [{ id: "proj-1", name: "Project 1", description: "", owner_id: "user-1", created_at: "", updated_at: "" }];
   
-  const mockMembers = {
-    items: [
-      {
-        id: "mem-1",
-        project_id: "proj-1",
-        user_id: "user-1",
-        invited_by: null,
-        role: "owner" as const,
-        created_at: "",
-        updated_at: "",
-        user_name: "Member 1",
-        user_email: "member1@example.com",
-      },
-    ],
-    total: 1,
-    page: 1,
-    page_size: 20,
-  };
+  const mockMembers = [
+    {
+      id: "mem-1",
+      project_id: "proj-1",
+      user_id: "user-1",
+      invited_by: null,
+      role: "owner" as const,
+      created_at: "",
+      updated_at: "",
+      user_name: "Member 1",
+      user_email: "member1@example.com",
+    },
+  ];
 
   const mockTasks = {
     items: [

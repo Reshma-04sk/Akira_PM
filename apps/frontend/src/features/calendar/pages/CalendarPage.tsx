@@ -9,8 +9,8 @@ import {
   Plus
 } from "lucide-react";
 import { tasksApi, Task, TaskStatus, TaskPriority, TaskListResponse } from "@/services/api/tasks.api";
-import { projectsApi } from "@/services/api/projects.api";
-import { projectMembersApi } from "@/services/api/project-members.api";
+import { projectsApi, Project } from "@/services/api/projects.api";
+import { projectMembersApi, ProjectMember } from "@/services/api/project-members.api";
 import { Card, CardContent } from "@/components/ui/data-display";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/selection";
@@ -44,10 +44,14 @@ export const CalendarPage: React.FC = () => {
   const [taskDueDate, setTaskDueDate] = useState("");
 
   // Queries - Projects list
-  const { data: projects, isLoading: projectsLoading } = useQuery({
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects", "list"],
     queryFn: () => projectsApi.list().then((res) => res.data),
   });
+
+  const projects: Project[] = Array.isArray(projectsData) 
+    ? projectsData 
+    : ((projectsData as any)?.items ? (projectsData as any).items : []);
 
   // Handle setting default project ID
   React.useEffect(() => {
@@ -68,6 +72,10 @@ export const CalendarPage: React.FC = () => {
     enabled: !!selectedProjectId,
   });
 
+  const members: ProjectMember[] = Array.isArray(membersResponse)
+    ? membersResponse
+    : ((membersResponse as any)?.items ? (membersResponse as any).items : []);
+
   // Queries - Tasks list (up to 100 for visual calendar)
   const { data: tasksResponse, isLoading: tasksLoading } = useQuery({
     queryKey: ["tasks", "list", { projectId: selectedProjectId, pageSize: 100 }],
@@ -83,7 +91,9 @@ export const CalendarPage: React.FC = () => {
     enabled: !!selectedProjectId,
   });
 
-  const tasks: Task[] = (tasksResponse as any)?.items || [];
+  const tasks: Task[] = Array.isArray(tasksResponse)
+    ? tasksResponse
+    : (tasksResponse as any)?.items || [];
 
   // Mutations
   const updateTaskMutation = useMutation({
@@ -273,9 +283,9 @@ export const CalendarPage: React.FC = () => {
   };
 
   // Options lists
-  const assigneeOptions = ((membersResponse as any)?.items || []).map((m: any) => ({
-    value: m.user.id,
-    label: m.user.full_name || m.user.email,
+  const assigneeOptions = (members || []).map((m: any) => ({
+    value: m.user_id,
+    label: m.user_name || m.user_email || m.user_id,
   }));
 
   const projectOptions = (projects || []).map((p) => ({
