@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies.auth import get_current_active_user
 from src.dependencies.database import get_db_session
+from src.models.task import TaskPriority, TaskStatus
 from src.models.user import User
 from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.project_repository import ProjectRepository
@@ -55,10 +56,10 @@ async def list_tasks(
     assignee_id: UUID | None = Query(  # noqa: B008
         default=None, description="Filter by assignee"
     ),
-    status_filter: str | None = Query(  # noqa: B008
+    status_filter: TaskStatus | None = Query(  # noqa: B008
         default=None, alias="status", description="Filter by status"
     ),
-    priority_filter: str | None = Query(  # noqa: B008
+    priority_filter: TaskPriority | None = Query(  # noqa: B008
         default=None, alias="priority", description="Filter by priority"
     ),
     search: str | None = Query(default=None, description="Search by title"),  # noqa: B008

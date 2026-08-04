@@ -144,6 +144,34 @@ interface SidebarItemProps {
   isCollapsed: boolean;
 }
 
+const prefetchRoute = (to: string) => {
+  switch (to) {
+    case "/dashboard":
+      import("@/features/dashboard/pages/DashboardPage");
+      break;
+    case "/projects":
+      import("@/features/projects/pages/ProjectsListPage");
+      break;
+    case "/tasks":
+      import("@/features/tasks/pages/TasksListPage");
+      break;
+    case "/calendar":
+      import("@/features/calendar/pages/CalendarPage");
+      break;
+    case "/reports":
+      import("@/features/reports/pages/ReportsPage");
+      break;
+    case "/teams":
+      import("@/features/teams/pages/TeamsPage");
+      break;
+    case "/settings":
+      import("@/features/settings/pages/SettingsPage");
+      break;
+    default:
+      break;
+  }
+};
+
 export const SidebarItem: React.FC<SidebarItemProps> = ({
   to,
   label,
@@ -157,6 +185,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     <li role="presentation">
       <Link
         to={to}
+        onMouseEnter={() => prefetchRoute(to)}
+        onFocus={() => prefetchRoute(to)}
         className={cn(
           "flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg hover:bg-accent/40 hover:text-accent-foreground transition-all select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-none",
           isActive

@@ -60,10 +60,18 @@ class ProjectNested(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserNested(BaseModel):
+class AssigneeNested(BaseModel):
     id: uuid.UUID
     full_name: str | None = None
+    email: str
     avatar_url: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CreatorNested(BaseModel):
+    id: uuid.UUID
+    full_name: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -74,8 +82,8 @@ class TaskResponse(TaskBase):
     created_at: datetime
     updated_at: datetime
     project: ProjectNested
-    assignee: UserNested | None = None
-    creator: UserNested
+    assignee: AssigneeNested | None = None
+    creator: CreatorNested
 
     model_config = ConfigDict(from_attributes=True)
 

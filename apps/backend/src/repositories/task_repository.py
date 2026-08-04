@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import desc, func, select
+from sqlalchemy import case, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -42,7 +42,7 @@ class TaskRepository(BaseRepository[Task]):
 
     async def exists_by_title_for_project(self, title: str, project_id: UUID) -> bool:
         statement = select(Task.id).where(
-            Task.title == title.strip(),
+            func.lower(Task.title) == func.lower(title.strip()),
             Task.project_id == project_id,
         )
         result = await self.session.execute(statement)
@@ -82,7 +82,7 @@ class TaskRepository(BaseRepository[Task]):
             query = query.where(Task.priority == priority)
             count_query = count_query.where(Task.priority == priority)
 
-        if search:
+        if search and search.strip():
             search_filter = Task.title.ilike(f"%{search.strip()}%")
             query = query.where(search_filter)
             count_query = count_query.where(search_filter)
@@ -129,24 +129,19 @@ class TaskRepository(BaseRepository[Task]):
 
         now = datetime.now(UTC)
 
-        # Basic counts
-        total_stmt = select(func.count(Task.id)).where(Task.project_id.in_(project_ids))
-        comp_stmt = select(func.count(Task.id)).where(
-            Task.project_id.in_(project_ids), Task.status == TaskStatus.DONE
-        )
-        pend_stmt = select(func.count(Task.id)).where(
-            Task.project_id.in_(project_ids), Task.status != TaskStatus.DONE
-        )
-        over_stmt = select(func.count(Task.id)).where(
-            Task.project_id.in_(project_ids),
-            Task.status != TaskStatus.DONE,
-            Task.due_date < now,
-        )
+        # Consolidated counts query using CASE WHEN
+        counts_stmt = select(
+            func.count(Task.id).label("total"),
+            func.sum(case((Task.status == TaskStatus.DONE, 1), else_=0)).label("completed"),
+            func.sum(case((Task.status != TaskStatus.DONE, 1), else_=0)).label("pending"),
+            func.sum(case(((Task.status != TaskStatus.DONE) & (Task.due_date < now), 1), else_=0)).label("overdue"),
+        ).where(Task.project_id.in_(project_ids))
 
-        total_tasks = (await self.session.execute(total_stmt)).scalar_one()
-        completed_tasks = (await self.session.execute(comp_stmt)).scalar_one()
-        pending_tasks = (await self.session.execute(pend_stmt)).scalar_one()
-        overdue_tasks = (await self.session.execute(over_stmt)).scalar_one()
+        counts_res = (await self.session.execute(counts_stmt)).one()
+        total_tasks = counts_res.total or 0
+        completed_tasks = int(counts_res.completed or 0)
+        pending_tasks = int(counts_res.pending or 0)
+        overdue_tasks = int(counts_res.overdue or 0)
 
         # Grouped counts
         priority_stmt = (

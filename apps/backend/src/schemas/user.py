@@ -27,6 +27,21 @@ class UserResponse(UserBase):
     role: UserRole
     is_active: bool
     is_verified: bool
+    avatar_url: str | None = None
+    notification_preferences: dict | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: str | None = Field(None, max_length=255)
+    avatar_url: str | None = Field(None, max_length=512)
+    notification_preferences: dict | None = None
+
+
+class UserPasswordChange(BaseModel):
+    old_password: str
+    new_password: str = Field(
+        ..., min_length=8, description="New password must be at least 8 characters"
+    )

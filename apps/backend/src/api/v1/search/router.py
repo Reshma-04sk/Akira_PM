@@ -7,6 +7,7 @@ from src.models.user import User
 from src.repositories.comment_repository import CommentRepository
 from src.repositories.project_repository import ProjectRepository
 from src.repositories.task_repository import TaskRepository
+from src.repositories.user_repository import UserRepository
 from src.schemas.response import APIResponse
 from src.schemas.search import SearchResultsResponse
 from src.services.search_service import SearchService
@@ -20,7 +21,8 @@ def get_search_service(
     project_repo = ProjectRepository(db)
     task_repo = TaskRepository(db)
     comment_repo = CommentRepository(db)
-    return SearchService(project_repo, task_repo, comment_repo)
+    user_repo = UserRepository(db)
+    return SearchService(project_repo, task_repo, comment_repo, user_repo)
 
 
 @router.get("", response_model=APIResponse[SearchResultsResponse])

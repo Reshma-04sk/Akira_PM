@@ -46,7 +46,12 @@ async def upload_attachment(
     """
     Uploads a file attachment for a specific task.
     """
+    max_file_size = 10 * 1024 * 1024  # 10MB limit
     content = await file.read()
+    if len(content) > max_file_size:
+        from src.core.exceptions import ValidationException
+        raise ValidationException("File size exceeds the maximum limit of 10MB")
+
     attachment = await service.upload_attachment(
         task_id=task_id,
         user_id=current_user.id,

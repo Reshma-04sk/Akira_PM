@@ -186,3 +186,92 @@ async def test_update_and_delete_task(db_session: AsyncSession) -> None:
     await service.delete_task(task.id, owner.id)
     with pytest.raises(NotFoundException):
         await service.get_task(task.id, owner.id)
+
+
+@pytest.mark.asyncio
+async def test_create_task_empty_title_fails(db_session: AsyncSession) -> None:
+    user_repo = UserRepository(db_session)
+    project_repo = ProjectRepository(db_session)
+    task_repo = TaskRepository(db_session)
+    service = TaskService(task_repo, project_repo, user_repo)
+
+    owner = await user_repo.create(
+        {
+            "email": "owner_empty@example.com",
+            "hashed_password": "pwd",
+            "full_name": "Owner",
+            "role": UserRole.USER,
+        }
+    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
+
+    with pytest.raises(
+        ValidationException, match="Title cannot be empty or whitespace only"
+    ):
+        await service.create_task(
+            TaskCreate(title="   ", project_id=project.id), owner.id
+        )
+
+
+@pytest.mark.asyncio
+async def test_create_task_case_insensitive_duplicate_fails(
+    db_session: AsyncSession,
+) -> None:
+    user_repo = UserRepository(db_session)
+    project_repo = ProjectRepository(db_session)
+    task_repo = TaskRepository(db_session)
+    service = TaskService(task_repo, project_repo, user_repo)
+
+    owner = await user_repo.create(
+        {
+            "email": "owner_dup@example.com",
+            "hashed_password": "pwd",
+            "full_name": "Owner",
+            "role": UserRole.USER,
+        }
+    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
+
+    await service.create_task(
+        TaskCreate(title="Test Task", project_id=project.id), owner.id
+    )
+
+    with pytest.raises(ValidationException, match="already exists"):
+        await service.create_task(
+            TaskCreate(title="test task", project_id=project.id), owner.id
+        )
+
+
+@pytest.mark.asyncio
+async def test_create_task_assignee_not_member_fails(db_session: AsyncSession) -> None:
+    user_repo = UserRepository(db_session)
+    project_repo = ProjectRepository(db_session)
+    task_repo = TaskRepository(db_session)
+    service = TaskService(task_repo, project_repo, user_repo)
+
+    owner = await user_repo.create(
+        {
+            "email": "owner_assignee@example.com",
+            "hashed_password": "pwd",
+            "full_name": "Owner",
+            "role": UserRole.USER,
+        }
+    )
+    other = await user_repo.create(
+        {
+            "email": "other_assignee@example.com",
+            "hashed_password": "pwd",
+            "full_name": "Other",
+            "role": UserRole.USER,
+        }
+    )
+    project = await project_repo.create({"name": "Project 1", "owner_id": owner.id})
+
+    # Assigning to non-member/non-owner should fail
+    with pytest.raises(
+        ValidationException, match="Assignee must be a member of the project"
+    ):
+        await service.create_task(
+            TaskCreate(title="Task", project_id=project.id, assignee_id=other.id),
+            owner.id,
+        )

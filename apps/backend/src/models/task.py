@@ -45,11 +45,13 @@ class Task(Base):
     status: Mapped[TaskStatus] = mapped_column(
         SQLEnum(TaskStatus, native_enum=False),
         default=TaskStatus.TODO,
+        index=True,
         nullable=False,
     )
     priority: Mapped[TaskPriority] = mapped_column(
         SQLEnum(TaskPriority, native_enum=False),
         default=TaskPriority.MEDIUM,
+        index=True,
         nullable=False,
     )
     due_date: Mapped[datetime | None] = mapped_column(

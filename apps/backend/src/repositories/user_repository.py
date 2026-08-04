@@ -13,3 +13,18 @@ class UserRepository(BaseRepository[User]):
         statement = select(User).where(User.email == email.lower().strip())
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
+
+    async def search_users(
+        self, query_str: str, limit: int = 20, offset: int = 0
+    ) -> list[User]:
+        statement = (
+            select(User)
+            .where(
+                User.email.ilike(f"%{query_str.strip()}%")
+                | User.full_name.ilike(f"%{query_str.strip()}%")
+            )
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.session.execute(statement)
+        return list(result.scalars().all())

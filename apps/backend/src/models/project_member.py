@@ -51,6 +51,7 @@ class ProjectMember(Base):
     invited_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
+        index=True,
         nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(

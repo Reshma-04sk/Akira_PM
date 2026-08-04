@@ -39,7 +39,7 @@ async def test_search_service_and_api(
     comment_repo = CommentRepository(db_session)
 
     task_service = TaskService(task_repo, project_repo, user_repo)
-    search_service = SearchService(project_repo, task_repo, comment_repo)
+    search_service = SearchService(project_repo, task_repo, comment_repo, user_repo)
 
     # 1. Setup User
     headers = await get_auth_headers(client, "search_user@example.com", "Search User")
@@ -85,3 +85,9 @@ async def test_search_service_and_api(
     assert api_res_alpha.status_code == 200
     assert len(api_res_alpha.json()["data"]["projects"]) == 1
     assert len(api_res_alpha.json()["data"]["comments"]) == 1
+
+    # 5. Search for user by email/name query matching
+    api_res_user = await client.get("/api/v1/search?q=Search", headers=headers)
+    assert api_res_user.status_code == 200
+    assert len(api_res_user.json()["data"]["users"]) == 1
+    assert api_res_user.json()["data"]["users"][0]["email"] == "search_user@example.com"

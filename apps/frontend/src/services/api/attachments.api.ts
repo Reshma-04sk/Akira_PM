@@ -5,13 +5,13 @@ import { ApiResponse } from "./response";
 
 export interface Attachment {
   id: string;
-  taskId: string;
+  task_id: string;
+  uploaded_by: string;
   filename: string;
-  fileSize: number;
-  contentType: string;
-  url: string;
-  uploadedById: string;
-  createdAt: string;
+  file_path: string;
+  mime_type: string;
+  file_size: number;
+  created_at: string;
 }
 
 export const attachmentsApi = {
@@ -21,11 +21,22 @@ export const attachmentsApi = {
 
   upload(taskId: string, file: File, config?: RequestConfig): Promise<ApiResponse<Attachment>> {
     const formData = new FormData();
+    formData.append("task_id", taskId);
     formData.append("file", file);
 
-    // Axios client detects FormData and correctly injects multi-part content headers
-    return apiClient.post<Attachment>(ENDPOINTS.ATTACHMENTS.UPLOAD(taskId), formData, {
+    return apiClient.post<Attachment>(ENDPOINTS.ATTACHMENTS.UPLOAD, formData, {
       ...config,
+      headers: {
+        ...(config?.headers || {}),
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  download(id: string, config?: RequestConfig): Promise<ApiResponse<Blob>> {
+    return apiClient.get<Blob>(ENDPOINTS.ATTACHMENTS.DOWNLOAD(id), {
+      ...config,
+      responseType: "blob" as any,
     });
   },
 

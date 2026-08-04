@@ -1,14 +1,11 @@
 import React, { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
-  FolderGit2, 
   Users, 
   Clock, 
-  CheckCircle2, 
   ArrowLeft,
   Calendar,
-  AlertCircle,
   FileText
 } from "lucide-react";
 import { projectsApi } from "@/services/api/projects.api";
@@ -24,23 +21,17 @@ export const ProjectDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"overview" | "members" | "activity">("overview");
 
-  if (!id) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-xs text-destructive font-bold">Invalid Project ID parameters.</p>
-      </div>
-    );
-  }
-
   // Queries
   const { data: project, isLoading: projectLoading, error: projectError } = useQuery({
     queryKey: ["projects", "detail", id],
-    queryFn: () => projectsApi.getDetail(id).then((res) => res.data),
+    queryFn: () => projectsApi.getDetail(id || "").then((res) => res.data),
+    enabled: !!id,
   });
 
   const { data: tasks, isLoading: tasksLoading } = useQuery({
     queryKey: ["tasks", "list", id],
-    queryFn: () => tasksApi.list(id).then((res) => res.data),
+    queryFn: () => tasksApi.list(id || "").then((res) => res.data),
+    enabled: !!id,
   });
 
   const { data: notifications, isLoading: notificationsLoading } = useQuery({
@@ -50,8 +41,17 @@ export const ProjectDetailsPage: React.FC = () => {
 
   const { data: membersResponse, isLoading: membersLoading, error: membersError } = useQuery({
     queryKey: ["project-members", "list", id],
-    queryFn: () => projectMembersApi.list(id).then((res) => res.data),
+    queryFn: () => projectMembersApi.list(id || "").then((res) => res.data),
+    enabled: !!id,
   });
+
+  if (!id) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-xs text-destructive font-bold">Invalid Project ID parameters.</p>
+      </div>
+    );
+  }
 
   const isLoading = projectLoading || tasksLoading;
 
@@ -82,7 +82,7 @@ export const ProjectDetailsPage: React.FC = () => {
 
   // Task filtering indicators
   const totalTasks = tasks?.length ?? 0;
-  const completedTasks = tasks?.filter((t) => t.status === "Done").length ?? 0;
+  const completedTasks = tasks?.filter((t) => t.status === "done").length ?? 0;
   const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
@@ -217,19 +217,19 @@ export const ProjectDetailsPage: React.FC = () => {
               <div className="flex justify-between border-b border-border/25 pb-2">
                 <span className="text-muted-foreground">Total Backlog</span>
                 <span className="font-bold text-foreground">
-                  {tasks?.filter((t) => t.status === "Backlog").length ?? 0}
+                  {tasks?.filter((t) => t.status === "todo").length ?? 0}
                 </span>
               </div>
               <div className="flex justify-between border-b border-border/25 pb-2">
                 <span className="text-muted-foreground">In Progress</span>
                 <span className="font-bold text-foreground">
-                  {tasks?.filter((t) => t.status === "InProgress").length ?? 0}
+                  {tasks?.filter((t) => t.status === "in_progress").length ?? 0}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Pending Review</span>
                 <span className="font-bold text-foreground">
-                  {tasks?.filter((t) => t.status === "InReview").length ?? 0}
+                  {tasks?.filter((t) => t.status === "in_review").length ?? 0}
                 </span>
               </div>
             </CardContent>

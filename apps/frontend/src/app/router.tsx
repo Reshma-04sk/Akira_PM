@@ -1,46 +1,72 @@
+import { Suspense, lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { BlankLayout } from "@/components/layout/BlankLayout";
 import { NotFound } from "@/components/common/NotFound";
-import { PageContainer } from "@/components/common/PageContainer";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
+
 import { ProtectedRoute, PublicRoute } from "@/features/auth/auth-guards";
 
-// Import Auth UI Pages
-import { LoginPage } from "@/features/auth/pages/LoginPage";
-import { RegisterPage } from "@/features/auth/pages/RegisterPage";
-import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
-import { EmailVerificationPage } from "@/features/auth/pages/EmailVerificationPage";
-
-// Import Feature Dashboard Page
-import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
-
-// Import Projects Module Pages
-import { ProjectsListPage } from "@/features/projects/pages/ProjectsListPage";
-import { ProjectDetailsPage } from "@/features/projects/pages/ProjectDetailsPage";
-
-// Import Tasks Module Page
-import { TasksListPage } from "@/features/tasks/pages/TasksListPage";
-
-// Reusable marketing landing placeholder
-const LandingPlaceholder = () => (
-  <PageContainer className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-    <h2 className="text-3xl font-bold tracking-tight">Welcome to Akira PM</h2>
-    <p className="mt-2 text-muted-foreground font-medium max-w-md mx-auto leading-relaxed">
-      Collaborative, production-grade project management built for high performance teams.
-    </p>
-  </PageContainer>
+// Lazy load Auth UI Pages
+const LoginPage = lazy(() =>
+  import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage }))
+);
+const RegisterPage = lazy(() =>
+  import("@/features/auth/pages/RegisterPage").then((m) => ({ default: m.RegisterPage }))
+);
+const ForgotPasswordPage = lazy(() =>
+  import("@/features/auth/pages/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage }))
+);
+const ResetPasswordPage = lazy(() =>
+  import("@/features/auth/pages/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage }))
+);
+const EmailVerificationPage = lazy(() =>
+  import("@/features/auth/pages/EmailVerificationPage").then((m) => ({ default: m.EmailVerificationPage }))
 );
 
-const SettingsPlaceholder = () => (
-  <PageContainer>
-    <div className="p-6 border border-dashed border-border rounded-lg">
-      <h2 className="text-xl font-bold">Settings Placeholder</h2>
-      <p className="mt-1 text-sm text-muted-foreground">User settings, organization details, and theme configurations.</p>
-    </div>
-  </PageContainer>
+// Lazy load Feature Dashboard Page
+const DashboardPage = lazy(() =>
+  import("@/features/dashboard/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
 );
+
+// Lazy load Projects Module Pages
+const ProjectsListPage = lazy(() =>
+  import("@/features/projects/pages/ProjectsListPage").then((m) => ({ default: m.ProjectsListPage }))
+);
+const ProjectDetailsPage = lazy(() =>
+  import("@/features/projects/pages/ProjectDetailsPage").then((m) => ({ default: m.ProjectDetailsPage }))
+);
+
+// Lazy load Tasks Module Page
+const TasksListPage = lazy(() =>
+  import("@/features/tasks/pages/TasksListPage").then((m) => ({ default: m.TasksListPage }))
+);
+
+// Lazy load Settings & Teams Module Pages
+const SettingsPage = lazy(() =>
+  import("@/features/settings/pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
+);
+const TeamsPage = lazy(() =>
+  import("@/features/teams/pages/TeamsPage").then((m) => ({ default: m.TeamsPage }))
+);
+
+// Lazy load Calendar & Reports Module Pages
+const CalendarPage = lazy(() =>
+  import("@/features/calendar/pages/CalendarPage").then((m) => ({ default: m.CalendarPage }))
+);
+const ReportsPage = lazy(() =>
+  import("@/features/reports/pages/ReportsPage").then((m) => ({ default: m.ReportsPage }))
+);
+
+// Lazy-loaded marketing pages
+const HomePage = lazy(() => import("@/features/marketing/pages/HomePage"));
+const FeaturesPage = lazy(() => import("@/features/marketing/pages/FeaturesPage"));
+const PricingPage = lazy(() => import("@/features/marketing/pages/PricingPage"));
+const AboutPage = lazy(() => import("@/features/marketing/pages/AboutPage"));
+const ContactPage = lazy(() => import("@/features/marketing/pages/ContactPage"));
+const PrivacyPage = lazy(() => import("@/features/marketing/pages/PrivacyPage"));
+const TermsPage = lazy(() => import("@/features/marketing/pages/TermsPage"));
 
 export const router = createBrowserRouter([
   // Public marketing routes
@@ -50,7 +76,31 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <LandingPlaceholder />,
+        element: <Suspense fallback={null}><HomePage /></Suspense>,
+      },
+      {
+        path: "features",
+        element: <Suspense fallback={null}><FeaturesPage /></Suspense>,
+      },
+      {
+        path: "pricing",
+        element: <Suspense fallback={null}><PricingPage /></Suspense>,
+      },
+      {
+        path: "about",
+        element: <Suspense fallback={null}><AboutPage /></Suspense>,
+      },
+      {
+        path: "contact",
+        element: <Suspense fallback={null}><ContactPage /></Suspense>,
+      },
+      {
+        path: "privacy",
+        element: <Suspense fallback={null}><PrivacyPage /></Suspense>,
+      },
+      {
+        path: "terms",
+        element: <Suspense fallback={null}><TermsPage /></Suspense>,
       },
     ],
   },
@@ -60,23 +110,23 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "login",
-        element: <LoginPage />,
+        element: <Suspense fallback={<LoadingScreen />}><LoginPage /></Suspense>,
       },
       {
         path: "register",
-        element: <RegisterPage />,
+        element: <Suspense fallback={<LoadingScreen />}><RegisterPage /></Suspense>,
       },
       {
         path: "forgot-password",
-        element: <ForgotPasswordPage />,
+        element: <Suspense fallback={<LoadingScreen />}><ForgotPasswordPage /></Suspense>,
       },
       {
         path: "reset-password",
-        element: <ResetPasswordPage />,
+        element: <Suspense fallback={<LoadingScreen />}><ResetPasswordPage /></Suspense>,
       },
       {
         path: "verify-email",
-        element: <EmailVerificationPage />,
+        element: <Suspense fallback={<LoadingScreen />}><EmailVerificationPage /></Suspense>,
       },
     ],
   },
@@ -86,23 +136,35 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <DashboardPage />,
+        element: <Suspense fallback={<LoadingScreen />}><DashboardPage /></Suspense>,
       },
       {
         path: "projects",
-        element: <ProjectsListPage />,
+        element: <Suspense fallback={<LoadingScreen />}><ProjectsListPage /></Suspense>,
       },
       {
         path: "projects/:id",
-        element: <ProjectDetailsPage />,
+        element: <Suspense fallback={<LoadingScreen />}><ProjectDetailsPage /></Suspense>,
       },
       {
         path: "tasks",
-        element: <TasksListPage />,
+        element: <Suspense fallback={<LoadingScreen />}><TasksListPage /></Suspense>,
+      },
+      {
+        path: "calendar",
+        element: <Suspense fallback={<LoadingScreen />}><CalendarPage /></Suspense>,
+      },
+      {
+        path: "reports",
+        element: <Suspense fallback={<LoadingScreen />}><ReportsPage /></Suspense>,
+      },
+      {
+        path: "teams",
+        element: <Suspense fallback={<LoadingScreen />}><TeamsPage /></Suspense>,
       },
       {
         path: "settings",
-        element: <SettingsPlaceholder />,
+        element: <Suspense fallback={<LoadingScreen />}><SettingsPage /></Suspense>,
       },
     ],
   },

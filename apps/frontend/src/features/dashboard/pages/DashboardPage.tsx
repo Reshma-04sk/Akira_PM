@@ -3,10 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   FolderGit2, 
   CheckSquare, 
-  Users, 
   Plus, 
   UserPlus, 
-  FileText, 
   AlertCircle, 
   Calendar,
   Clock
@@ -39,7 +37,7 @@ export const DashboardPage: React.FC = () => {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskProject, setTaskProject] = useState("");
-  const [taskPriority, setTaskPriority] = useState<TaskPriority>("Medium");
+  const [taskPriority, setTaskPriority] = useState<TaskPriority>("medium");
   const [inviteEmail, setInviteEmail] = useState("");
 
   // Queries
@@ -48,7 +46,7 @@ export const DashboardPage: React.FC = () => {
     queryFn: () => dashboardApi.getOverview().then((res) => res.data),
   });
 
-  const { data: projects, isLoading: projectsLoading, error: projectsError } = useQuery({
+  const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects", "list"],
     queryFn: () => projectsApi.list().then((res) => res.data),
   });
@@ -383,14 +381,14 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <div className="space-y-2.5">
                   {tasks
-                    .filter((t) => t.dueDate)
+                    .filter((t) => t.due_date)
                     .slice(0, 3)
                     .map((task) => (
                       <div key={task.id} className="flex items-center justify-between text-xs p-2 border border-border/40 bg-card/5 rounded">
                         <span className="font-bold text-foreground truncate max-w-[120px]">{task.title}</span>
                         <span className="text-[10px] text-destructive font-semibold flex items-center gap-1">
                           <AlertCircle className="h-3 w-3 shrink-0" />
-                          {task.dueDate}
+                          {task.due_date}
                         </span>
                       </div>
                     ))}

@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import desc, func, select
@@ -10,6 +11,20 @@ from src.repositories.base import BaseRepository
 class AuditLogRepository(BaseRepository[AuditLog]):
     def __init__(self, session: AsyncSession):
         super().__init__(AuditLog, session)
+
+    async def create(self, attributes: dict[str, Any]) -> AuditLog:
+        if "details" in attributes and isinstance(attributes["details"], dict):
+            attributes["details"] = self._serialize_uuids(attributes["details"])
+        return await super().create(attributes)
+
+    def _serialize_uuids(self, data: Any) -> Any:
+        if isinstance(data, dict):
+            return {k: self._serialize_uuids(v) for k, v in data.items()}
+        if isinstance(data, list):
+            return [self._serialize_uuids(x) for x in data]
+        if isinstance(data, UUID):
+            return str(data)
+        return data
 
     async def get_paginated_logs(
         self,

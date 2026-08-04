@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /projects
+Disallow: /tasks
+Disallow: /calendar
+Disallow: /reports
+Disallow: /teams
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+Sitemap: https://akirapm.io/sitemap.xml

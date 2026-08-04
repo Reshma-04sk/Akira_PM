@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Check, ChevronsUpDown, Plus, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "@/components/ui/feedback";
 
 interface Workspace {
   id: string;
@@ -106,14 +107,14 @@ export const WorkspaceSwitcher: React.FC = () => {
             ))}
             <div className="border-t border-border mt-1 pt-1">
               <button
-                onClick={() => console.log("Create workspace")}
+                onClick={() => toast.info("Coming soon", "Workspace creation will be available in the next release.")}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Create Workspace
               </button>
               <button
-                onClick={() => console.log("Explore premium")}
+                onClick={() => toast.info("Feature preview", "Upgrade plan to Pro is in test mode.")}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
               >
                 <Sparkles className="h-3.5 w-3.5" />

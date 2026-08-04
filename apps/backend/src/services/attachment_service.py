@@ -55,14 +55,24 @@ class AttachmentService:
         if not task:
             raise NotFoundException("Task not found")
 
-        await self._verify_project_membership(task.project_id, user_id)
+        # Enforce workspace and project attachment upload permissions (Viewer cannot upload)
+        from src.dependencies.permissions import check_comment_attach_permission
+
+        await check_comment_attach_permission(
+            task.project_id, user_id, self.attachment_repository.session
+        )
 
         # Ensure upload directory exists
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+        # Sanitize filename to prevent path traversal
+        safe_filename = os.path.basename(filename)
+        if not safe_filename:
+            safe_filename = "file"
+
         # Generate unique local filename
         unique_id = uuid.uuid4()
-        local_filename = f"{unique_id}_{filename}"
+        local_filename = f"{unique_id}_{safe_filename}"
         file_path = os.path.join(UPLOAD_DIR, local_filename)
 
         # Save file to disk
@@ -79,6 +89,30 @@ class AttachmentService:
             "file_size": file_size,
         }
         attachment = await self.attachment_repository.create(attrs)
+
+        # Trigger Notification to task assignee
+        if task.assignee_id and task.assignee_id != user_id:
+            try:
+                from src.models.notification import NotificationType
+                from src.repositories.notification_repository import (
+                    NotificationRepository,
+                )
+
+                n_repo = NotificationRepository(self.attachment_repository.session)
+                await n_repo.create(
+                    {
+                        "user_id": task.assignee_id,
+                        "type": NotificationType.ATTACHMENT_ADDED,
+                        "title": "Attachment Added",
+                        "message": (
+                            f"A new attachment '{filename}' was uploaded to task '{task.title}'"
+                        ),
+                        "is_read": False,
+                    }
+                )
+            except Exception:
+                pass
+
         return AttachmentResponse.model_validate(attachment)
 
     async def get_attachment_file(

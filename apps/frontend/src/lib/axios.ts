@@ -61,6 +61,11 @@ export const registerInterceptors = () => {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      const activeWorkspaceId = localStorage.getItem("akira_active_workspace_id");
+      if (activeWorkspaceId && config.headers) {
+        config.headers["X-Workspace-ID"] = activeWorkspaceId;
+      }
       return config;
     },
     (error) => Promise.reject(error)
@@ -89,6 +94,16 @@ export const registerInterceptors = () => {
       // Clean up request abort controller reference
       const controller = (response.config as any)._abortController;
       if (controller) removeAbortController(controller);
+
+      // Unwrap standard APIResponse wrapper
+      if (
+        response.data &&
+        typeof response.data === "object" &&
+        response.data.success !== undefined &&
+        response.data.data !== undefined
+      ) {
+        response.data = response.data.data;
+      }
       return response;
     },
     async (error: AxiosError) => {
@@ -132,18 +147,28 @@ export const registerInterceptors = () => {
 
         const refreshToken = authStorage.getRefreshToken();
         if (!refreshToken) {
+          const wasAuthenticated = !!authStorage.getAccessToken();
           authStorage.clearTokens();
           isRefreshing = false;
-          authEventBus.emit("session-expired");
-          return Promise.reject(new Error("No refresh token available"));
+          if (wasAuthenticated) {
+            authEventBus.emit("session-expired");
+            return Promise.reject(new Error("Session expired. Please log in again."));
+          }
+          return Promise.reject(new Error(message));
         }
 
         try {
           const response = await axios.post(`${baseURL}/auth/refresh`, {
-            refreshToken,
+            refresh_token: refreshToken,
           });
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          const responseData = response.data?.data || response.data;
+          const accessToken = responseData?.accessToken || responseData?.access_token;
+          const newRefreshToken = responseData?.refreshToken || responseData?.refresh_token;
+
+          if (!accessToken || !newRefreshToken) {
+            throw new Error("Invalid token response");
+          }
 
           authStorage.setAccessToken(accessToken);
           authStorage.setRefreshToken(newRefreshToken);

@@ -238,3 +238,85 @@ async def test_task_api_pagination_search_and_filters(
     assert res_page.status_code == 200
     assert res_page.json()["data"]["total"] == 2
     assert len(res_page.json()["data"]["items"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_task_api_invalid_query_params(client: AsyncClient) -> None:
+    headers = await get_auth_headers(
+        client, "owner_invalid_query@example.com", "Owner User"
+    )
+
+    # Create project
+    proj_res = await client.post(
+        "/api/v1/projects", json={"name": "Proj Invalid Query"}, headers=headers
+    )
+    project_id = proj_res.json()["data"]["id"]
+
+    # Request with invalid status
+    res1 = await client.get(
+        f"/api/v1/tasks?project_id={project_id}&status=invalid_status_val",
+        headers=headers,
+    )
+    assert res1.status_code == 422
+
+    # Request with invalid priority
+    res2 = await client.get(
+        f"/api/v1/tasks?project_id={project_id}&priority=invalid_priority_val",
+        headers=headers,
+    )
+    assert res2.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_task_api_empty_title_validation(client: AsyncClient) -> None:
+    headers = await get_auth_headers(
+        client, "owner_empty_title@example.com", "Owner User"
+    )
+
+    # Create project
+    proj_res = await client.post(
+        "/api/v1/projects", json={"name": "Proj Empty Title"}, headers=headers
+    )
+    project_id = proj_res.json()["data"]["id"]
+
+    # Attempt to create task with empty title
+    res = await client.post(
+        "/api/v1/tasks",
+        json={"title": "   ", "project_id": project_id},
+        headers=headers,
+    )
+    assert res.status_code == 422
+    assert "Title cannot be empty or whitespace only" in res.json()["error"]["message"]
+
+
+@pytest.mark.asyncio
+async def test_task_api_assignee_not_member_validation(client: AsyncClient) -> None:
+    headers_owner = await get_auth_headers(
+        client, "owner_assignee_api@example.com", "Owner User"
+    )
+    headers_other = await get_auth_headers(
+        client, "other_assignee_api@example.com", "Other User"
+    )
+
+    # Create project
+    proj_res = await client.post(
+        "/api/v1/projects", json={"name": "Proj Assignee API"}, headers=headers_owner
+    )
+    project_id = proj_res.json()["data"]["id"]
+
+    # Get other user's ID
+    me_res = await client.get("/api/v1/auth/me", headers=headers_other)
+    other_id = me_res.json()["data"]["id"]
+
+    # Attempt to assign task to other user who is not a member
+    res = await client.post(
+        "/api/v1/tasks",
+        json={
+            "title": "Unassignable Task",
+            "project_id": project_id,
+            "assignee_id": other_id,
+        },
+        headers=headers_owner,
+    )
+    assert res.status_code == 422
+    assert "Assignee must be a member of the project" in res.json()["error"]["message"]

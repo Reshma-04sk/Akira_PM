@@ -62,8 +62,12 @@ class CommentService:
         if not task:
             raise NotFoundException("Task not found")
 
-        # Business Rule: Only project members can comment
-        await self._verify_project_membership(task.project_id, user_id)
+        # Enforce workspace and project comment permissions (Viewer cannot comment)
+        from src.dependencies.permissions import check_comment_attach_permission
+
+        await check_comment_attach_permission(
+            task.project_id, user_id, self.comment_repository.session
+        )
 
         comment_attrs = {
             "task_id": data.task_id,
@@ -73,15 +77,75 @@ class CommentService:
         comment = await self.comment_repository.create(comment_attrs)
         logger.info("Comment created: %s by user %s", comment.id, user_id)
 
-        # Trigger Notification to task assignee
-        if task.assignee_id and task.assignee_id != user_id:
+        # Trigger Mentions and Notification
+        import re
+
+        from src.models.notification import NotificationType
+        from src.repositories.notification_repository import (
+            NotificationRepository,
+        )
+
+        # Parse mentions
+        mention_matches = re.findall(r"@([a-zA-Z0-9_\-\.\@]+)", data.content)
+        mentioned_tokens = {m.lower().strip() for m in mention_matches if m.strip()}
+        notified_users = set()
+
+        n_repo = NotificationRepository(self.comment_repository.session)
+
+        if mentioned_tokens:
             try:
-                from src.models.notification import NotificationType
-                from src.repositories.notification_repository import (
-                    NotificationRepository,
+                # Fetch project members
+                members, _ = await self.project_member_repository.list_members(
+                    project_id=task.project_id, page_size=1000
                 )
 
-                n_repo = NotificationRepository(self.comment_repository.session)
+                for m in members:
+                    if not m.user or m.user_id == user_id:
+                        continue
+
+                    email = m.user.email.lower()
+                    email_prefix = email.split("@")[0]
+                    full_name_clean = (
+                        m.user.full_name.lower().replace(" ", "")
+                        if m.user.full_name
+                        else ""
+                    )
+                    full_name_tokens = (
+                        {tok.lower() for tok in m.user.full_name.split()}
+                        if m.user.full_name
+                        else set()
+                    )
+
+                    is_mentioned = (
+                        email in mentioned_tokens
+                        or email_prefix in mentioned_tokens
+                        or (full_name_clean and full_name_clean in mentioned_tokens)
+                        or any(tok in mentioned_tokens for tok in full_name_tokens)
+                    )
+
+                    if is_mentioned and m.user_id not in notified_users:
+                        notified_users.add(m.user_id)
+                        await n_repo.create(
+                            {
+                                "user_id": m.user_id,
+                                "type": NotificationType.MENTION,
+                                "title": "Mentioned in Comment",
+                                "message": (
+                                    f"You were mentioned in a comment on task '{task.title}'"
+                                ),
+                                "is_read": False,
+                            }
+                        )
+            except Exception as e:
+                logger.error("Failed to process mentions: %s", e)
+
+        # Trigger Notification to task assignee (if they haven't already been notified by mention)
+        if (
+            task.assignee_id
+            and task.assignee_id != user_id
+            and task.assignee_id not in notified_users
+        ):
+            try:
                 await n_repo.create(
                     {
                         "user_id": task.assignee_id,

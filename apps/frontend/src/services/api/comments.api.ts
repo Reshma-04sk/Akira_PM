@@ -5,23 +5,36 @@ import { ApiResponse } from "./response";
 
 export interface Comment {
   id: string;
-  taskId: string;
-  authorId: string;
+  task_id: string;
+  user_id: string;
   content: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommentListResponse {
+  items: Comment[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 export interface CreateCommentPayload {
+  task_id: string;
   content: string;
 }
 
 export const commentsApi = {
-  list(taskId: string, config?: RequestConfig): Promise<ApiResponse<Comment[]>> {
-    return apiClient.get<Comment[]>(ENDPOINTS.COMMENTS.LIST(taskId), config);
+  list(taskId: string, config?: RequestConfig): Promise<ApiResponse<CommentListResponse>> {
+    return apiClient.get<CommentListResponse>(ENDPOINTS.COMMENTS.LIST(taskId), config);
   },
 
-  create(taskId: string, payload: CreateCommentPayload, config?: RequestConfig): Promise<ApiResponse<Comment>> {
-    return apiClient.post<Comment>(ENDPOINTS.COMMENTS.CREATE(taskId), payload, config);
+  create(payload: CreateCommentPayload, config?: RequestConfig): Promise<ApiResponse<Comment>> {
+    return apiClient.post<Comment>(ENDPOINTS.COMMENTS.CREATE, payload, config);
+  },
+
+  update(id: string, payload: { content: string }, config?: RequestConfig): Promise<ApiResponse<Comment>> {
+    return apiClient.patch<Comment>(ENDPOINTS.COMMENTS.UPDATE(id), payload, config);
   },
 
   delete(id: string, config?: RequestConfig): Promise<ApiResponse<void>> {

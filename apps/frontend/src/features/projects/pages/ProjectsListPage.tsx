@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,10 +12,7 @@ import {
   Plus, 
   Trash2, 
   Edit3, 
-  MoreVertical, 
-  Calendar, 
   Clock, 
-  CheckCircle2,
   Users
 } from "lucide-react";
 import { projectsApi, Project } from "@/services/api/projects.api";
@@ -26,7 +23,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/selection";
 import { FormField, FormLabel } from "@/components/ui/form";
 import { Dialog } from "@/components/ui/overlay";
-import { Card, CardHeader, CardTitle, CardContent, Avatar, EmptyState } from "@/components/ui/data-display";
+import { Card, CardHeader, CardTitle, CardContent, EmptyState } from "@/components/ui/data-display";
 import { Skeleton, toast, Progress } from "@/components/ui/feedback";
 
 // Colors schema selection
@@ -191,12 +188,9 @@ const ProjectListRow: React.FC<{
 
 export const ProjectsListPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
   // Layout & Filters State
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
 
   // Modals state

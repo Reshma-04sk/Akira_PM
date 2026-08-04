@@ -3,7 +3,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, DateTime, String
+from sqlalchemy import JSON, UUID, Boolean, DateTime, String
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -17,7 +17,8 @@ if TYPE_CHECKING:
     from src.models.project_member import ProjectMember
     from src.models.refresh_token import RefreshToken
     from src.models.task import Task
-
+    from src.models.workspace import Workspace
+    from src.models.workspace_member import WorkspaceMember
 
 class UserRole(enum.StrEnum):
     ADMIN = "admin"
@@ -44,6 +45,8 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    notification_preferences: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
     )
@@ -79,4 +82,10 @@ class User(Base):
     )
     attachments: Mapped[list["Attachment"]] = relationship(
         "Attachment", back_populates="uploader", cascade="all, delete-orphan"
+    )
+    workspaces: Mapped[list["Workspace"]] = relationship(
+        "Workspace", back_populates="owner", cascade="all, delete-orphan"
+    )
+    workspace_memberships: Mapped[list["WorkspaceMember"]] = relationship(
+        "WorkspaceMember", back_populates="user", cascade="all, delete-orphan"
     )

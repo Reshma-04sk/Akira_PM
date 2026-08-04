@@ -5,17 +5,32 @@ import { ApiResponse } from "./response";
 
 export interface Notification {
   id: string;
-  userId: string;
+  user_id: string;
+  type: string;
   title: string;
   message: string;
-  isRead: boolean;
-  type: string;
-  createdAt: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 export const notificationsApi = {
   list(config?: RequestConfig): Promise<ApiResponse<Notification[]>> {
-    return apiClient.get<Notification[]>(ENDPOINTS.NOTIFICATIONS.LIST, config);
+    return apiClient.get<NotificationListResponse>(ENDPOINTS.NOTIFICATIONS.LIST, config)
+      .then((res) => ({
+        data: res.data.items,
+        status: res.status,
+      }));
+  },
+
+  listPaginated(config?: RequestConfig): Promise<ApiResponse<NotificationListResponse>> {
+    return apiClient.get<NotificationListResponse>(ENDPOINTS.NOTIFICATIONS.LIST, config);
   },
 
   markRead(id: string, config?: RequestConfig): Promise<ApiResponse<Notification>> {
@@ -23,6 +38,6 @@ export const notificationsApi = {
   },
 
   markAllRead(config?: RequestConfig): Promise<ApiResponse<void>> {
-    return apiClient.post<void>(ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, undefined, config);
+    return apiClient.patch<void>(ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, undefined, config);
   },
 };

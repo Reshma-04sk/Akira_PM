@@ -30,7 +30,7 @@ describe("useAuth & AuthProvider", () => {
   });
 
   it("should resolve context when within AuthProvider", () => {
-    vi.mocked(authService.getCurrentUser).mockResolvedValue(null);
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(null as any);
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthProvider>{children}</AuthProvider>

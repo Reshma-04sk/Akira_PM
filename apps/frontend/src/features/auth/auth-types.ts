@@ -4,7 +4,13 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  full_name?: string | null;
   role: UserRole;
+  avatar_url?: string | null;
+  notification_preferences?: Record<string, boolean> | null;
+  is_verified?: boolean;
+  is_active?: boolean;
+  created_at?: string;
   createdAt?: string;
 }
 

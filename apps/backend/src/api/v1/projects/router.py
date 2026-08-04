@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies.auth import get_current_active_user
@@ -50,6 +50,7 @@ async def list_projects(
     search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    workspace_id: UUID | None = Header(None, alias="X-Workspace-ID"),  # noqa: B008
     current_user: User = Depends(get_current_active_user),  # noqa: B008
     service: ProjectService = Depends(get_project_service),  # noqa: B008
 ) -> APIResponse[ProjectListResponse]:
@@ -58,6 +59,7 @@ async def list_projects(
     """
     project_list_response = await service.list_projects(
         owner_id=current_user.id,
+        workspace_id=workspace_id,
         search=search,
         page=page,
         page_size=page_size,

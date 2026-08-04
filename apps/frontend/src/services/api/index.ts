@@ -15,3 +15,4 @@ export * from "./dashboard.api";
 export * from "./search.api";
 export * from "./attachments.api";
 export * from "./project-members.api";
+export * from "./ai.api";

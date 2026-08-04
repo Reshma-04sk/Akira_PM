@@ -46,6 +46,7 @@ class ProjectRepository(BaseRepository[Project]):
         self,
         *,
         owner_id: UUID | None = None,
+        workspace_id: UUID | None = None,
         search: str | None = None,
         page: int = 1,
         page_size: int = 20,
@@ -59,7 +60,10 @@ class ProjectRepository(BaseRepository[Project]):
             query = query.where(Project.is_archived.is_(False))
             count_query = count_query.where(Project.is_archived.is_(False))
 
-        if owner_id:
+        if workspace_id:
+            query = query.where(Project.workspace_id == workspace_id)
+            count_query = count_query.where(Project.workspace_id == workspace_id)
+        elif owner_id:
             query = query.where(Project.owner_id == owner_id)
             count_query = count_query.where(Project.owner_id == owner_id)
 

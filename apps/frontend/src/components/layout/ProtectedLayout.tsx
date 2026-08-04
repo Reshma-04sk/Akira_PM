@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
@@ -6,12 +6,43 @@ import { PageTransition } from "../common/PageTransition";
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
+const SearchModal = lazy(() =>
+  import("@/features/search/components/SearchModal").then((module) => ({
+    default: module.SearchModal,
+  }))
+);
+
 export const ProtectedLayout: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+
+    const handleOpenSearch = () => {
+      setIsSearchOpen(true);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("akira-open-search", handleOpenSearch);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("akira-open-search", handleOpenSearch);
+    };
+  }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground animate-in fade-in-30 duration-200">
+      <Suspense fallback={null}>
+        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      </Suspense>
       {/* Mobile sidebar overlay drawer */}
       <AnimatePresence>
         {isMobileOpen && (

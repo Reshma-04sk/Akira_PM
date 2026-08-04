@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from src.models.project_member import ProjectMember
     from src.models.task import Task
     from src.models.user import User
+    from src.models.workspace import Workspace
 
 
 def utc_now() -> datetime:
@@ -31,6 +32,12 @@ class Project(Base):
         index=True,
         nullable=False,
     )
+    workspace_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("workspaces.id", ondelete="CASCADE"),
+        index=True,
+        nullable=True,
+    )
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False
@@ -40,6 +47,9 @@ class Project(Base):
     )
 
     owner: Mapped["User"] = relationship("User", back_populates="projects")
+    workspace: Mapped["Workspace"] = relationship(
+        "Workspace", back_populates="projects"
+    )
     tasks: Mapped[list["Task"]] = relationship(
         "Task", back_populates="project", cascade="all, delete-orphan"
     )

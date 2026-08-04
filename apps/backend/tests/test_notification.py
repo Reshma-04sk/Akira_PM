@@ -80,7 +80,7 @@ async def test_notification_triggers_and_api(
     assert notifs.items[0].type == NotificationType.PROJECT_INVITE
 
     # 3. Trigger TASK_ASSIGNED notification
-    await task_service.create_task(
+    task = await task_service.create_task(
         TaskCreate(
             title="Assigned task",
             project_id=project.id,
@@ -103,11 +103,51 @@ async def test_notification_triggers_and_api(
     assert notifs.total == 3
     assert notifs.items[0].type == NotificationType.ROLE_CHANGED
 
+    # 5. Trigger MENTION notification via comment
+    from src.repositories.comment_repository import CommentRepository
+    from src.schemas.comment import CommentCreate
+    from src.services.comment_service import CommentService
+
+    comment_repo = CommentRepository(db_session)
+    comment_service = CommentService(comment_repo, task_repo, project_repo, member_repo)
+    # The assignee's email is assignee_notif@example.com
+    await comment_service.create_comment(
+        CommentCreate(
+            task_id=task.id, content="Please look at this @assignee_notif@example.com"
+        ),
+        owner.id,
+    )
+    notifs = await notification_service.list_notifications(user_id=assignee_id)
+    # Wait, 3 previous notifications + 1 mention = 4
+    assert notifs.total == 4
+    assert notifs.items[0].type == NotificationType.MENTION
+
+    # 6. Trigger ATTACHMENT_ADDED notification via attachment upload
+    from src.repositories.attachment_repository import AttachmentRepository
+    from src.services.attachment_service import AttachmentService
+
+    attachment_repo = AttachmentRepository(db_session)
+    attachment_service = AttachmentService(
+        attachment_repo, task_repo, project_repo, member_repo
+    )
+    await attachment_service.upload_attachment(
+        task_id=task.id,
+        user_id=owner.id,
+        filename="notes.txt",
+        mime_type="text/plain",
+        file_size=12,
+        content=b"hello world!",
+    )
+    notifs = await notification_service.list_notifications(user_id=assignee_id)
+    # 4 previous + 1 attachment_added = 5
+    assert notifs.total == 5
+    assert notifs.items[0].type == NotificationType.ATTACHMENT_ADDED
+
     # GET /notifications
     res = await client.get("/api/v1/notifications", headers=headers)
     assert res.status_code == 200
     data = res.json()["data"]
-    assert data["total"] == 3
+    assert data["total"] == 5
     notif_id = data["items"][0]["id"]
 
     # PATCH /notifications/{id}/read

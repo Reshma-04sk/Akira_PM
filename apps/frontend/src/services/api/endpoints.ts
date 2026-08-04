@@ -12,6 +12,7 @@ export const ENDPOINTS = {
     ME: "/users/me",
     UPDATE_PROFILE: "/users/profile",
     LIST: "/users",
+    CHANGE_PASSWORD: "/users/change-password",
   },
   PROJECTS: {
     LIST: "/projects",
@@ -35,8 +36,9 @@ export const ENDPOINTS = {
     DRAG_DROP: (id: string) => `/tasks/${id}/move`,
   },
   COMMENTS: {
-    LIST: (taskId: string) => `/tasks/${taskId}/comments`,
-    CREATE: (taskId: string) => `/tasks/${taskId}/comments`,
+    LIST: (taskId: string) => `/comments?task_id=${taskId}`,
+    CREATE: "/comments",
+    UPDATE: (id: string) => `/comments/${id}`,
     DELETE: (id: string) => `/comments/${id}`,
   },
   NOTIFICATIONS: {
@@ -54,8 +56,24 @@ export const ENDPOINTS = {
     GLOBAL: "/search",
   },
   ATTACHMENTS: {
-    LIST: (taskId: string) => `/tasks/${taskId}/attachments`,
-    UPLOAD: (taskId: string) => `/tasks/${taskId}/attachments`,
+    LIST: (taskId: string) => `/attachments?task_id=${taskId}`,
+    UPLOAD: "/attachments",
+    DOWNLOAD: (id: string) => `/attachments/${id}`,
     DELETE: (id: string) => `/attachments/${id}`,
+  },
+  WORKSPACES: {
+    LIST: "/workspaces",
+    CREATE: "/workspaces",
+    DETAIL: (id: string) => `/workspaces/${id}`,
+    UPDATE: (id: string) => `/workspaces/${id}`,
+    MEMBERS: (id: string) => `/workspaces/${id}/members`,
+    INVITE: (id: string) => `/workspaces/${id}/members/invite`,
+    UPDATE_MEMBER: (id: string, userId: string) => `/workspaces/${id}/members/${userId}`,
+    REMOVE_MEMBER: (id: string, userId: string) => `/workspaces/${id}/members/${userId}`,
+  },
+  AI: {
+    CONFIG: "/ai/config",
+    HEALTH: "/ai/health",
+    TEST: "/ai/test",
   },
 } as const;

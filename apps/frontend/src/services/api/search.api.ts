@@ -6,6 +6,7 @@ import { ApiResponse } from "./response";
 export interface SearchResult {
   projects: Array<{ id: string; name: string; description: string }>;
   tasks: Array<{ id: string; title: string; status: string; projectId: string }>;
+  users: Array<{ id: string; email: string; full_name: string | null }>;
 }
 
 export const searchApi = {

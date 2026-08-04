@@ -2,10 +2,11 @@ import logging
 from uuid import UUID
 
 from src.core.exceptions import (
-    ForbiddenException,
     NotFoundException,
     ValidationException,
 )
+from src.core.redis import invalidate_dashboard_cache
+from src.models.task import TaskPriority, TaskStatus
 from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.project_repository import ProjectRepository
 from src.repositories.task_repository import TaskRepository
@@ -39,18 +40,23 @@ class TaskService:
         if not project:
             raise NotFoundException("Project not found")
 
-        # Only project owners can create tasks
-        if project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to create tasks for this project"
-            )
+        # Enforce workspace and project task create permissions
+        from src.dependencies.permissions import check_task_create_permission
+
+        await check_task_create_permission(
+            project, user_id, self.task_repository.session
+        )
+
+        stripped_title = data.title.strip()
+        if not stripped_title:
+            raise ValidationException("Title cannot be empty or whitespace only")
 
         # Prevent duplicate active task titles within same project
         if await self.task_repository.exists_by_title_for_project(
-            data.title, data.project_id
+            stripped_title, data.project_id
         ):
             raise ValidationException(
-                f"A task titled '{data.title}' already exists in this project"
+                f"A task titled '{stripped_title}' already exists in this project"
             )
 
         # Verify assignee exists before assignment
@@ -59,8 +65,19 @@ class TaskService:
             if not assignee:
                 raise ValidationException("Assignee user does not exist")
 
+            # Verify project membership for assignee
+            from src.repositories.project_member_repository import (
+                ProjectMemberRepository,
+            )
+
+            pm_repo = ProjectMemberRepository(self.task_repository.session)
+            if assignee.id != project.owner_id and not await pm_repo.exists(
+                project.id, assignee.id
+            ):
+                raise ValidationException("Assignee must be a member of the project")
+
         task_attributes = {
-            "title": data.title.strip(),
+            "title": stripped_title,
             "description": data.description,
             "status": data.status,
             "priority": data.priority,
@@ -107,6 +124,10 @@ class TaskService:
             except Exception as e:
                 logger.error("Failed to create task assignment notification: %s", e)
 
+        await invalidate_dashboard_cache(
+            user_ids=[user_id, task.assignee_id] if task.assignee_id else [user_id],
+            project_ids=[task.project_id],
+        )
         db_task = await self.task_repository.get_by_id(task.id)
         return TaskResponse.model_validate(db_task)
 
@@ -115,10 +136,10 @@ class TaskService:
         if not task:
             raise NotFoundException("Task not found")
 
-        # Only project owner can access tasks
-        project = await self.project_repository.get_by_id(task.project_id)
-        if not project or project.owner_id != user_id:
-            raise ForbiddenException("You do not have permission to access this task")
+        # Enforce task read permissions
+        from src.dependencies.permissions import check_task_read_permission
+
+        await check_task_read_permission(task, user_id, self.task_repository.session)
 
         return TaskResponse.model_validate(task)
 
@@ -128,8 +149,8 @@ class TaskService:
         project_id: UUID,
         user_id: UUID,
         assignee_id: UUID | None = None,
-        status: str | None = None,
-        priority: str | None = None,
+        status: TaskStatus | None = None,
+        priority: TaskPriority | None = None,
         search: str | None = None,
         page: int = 1,
         page_size: int = 20,
@@ -139,10 +160,12 @@ class TaskService:
         if not project:
             raise NotFoundException("Project not found")
 
-        if project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to list tasks for this project"
-            )
+        # Enforce task list permissions
+        from src.dependencies.permissions import check_project_read_permission
+
+        await check_project_read_permission(
+            project, user_id, self.task_repository.session
+        )
 
         items, total = await self.task_repository.list_tasks(
             project_id=project_id,
@@ -168,15 +191,18 @@ class TaskService:
         if not task:
             raise NotFoundException("Task not found")
 
-        project = await self.project_repository.get_by_id(task.project_id)
-        if not project or project.owner_id != user_id:
-            raise ForbiddenException("You do not have permission to update this task")
+        # Enforce task update permissions
+        from src.dependencies.permissions import check_task_write_permission
+
+        await check_task_write_permission(task, user_id, self.task_repository.session)
 
         update_attrs = {}
 
         # If title is updated, check for duplicate title in project
         if data.title is not None:
             new_title = data.title.strip()
+            if not new_title:
+                raise ValidationException("Title cannot be empty or whitespace only")
             if new_title != task.title:
                 if await self.task_repository.exists_by_title_for_project(
                     new_title, task.project_id
@@ -203,6 +229,23 @@ class TaskService:
                 assignee = await self.user_repository.get_by_id(data.assignee_id)
                 if not assignee:
                     raise ValidationException("Assignee user does not exist")
+
+                project = await self.project_repository.get_by_id(task.project_id)
+                if not project:
+                    raise NotFoundException("Project not found")
+
+                # Verify project membership for assignee
+                from src.repositories.project_member_repository import (
+                    ProjectMemberRepository,
+                )
+
+                pm_repo = ProjectMemberRepository(self.task_repository.session)
+                if assignee.id != project.owner_id and not await pm_repo.exists(
+                    project.id, assignee.id
+                ):
+                    raise ValidationException(
+                        "Assignee must be a member of the project"
+                    )
             update_attrs["assignee_id"] = data.assignee_id
 
         # Perform update
@@ -260,6 +303,10 @@ class TaskService:
             except Exception as e:
                 logger.error("Failed to create task update notification: %s", e)
 
+        await invalidate_dashboard_cache(
+            user_ids=list(filter(None, {user_id, task.assignee_id, old_assignee})),
+            project_ids=[task.project_id],
+        )
         db_task = await self.task_repository.get_by_id(task.id)
         return TaskResponse.model_validate(db_task)
 
@@ -268,9 +315,14 @@ class TaskService:
         if not task:
             raise NotFoundException("Task not found")
 
-        project = await self.project_repository.get_by_id(task.project_id)
-        if not project or project.owner_id != user_id:
-            raise ForbiddenException("You do not have permission to delete this task")
+        # Enforce task delete permissions
+        from src.dependencies.permissions import check_task_write_permission
+
+        await check_task_write_permission(task, user_id, self.task_repository.session)
+
+        # Capture project and assignee details before deleting
+        project_id = task.project_id
+        assignee_id = task.assignee_id
 
         await self.task_repository.soft_delete(task)
         logger.info("Task deleted successfully: %s", task.id)
@@ -285,3 +337,7 @@ class TaskService:
                     "details": {"deleted": True},
                 }
             )
+        await invalidate_dashboard_cache(
+            user_ids=[user_id, assignee_id] if assignee_id else [user_id],
+            project_ids=[project_id],
+        )

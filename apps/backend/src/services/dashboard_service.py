@@ -4,6 +4,7 @@ from src.core.exceptions import (
     ForbiddenException,
     NotFoundException,
 )
+from src.core.redis import get_cached_val, set_cached_val
 from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.project_member_repository import ProjectMemberRepository
 from src.repositories.project_repository import ProjectRepository
@@ -44,12 +45,16 @@ class DashboardService:
             raise ForbiddenException("You do not have access to this project")
 
     async def get_overview(self, user_id: UUID) -> DashboardOverviewResponse:
+        cache_key = f"dashboard:overview:{user_id}"
+        cached = await get_cached_val(cache_key)
+        if cached:
+            return DashboardOverviewResponse.model_validate(cached)
         project_ids = await self.project_repository.get_user_involved_project_ids(
             user_id
         )
         stats = await self.task_repository.get_dashboard_stats(project_ids)
 
-        return DashboardOverviewResponse(
+        response = DashboardOverviewResponse(
             projects_count=len(project_ids),
             tasks_count=stats["total_tasks"],
             completed_tasks=stats["completed_tasks"],
@@ -58,6 +63,8 @@ class DashboardService:
             tasks_by_priority=stats["by_priority"],
             tasks_by_status=stats["by_status"],
         )
+        await set_cached_val(cache_key, response.model_dump(), expire_seconds=120)
+        return response
 
     async def get_activity(
         self, user_id: UUID, limit: int = 10
@@ -85,10 +92,15 @@ class DashboardService:
     async def get_project_dashboard(
         self, project_id: UUID, user_id: UUID
     ) -> DashboardProjectOverviewResponse:
+        cache_key = f"dashboard:project:{project_id}"
+        cached = await get_cached_val(cache_key)
+        if cached:
+            return DashboardProjectOverviewResponse.model_validate(cached)
+
         await self._verify_project_membership(project_id, user_id)
         stats = await self.task_repository.get_dashboard_stats([project_id])
 
-        return DashboardProjectOverviewResponse(
+        response = DashboardProjectOverviewResponse(
             tasks_count=stats["total_tasks"],
             completed_tasks=stats["completed_tasks"],
             pending_tasks=stats["pending_tasks"],
@@ -96,3 +108,5 @@ class DashboardService:
             tasks_by_priority=stats["by_priority"],
             tasks_by_status=stats["by_status"],
         )
+        await set_cached_val(cache_key, response.model_dump(), expire_seconds=120)
+        return response

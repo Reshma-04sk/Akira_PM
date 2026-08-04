@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies.auth import get_current_active_user
 from src.dependencies.database import get_db_session
+from src.dependencies.rate_limit import rate_limit
 from src.models.user import User
 from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.refresh_token_repository import RefreshTokenRepository
@@ -27,6 +28,7 @@ def get_auth_service(db: AsyncSession = Depends(get_db_session)) -> AuthService:
     "/register",
     response_model=APIResponse[UserResponse],
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit(limit=5, window_seconds=60))],
 )
 async def register(
     data: UserRegister,
@@ -39,7 +41,11 @@ async def register(
     return APIResponse(data=user_response)
 
 
-@router.post("/login", response_model=APIResponse[TokenResponse])
+@router.post(
+    "/login",
+    response_model=APIResponse[TokenResponse],
+    dependencies=[Depends(rate_limit(limit=5, window_seconds=60))],
+)
 async def login(
     data: UserLogin,
     auth_service: AuthService = Depends(get_auth_service),
@@ -99,7 +105,11 @@ class VerifyEmailRequest(BaseModel):
     token: str
 
 
-@router.post("/forgot-password", response_model=APIResponse[dict[str, str]])
+@router.post(
+    "/forgot-password",
+    response_model=APIResponse[dict[str, str]],
+    dependencies=[Depends(rate_limit(limit=3, window_seconds=60))],
+)
 async def forgot_password(
     data: ForgotPasswordRequest,
 ) -> APIResponse[dict[str, str]]:
@@ -111,7 +121,11 @@ async def forgot_password(
     )
 
 
-@router.post("/reset-password", response_model=APIResponse[dict[str, str]])
+@router.post(
+    "/reset-password",
+    response_model=APIResponse[dict[str, str]],
+    dependencies=[Depends(rate_limit(limit=3, window_seconds=60))],
+)
 async def reset_password(
     data: ResetPasswordRequest,
 ) -> APIResponse[dict[str, str]]:
@@ -121,7 +135,11 @@ async def reset_password(
     return APIResponse(data={"message": "Password updated successfully"})
 
 
-@router.post("/verify-email", response_model=APIResponse[dict[str, str]])
+@router.post(
+    "/verify-email",
+    response_model=APIResponse[dict[str, str]],
+    dependencies=[Depends(rate_limit(limit=3, window_seconds=60))],
+)
 async def verify_email(
     data: VerifyEmailRequest,
 ) -> APIResponse[dict[str, str]]:

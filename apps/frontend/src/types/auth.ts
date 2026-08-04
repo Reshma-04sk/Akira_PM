@@ -28,11 +28,11 @@ export interface APIResponse<T> {
 
 export interface LoginPayload {
   email: string;
-  password: str;
+  password: string;
 }
 
 export interface RegisterPayload {
   email: string;
-  password: str;
+  password: string;
   full_name?: string;
 }

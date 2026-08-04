@@ -6,6 +6,7 @@ from src.core.exceptions import (
     NotFoundException,
     ValidationException,
 )
+from src.core.redis import invalidate_dashboard_cache
 from src.repositories.audit_log_repository import AuditLogRepository
 from src.repositories.project_repository import ProjectRepository
 from src.schemas.project import (
@@ -30,7 +31,21 @@ class ProjectService:
     async def create_project(
         self, data: ProjectCreate, owner_id: UUID
     ) -> ProjectResponse:
-        # Check duplicate name for this owner
+        from src.dependencies.permissions import WorkspaceRole
+        from src.services.workspace_service import get_user_workspace_context
+
+        # Resolve active/default workspace context
+        workspace, ws_role = await get_user_workspace_context(
+            owner_id, self.project_repository.session
+        )
+
+        # Only Owner, Admin, and Manager roles can create projects
+        if ws_role in (WorkspaceRole.DEVELOPER, WorkspaceRole.VIEWER):
+            raise ForbiddenException(
+                "You do not have permission to create projects in this workspace"
+            )
+
+        # Check duplicate name for this workspace/owner
         if await self.project_repository.exists_by_name_for_owner(data.name, owner_id):
             raise ValidationException(
                 f"An active project named '{data.name}' already exists for this user"
@@ -40,6 +55,7 @@ class ProjectService:
             "name": data.name.strip(),
             "description": data.description,
             "owner_id": owner_id,
+            "workspace_id": workspace.id,
             "is_archived": False,
         }
         project = await self.project_repository.create(project_attributes)
@@ -52,10 +68,14 @@ class ProjectService:
                     "action": "project_create",
                     "entity_type": "project",
                     "entity_id": str(project.id),
-                    "details": {"name": project.name},
+                    "details": {
+                        "name": project.name,
+                        "workspace_id": str(workspace.id),
+                    },
                 }
             )
 
+        await invalidate_dashboard_cache(user_ids=[owner_id])
         return ProjectResponse.model_validate(project)
 
     async def get_project(self, project_id: UUID, user_id: UUID) -> ProjectResponse:
@@ -63,11 +83,12 @@ class ProjectService:
         if not project:
             raise NotFoundException("Project not found")
 
-        # Verify access: only the project owner can access the project details
-        if project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to access this project"
-            )
+        # Verify access using RBAC permissions
+        from src.dependencies.permissions import check_project_read_permission
+
+        await check_project_read_permission(
+            project, user_id, self.project_repository.session
+        )
 
         return ProjectResponse.model_validate(project)
 
@@ -75,13 +96,24 @@ class ProjectService:
         self,
         *,
         owner_id: UUID,
+        workspace_id: UUID | None = None,
         search: str | None = None,
         page: int = 1,
         page_size: int = 20,
     ) -> ProjectListResponse:
-        # Get projects list and count for the owner
+        # If no workspace_id was passed, resolve default workspace for owner_id
+        if not workspace_id:
+            from src.services.workspace_service import get_user_workspace_context
+
+            workspace, role = await get_user_workspace_context(
+                owner_id, self.project_repository.session
+            )
+            workspace_id = workspace.id
+
+        # Get projects list and count for the workspace
         items, total = await self.project_repository.list_projects(
             owner_id=owner_id,
+            workspace_id=workspace_id,
             search=search,
             page=page,
             page_size=page_size,
@@ -101,11 +133,12 @@ class ProjectService:
         if not project:
             raise NotFoundException("Project not found")
 
-        # Business Rule: Only the project owner can update
-        if project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to update this project"
-            )
+        # Verify write permissions using RBAC helper
+        from src.dependencies.permissions import check_project_write_permission
+
+        await check_project_write_permission(
+            project, user_id, self.project_repository.session
+        )
 
         update_attrs = {}
         # If name is updated, check for duplicate name
@@ -143,6 +176,7 @@ class ProjectService:
                     }
                 )
 
+        await invalidate_dashboard_cache(user_ids=[user_id], project_ids=[project_id])
         return ProjectResponse.model_validate(project)
 
     async def delete_project(self, project_id: UUID, user_id: UUID) -> None:
@@ -150,11 +184,12 @@ class ProjectService:
         if not project:
             raise NotFoundException("Project not found")
 
-        # Business Rule: Only the project owner can delete
-        if project.owner_id != user_id:
-            raise ForbiddenException(
-                "You do not have permission to delete this project"
-            )
+        # Verify delete permissions using RBAC helper
+        from src.dependencies.permissions import check_project_write_permission
+
+        await check_project_write_permission(
+            project, user_id, self.project_repository.session
+        )
 
         # Perform soft delete
         await self.project_repository.soft_delete(project)
@@ -170,3 +205,4 @@ class ProjectService:
                     "details": {"is_archived": True},
                 }
             )
+        await invalidate_dashboard_cache(user_ids=[user_id], project_ids=[project_id])

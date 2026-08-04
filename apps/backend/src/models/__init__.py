@@ -7,6 +7,8 @@ from src.models.project_member import ProjectMember, ProjectRole
 from src.models.refresh_token import RefreshToken
 from src.models.task import Task, TaskPriority, TaskStatus
 from src.models.user import User, UserRole
+from src.models.workspace import Workspace
+from src.models.workspace_member import WorkspaceMember
 
 __all__ = [
     "User",
@@ -23,4 +25,6 @@ __all__ = [
     "Notification",
     "NotificationType",
     "Attachment",
+    "Workspace",
+    "WorkspaceMember",
 ]

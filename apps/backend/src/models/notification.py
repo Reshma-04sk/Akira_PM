@@ -19,6 +19,8 @@ class NotificationType(enum.StrEnum):
     COMMENT_ADDED = "comment_added"
     PROJECT_INVITE = "project_invite"
     ROLE_CHANGED = "role_changed"
+    ATTACHMENT_ADDED = "attachment_added"
+    MENTION = "mention"
 
 
 def utc_now() -> datetime:
