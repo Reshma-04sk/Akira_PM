@@ -85,10 +85,10 @@ export const tasksApi: TasksApi = {
     config?: RequestConfig
   ): Promise<any> {
     if (typeof projectOrParams === "string") {
-      const res = await apiClient.get<TaskListResponse>(`/tasks?project_id=${projectOrParams}`, config);
+      const res = await apiClient.get<any>(`/tasks?project_id=${projectOrParams}`, config);
       return {
         ...res,
-        data: res.data.items,
+        data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
       };
     }
     const queryParams = new URLSearchParams();
@@ -97,11 +97,24 @@ export const tasksApi: TasksApi = {
         queryParams.append(key, String(val));
       }
     });
-    return apiClient.get<TaskListResponse>(`/tasks?${queryParams.toString()}`, config);
+    const res = await apiClient.get<any>(`/tasks?${queryParams.toString()}`, config);
+    const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+    const total = typeof res.data === "object" && res.data !== null && "total" in res.data 
+      ? res.data.total 
+      : items.length;
+    return {
+      ...res,
+      data: {
+        items,
+        total,
+        page: res.data?.page ?? 1,
+        page_size: res.data?.page_size ?? 20,
+      },
+    };
   },
 
   create(projectId: string, payload: CreateTaskPayload, config?: RequestConfig): Promise<ApiResponse<Task>> {
-    return apiClient.post<Task>(ENDPOINTS.TASKS.CREATE(projectId), payload, config);
+    return apiClient.post<Task>("/tasks", { ...payload, project_id: projectId }, config);
   },
 
   getDetail(id: string, config?: RequestConfig): Promise<ApiResponse<Task>> {

@@ -123,8 +123,8 @@ export const ReportsPage: React.FC = () => {
       t.status,
       t.priority,
       t.assignee ? t.assignee.full_name || t.assignee.email : "Unassigned",
-      t.due_date ? t.due_date.split("T")[0] : "",
-      t.created_at.split("T")[0],
+      t.due_date && typeof t.due_date === "string" ? t.due_date.split("T")[0] : "",
+      t.created_at && typeof t.created_at === "string" ? t.created_at.split("T")[0] : "",
     ]);
 
     const csvContent = [

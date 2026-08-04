@@ -266,6 +266,12 @@ export const TasksListPage: React.FC = () => {
     }
   };
 
+  const invalidateTaskData = () => {
+    queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["reports"] });
+  };
+
   // Mutations - Create Task
   const createMutation = useMutation({
     mutationFn: (payload: any) => tasksApi.create(selectedProjectId, payload),
@@ -307,7 +313,7 @@ export const TasksListPage: React.FC = () => {
       createForm.reset();
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -342,7 +348,7 @@ export const TasksListPage: React.FC = () => {
       setSelectedTask(null);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -365,7 +371,7 @@ export const TasksListPage: React.FC = () => {
       toast.success("Task status updated");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -390,7 +396,7 @@ export const TasksListPage: React.FC = () => {
       setSelectedTask(null);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -415,7 +421,7 @@ export const TasksListPage: React.FC = () => {
       setSelectedTaskIds(new Set());
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -440,7 +446,7 @@ export const TasksListPage: React.FC = () => {
       setSelectedTaskIds(new Set());
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 
@@ -465,7 +471,7 @@ export const TasksListPage: React.FC = () => {
       setSelectedTask(null);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", "list"] });
+      invalidateTaskData();
     },
   });
 

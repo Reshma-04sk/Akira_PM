@@ -59,8 +59,12 @@ export const workspacesApi = {
     return apiClient.patch<Workspace>(ENDPOINTS.WORKSPACES.UPDATE(id), payload, config);
   },
 
-  getMembers(id: string, config?: RequestConfig): Promise<ApiResponse<WorkspaceMember[]>> {
-    return apiClient.get<WorkspaceMember[]>(ENDPOINTS.WORKSPACES.MEMBERS(id), config);
+  async getMembers(id: string, config?: RequestConfig): Promise<ApiResponse<WorkspaceMember[]>> {
+    const res = await apiClient.get<any>(ENDPOINTS.WORKSPACES.MEMBERS(id), config);
+    return {
+      ...res,
+      data: Array.isArray(res.data) ? res.data : (res.data?.items ?? []),
+    };
   },
 
   inviteMember(id: string, payload: InviteMemberPayload, config?: RequestConfig): Promise<ApiResponse<WorkspaceMember>> {
