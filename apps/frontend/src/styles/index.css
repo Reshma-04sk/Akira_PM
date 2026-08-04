@@ -188,6 +188,37 @@ body {
     animation: shimmer 1.6s infinite linear;
     border-radius: 6px;
   }
+
+  .glass-navbar {
+    background: rgba(7, 6, 10, 0.35);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .glass-button {
+    background: transparent;
+    color: #f3efe6;
+    border: 1px solid rgba(243, 239, 230, 0.3);
+    transition: border-color 0.25s, background 0.25s;
+  }
+  
+  .glass-button:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.06);
+  }
+
+  .glass-footer {
+    background: #07060a;
+    border-top: 1px solid rgba(212, 175, 55, 0.12);
+  }
 }
 
 /* Sonner Luxury Glass Toast Overrides */

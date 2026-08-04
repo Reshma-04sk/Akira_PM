@@ -61,7 +61,7 @@ const ReportsPage = lazy(() =>
 );
 
 // Lazy-loaded marketing pages
-const HomePage = lazy(() => import("@/features/marketing/pages/HomePage"));
+const HomePage = lazy(() => import("@/features/marketing/pages/HomePage").then((m) => ({ default: m.HomePage })));
 const FeaturesPage = lazy(() => import("@/features/marketing/pages/FeaturesPage"));
 const PricingPage = lazy(() => import("@/features/marketing/pages/PricingPage"));
 const AboutPage = lazy(() => import("@/features/marketing/pages/AboutPage"));

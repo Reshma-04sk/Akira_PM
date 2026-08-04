@@ -2,7 +2,6 @@ import React, { useState, Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ArrowRight, 
   Plus, 
   Star, 
   Terminal, 
@@ -14,7 +13,6 @@ import {
   Database
 } from "lucide-react";
 const InteractiveBackground = lazy(() => import("../components/InteractiveBackground"));
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/data-display";
 
 const FEATURE_HIGHLIGHTS = [
@@ -47,11 +45,11 @@ const FAQ_ITEMS = [
   },
   {
     question: "Can I self-host the application infrastructure?",
-    answer: "Absolutely. We supply modular Dockerfiles and production compose files (`docker-compose.production.yml`) allowing you to orchestrate resources on AWS, Google Cloud, or bare metal.",
+    answer: "Absolutely. We supply modular Dockerfiles and private cloud composer configurations allowing you to orchestrate resources on AWS, Google Cloud, or bare metal.",
   },
   {
     question: "How do the Reports and Calendar modules work?",
-    answer: "Reports fetch and compile workspace status/workloads client-side with native SVG visual graphs and print-friendly CSS. The Calendar features HTML5 drag listeners to update sprint targets instantly.",
+    answer: "Reports fetch and compile workspace status/workloads client-side with native SVG visual graphs. The Calendar features HTML5 drag listeners to update sprint targets instantly.",
   },
   {
     question: "What support SLA is provided under the Enterprise plan?",
@@ -84,320 +82,299 @@ export const HomePage: React.FC = () => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   return (
-    <div className="relative min-h-screen overflow-hidden flex flex-col bg-background/30">
-      {/* 3D background */}
-      <Suspense fallback={<div className="absolute inset-0 -z-10 bg-background" />}>
+    <div className="relative min-h-screen overflow-hidden flex flex-col bg-[#07060a]">
+      {/* 3D background with scroll parallax */}
+      <Suspense fallback={<div className="absolute inset-0 -z-10 bg-[#07060a]" />}>
         <InteractiveBackground />
       </Suspense>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 sm:pt-32 sm:pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+      <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden">
+        <div className="relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8 select-none pointer-events-none">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-4"
+            className="space-y-6 flex flex-col items-center"
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm animate-pulse">
-              Production-Grade v1.0 Launch
+            {/* Eyebrow Badge */}
+            <span 
+              className="inline-block text-[12px] font-bold tracking-[3px] uppercase text-[#f3dfa0] border border-[#d4af37]/35 px-4 py-1.5 rounded-full"
+              style={{
+                background: "rgba(212, 175, 55, 0.05)",
+              }}
+            >
+              Introducing Akira PM
             </span>
-            <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] text-foreground max-w-4xl mx-auto">
-              Collaborative Project Management{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-                Engineered for Performance
-              </span>
+            
+            {/* Title - Luxury Georgia Font */}
+            <h1 
+              className="font-serif font-normal text-4xl sm:text-7xl tracking-[-0.5px] leading-[1.08] text-center"
+              style={{
+                background: "linear-gradient(180deg, #ffffff, #f3dfa0 120%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Project management,<br />refined.
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed font-medium">
-              Akira-PM aggregates team boards, monthly calendar schedulers, custom SVG performance metrics, and enterprise security in a unified workspace.
+            
+            {/* Paragraph */}
+            <p className="text-[#9a938a] text-[15px] sm:text-base max-w-lg mx-auto leading-relaxed font-medium">
+              Sprints, backlogs, and roadmaps in an interface that respects your focus. Built for teams who move fast without the clutter.
             </p>
           </motion.div>
 
+          {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex items-center justify-center gap-3"
+            className="flex items-center justify-center gap-4 flex-wrap pointer-events-auto"
           >
             <Link to="/register">
-              <Button size="lg" className="h-10 px-5 gap-1.5 font-bold shadow-md hover:scale-[1.01] transition-transform">
-                Get Started Free <ArrowRight className="h-4 w-4" />
-              </Button>
+              <button 
+                type="button"
+                className="px-8 py-3.5 text-[13px] font-bold tracking-[0.5px] rounded-full text-[#1a1206] cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                style={{
+                  background: "linear-gradient(135deg, #f3dfa0, #d4af37 60%, #8a6b1f)",
+                  boxShadow: "0 8px 24px rgba(212, 175, 55, 0.25)"
+                }}
+              >
+                Start free trial
+              </button>
             </Link>
             <Link to="/features">
-              <Button size="lg" variant="outline" className="h-10 px-5 font-bold hover:bg-accent/40">
-                Explore Features
-              </Button>
+              <button 
+                type="button"
+                className="glass-button px-8 py-3.5 text-[13px] font-bold tracking-[0.5px] rounded-full cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Watch the demo
+              </button>
             </Link>
           </motion.div>
+        </div>
 
-          {/* Interactive Hero Visual Mockup with Floating UI widgets */}
+        {/* Scroll Hint */}
+        <div className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2.5 text-[11px] tracking-[3px] uppercase text-[#9a938a] font-bold">
+          Scroll
+          <div 
+            className="w-[1px] h-[34px] overflow-hidden relative"
+            style={{
+              background: "linear-gradient(#d4af37, transparent)",
+            }}
+          >
+            <div 
+              className="absolute left-0 right-0 w-full bg-[#f3dfa0]"
+              style={{
+                height: "15px",
+                animation: "scrollmove 1.8s ease-in-out infinite",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* CSS Keyframe style for Scrollhint inline */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes scrollmove {
+            0% { top: -15px; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 34px; opacity: 0; }
+          }
+        `}} />
+      </section>
+
+      {/* Preview Section - App Screenshot Mockup */}
+      <section className="py-20 px-6 sm:px-8 border-t border-white/5 bg-[#0d0b10] relative z-20">
+        <div className="max-w-5xl mx-auto text-center space-y-12">
+          <div className="space-y-4">
+            <h2 className="font-serif font-normal text-3xl sm:text-5xl text-[#f3dfa0]">A command center for builders</h2>
+            <p className="text-[#9a938a] text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+              Explore a developer-first interface structured around speed, shortcuts, keyboard escape routes, and data validation rules.
+            </p>
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative max-w-5xl mx-auto border border-border/80 bg-card rounded-2xl overflow-hidden shadow-2xl mt-12 bg-card/60 backdrop-blur-md"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative border border-[#d4af37]/20 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.85)] bg-black/60 backdrop-blur-md"
           >
-            <div className="bg-muted/40 px-4 py-2 border-b border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="bg-white/5 px-4 py-2.5 border-b border-white/5 flex items-center justify-between text-xs text-[#9a938a]">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-red-500/80" />
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <span className="w-3 h-3 rounded-full bg-green-500/80" />
-                <span className="ml-2 font-semibold font-mono text-[10px] tracking-wide">akira-pm-shell (v1.0.0)</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                <span className="ml-2 font-mono text-[9px] tracking-wider text-muted-foreground">akira-pm-shell (v2.0.0)</span>
               </div>
-              <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-bold text-[9px] uppercase tracking-wide">Connected</span>
+              <span className="px-2 py-0.5 rounded-full bg-[#d4af37]/10 text-[#d4af37] font-bold text-[9px] uppercase tracking-widest border border-[#d4af37]/20">Active Session</span>
             </div>
             
-            <div className="p-4 sm:p-6 bg-background/40">
+            <div className="p-4 sm:p-6 bg-black/25">
               <img
                 src="/assets/preview_dashboard.webp"
-                alt="Akira Board Preview"
-                width={1000}
-                height={500}
-                className="w-full object-cover rounded-lg shadow-md border border-border/30 max-h-[480px]"
+                alt="Akira Dashboard Workspace Preview"
+                width={1200}
+                height={650}
+                className="w-full object-cover rounded-xl shadow-md border border-white/5 max-h-[500px]"
+                onError={(e) => {
+                  // Fallback to placeholder if not loaded yet
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop";
+                }}
               />
-
-              {/* Floating UI Widget 1 */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/4 -left-4 hidden lg:flex items-center gap-3 p-3 border border-border bg-card/90 backdrop-blur rounded-xl shadow-lg w-52 text-left"
-              >
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
-                  <Activity className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] font-bold text-foreground">Sprint Velocity</p>
-                  <p className="text-[9px] text-muted-foreground">42 completed tasks this cycle</p>
-                </div>
-              </motion.div>
-
-              {/* Floating UI Widget 2 */}
-              <motion.div 
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 4, delay: 1, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-1/4 -right-4 hidden lg:flex items-center gap-3 p-3 border border-border bg-card/90 backdrop-blur rounded-xl shadow-lg w-56 text-left"
-              >
-                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-                  <Shield className="h-4.5 w-4.5" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] font-bold text-foreground">Security Shield</p>
-                  <p className="text-[9px] text-muted-foreground">Active CSP & JWT rotators</p>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Trusted By Section */}
-      <section className="py-12 border-y border-border/40 bg-card/10 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Trusted by engineering teams at</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 mt-6 grayscale opacity-60">
-            <span className="text-sm font-black tracking-tight hover:grayscale-0 hover:opacity-100 transition-all cursor-default text-foreground">VELOCE TECH</span>
-            <span className="text-sm font-black tracking-tight hover:grayscale-0 hover:opacity-100 transition-all cursor-default text-foreground">GRIDSCALE</span>
-            <span className="text-sm font-black tracking-tight hover:grayscale-0 hover:opacity-100 transition-all cursor-default text-foreground">SECUREFLOW</span>
-            <span className="text-sm font-black tracking-tight hover:grayscale-0 hover:opacity-100 transition-all cursor-default text-foreground">DEVCORE</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Akira-PM Section */}
-      <section className="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-primary">Why Akira-PM</h2>
-          <p className="text-2xl sm:text-3xl font-black text-foreground">Designed for high-velocity teams</p>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Akira-PM provides complete, production-ready workspace architectures with absolute data transparency.
+      {/* Core Refined Features Motifs Section */}
+      <section className="py-24 px-6 sm:px-8 max-w-7xl mx-auto grid md:grid-cols-3 gap-8 relative z-20" id="features">
+        <motion.div 
+          whileHover={{ y: -6 }}
+          className="glass-panel rounded-[20px] p-10 flex flex-col gap-6"
+        >
+          {/* Capsule Motif */}
+          <div 
+            className="w-11 h-[88px] rounded-full border border-[#d4af37]/40"
+            style={{
+              background: "linear-gradient(160deg, rgba(255,255,255,0.18), rgba(212,175,55,0.08))"
+            }}
+          />
+          <h3 className="font-serif text-[20px] font-normal text-[#f3dfa0]">Sprints</h3>
+          <p className="text-[#9a938a] text-[14px] leading-relaxed">
+            Plan, track, and close sprints on one board. Every task carries its project, assignee, and priority at a glance.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          <motion.div 
-            whileHover={{ y: -5 }} 
-            className="p-6 border border-border bg-card/45 backdrop-blur rounded-2xl flex flex-col gap-4 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-              <Zap className="h-5 w-5" />
-            </div>
-            <h3 className="text-sm font-bold text-foreground">Extreme Responsiveness</h3>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              With integrated Upstash Redis caching, response aggregation, and 30-second stale time client-side, metrics load instantly.
-            </p>
-          </motion.div>
+        <motion.div 
+          whileHover={{ y: -6 }}
+          className="glass-panel rounded-[20px] p-10 flex flex-col gap-6"
+        >
+          {/* Cylinder Motif */}
+          <div 
+            className="w-[70px] h-[60px] rounded-lg"
+            style={{
+              background: "linear-gradient(135deg, #f3dfa0, #d4af37 55%, #8a6b1f)"
+            }}
+          />
+          <h3 className="font-serif text-[20px] font-normal text-[#f3dfa0]">Roadmaps</h3>
+          <p className="text-[#9a938a] text-[14px] leading-relaxed">
+            See the whole quarter without leaving the app. Timelines built from the same tasks your team already updates.
+          </p>
+        </motion.div>
 
-          <motion.div 
-            whileHover={{ y: -5 }} 
-            className="p-6 border border-border bg-card/45 backdrop-blur rounded-2xl flex flex-col gap-4 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-              <Database className="h-5 w-5" />
-            </div>
-            <h3 className="text-sm font-bold text-foreground">Complete Data Privacy</h3>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Host your workspace database locally or on private clouds. We support fully isolated configurations using Docker compose tools.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ y: -5 }} 
-            className="p-6 border border-border bg-card/45 backdrop-blur rounded-2xl flex flex-col gap-4 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
-              <Shield className="h-5 w-5" />
-            </div>
-            <h3 className="text-sm font-bold text-foreground">Advanced Security Headers</h3>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Equipped with strict Content-Security-Policies, Referrer-Policy blockers, and token validation checks built directly into routes.
-            </p>
-          </motion.div>
-        </div>
+        <motion.div 
+          whileHover={{ y: -6 }}
+          className="glass-panel rounded-[20px] p-10 flex flex-col gap-6"
+        >
+          {/* Torus Motif */}
+          <div 
+            className="w-[70px] h-[70px] rounded-full border-[14px] border-[#d4af37]/35 bg-transparent"
+          />
+          <h3 className="font-serif text-[20px] font-normal text-[#f3dfa0]">Backlog</h3>
+          <p className="text-[#9a938a] text-[14px] leading-relaxed">
+            Nothing gets lost. Every idea has a home until it's ready to move, with full history from creation to done.
+          </p>
+        </motion.div>
       </section>
 
-      {/* Productivity Statistics Widget Section */}
-      <section className="py-16 bg-card/20 border-y border-border/40 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              Performance Metrics
-            </span>
-            <h2 className="text-3xl font-black tracking-tight text-foreground">Keep sprints running on schedule</h2>
-            <p className="text-[11.5px] text-muted-foreground leading-relaxed">
-              Track cycle completion ratios, workload allocations, and overdue limits in real-time. Our custom client-side SVG metrics print directly to PDF for team reports.
-            </p>
-            <div className="grid grid-cols-2 gap-6 pt-4">
-              <div className="space-y-1.5">
-                <span className="text-3xl font-black text-primary">-45%</span>
-                <p className="text-[10px] text-muted-foreground font-bold">Reduction in cycle times</p>
-              </div>
-              <div className="space-y-1.5">
-                <span className="text-3xl font-black text-primary">99.9%</span>
-                <p className="text-[10px] text-muted-foreground font-bold">Workspace uptime guarantee</p>
-              </div>
-            </div>
+      {/* Tech Specifications */}
+      <section className="py-20 px-6 sm:px-8 border-y border-white/5 bg-[#0d0b10] relative z-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
+            <h2 className="text-xs font-bold uppercase tracking-[2px] text-[#d4af37]">Designed for Scale</h2>
+            <p className="text-2xl sm:text-3xl font-serif text-[#f3dfa0]">Agile infrastructure built to perform</p>
           </div>
 
-          {/* Interactive Stats Dashboard Mockup */}
-          <div className="p-5 border border-border bg-card rounded-2xl shadow-xl space-y-4 bg-card/80 backdrop-blur">
-            <div className="flex items-center justify-between border-b border-border/30 pb-3">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4.5 w-4.5 text-primary" />
-                <span className="text-xs font-bold text-foreground">Workspace Metrics</span>
-              </div>
-              <span className="text-[10px] font-mono text-muted-foreground">July 2026 Cycle</span>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-6 border border-white/5 bg-[#07060a] rounded-2xl flex flex-col gap-4">
+              <span className="h-10 w-10 rounded-xl bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center border border-[#d4af37]/20">
+                <Zap className="h-5 w-5" />
+              </span>
+              <h3 className="text-sm font-bold text-foreground">Sub-Millisecond Cache</h3>
+              <p className="text-[11px] text-[#9a938a] leading-relaxed">
+                Aggregated service APIs with local state caching ensure pages load immediately without query blocking.
+              </p>
             </div>
-            
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-muted-foreground">Completed Tasks</span>
-                  <span className="text-foreground">78%</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "78%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1 }}
-                    className="h-full bg-primary" 
-                  />
-                </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-muted-foreground">Sprint Hit Rate</span>
-                  <span className="text-foreground">92%</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "92%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, delay: 0.1 }}
-                    className="h-full bg-emerald-500" 
-                  />
-                </div>
-              </div>
+            <div className="p-6 border border-white/5 bg-[#07060a] rounded-2xl flex flex-col gap-4">
+              <span className="h-10 w-10 rounded-xl bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center border border-[#d4af37]/20">
+                <Database className="h-5 w-5" />
+              </span>
+              <h3 className="text-sm font-bold text-foreground">Supabase Prepared</h3>
+              <p className="text-[11px] text-[#9a938a] leading-relaxed">
+                Connect your workspace schema to remote instances. Enjoy flexible synchronization setups.
+              </p>
+            </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-muted-foreground">Resource Utilization</span>
-                  <span className="text-foreground">64%</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "64%" }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, delay: 0.2 }}
-                    className="h-full bg-yellow-500" 
-                  />
-                </div>
-              </div>
+            <div className="p-6 border border-white/5 bg-[#07060a] rounded-2xl flex flex-col gap-4">
+              <span className="h-10 w-10 rounded-xl bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center border border-[#d4af37]/20">
+                <Shield className="h-5 w-5" />
+              </span>
+              <h3 className="text-sm font-bold text-foreground">Audited RBAC Shield</h3>
+              <p className="text-[11px] text-[#9a938a] leading-relaxed">
+                Maintain audit log logs and member invites securely with dynamic workspace token validation middleware.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Feature Highlights Grid */}
-      <section className="py-16 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-primary">Built for Engineers</h2>
-            <p className="text-2xl font-black text-foreground">Advanced modules right out of the box</p>
-          </div>
+      <section className="py-20 px-6 sm:px-8 max-w-7xl mx-auto relative z-20">
+        <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
+          <h2 className="text-xs font-bold uppercase tracking-[2px] text-[#d4af37]">Built for Engineers</h2>
+          <p className="text-2xl font-serif text-[#f3dfa0]">Advanced modules right out of the box</p>
+        </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURE_HIGHLIGHTS.map((feat, idx) => {
-              const IconComp = feat.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
-                  className="p-5 border border-border bg-card/65 backdrop-blur rounded-2xl flex flex-col gap-3 shadow-sm hover:shadow hover:bg-card transition-all"
-                >
-                  <span className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/15">
-                    <IconComp className="h-4.5 w-4.5" />
-                  </span>
-                  <h3 className="text-xs font-bold text-foreground">{feat.title}</h3>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    {feat.desc}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {FEATURE_HIGHLIGHTS.map((feat, idx) => {
+            const IconComp = feat.icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="p-5 border border-white/5 bg-black/40 backdrop-blur rounded-2xl flex flex-col gap-3 shadow-sm hover:border-[#d4af37]/30 transition-colors"
+              >
+                <span className="h-8 w-8 rounded-lg bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center border border-[#d4af37]/15">
+                  <IconComp className="h-4.5 w-4.5" />
+                </span>
+                <h3 className="text-xs font-bold text-foreground">{feat.title}</h3>
+                <p className="text-[10px] text-[#9a938a] leading-relaxed">
+                  {feat.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-card/25 border-y border-border/30 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-6 sm:px-8 border-y border-white/5 bg-[#0d0b10] relative z-20">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-primary">Testimonials</h2>
-            <p className="text-2xl font-black text-foreground">Validated by Agile developers worldwide</p>
+            <h2 className="text-xs font-bold uppercase tracking-[2px] text-[#d4af37]">Testimonials</h2>
+            <p className="text-2xl font-serif text-[#f3dfa0]">Validated by Agile developers worldwide</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((test, idx) => (
-              <Card key={idx} className="p-5 flex flex-col gap-4 justify-between border-border bg-card/45 backdrop-blur">
+              <Card key={idx} className="p-6 flex flex-col gap-4 justify-between border-white/5 bg-black/40 backdrop-blur">
                 <div className="flex gap-1">
                   {Array.from({ length: test.rating }).map((_, rIdx) => (
                     <Star key={rIdx} className="h-3 w-3 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+                <p className="text-[11px] text-[#9a938a] italic leading-relaxed">
                   "{test.quote}"
                 </p>
-                <div className="flex flex-col gap-0.5 pt-3 border-t border-border/20">
+                <div className="flex flex-col gap-0.5 pt-3 border-t border-white/5">
                   <span className="text-[10px] font-black text-foreground">{test.author}</span>
-                  <span className="text-[9px] text-muted-foreground">{test.role}</span>
+                  <span className="text-[9px] text-[#9a938a]">{test.role}</span>
                 </div>
               </Card>
             ))}
@@ -406,77 +383,81 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* FAQ Accordion */}
-      <section className="py-16 sm:py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-primary">Support & FAQ</h2>
-            <p className="text-2xl font-black text-foreground">Got questions? We've got answers</p>
-          </div>
+      <section className="py-20 px-6 sm:px-8 max-w-3xl mx-auto relative z-20">
+        <div className="text-center mb-16 space-y-2">
+          <h2 className="text-xs font-bold uppercase tracking-[2px] text-[#d4af37]">FAQ</h2>
+          <p className="text-2xl font-serif text-[#f3dfa0]">Frequently Asked Questions</p>
+        </div>
 
-          <div className="space-y-4">
-            {FAQ_ITEMS.map((faq, idx) => {
-              const isOpen = activeFaq === idx;
-              return (
-                <div
-                  key={idx}
-                  className="border border-border bg-card/40 backdrop-blur rounded-xl overflow-hidden shadow-sm transition-all"
-                >
-                  <button
-                    onClick={() => setActiveFaq(isOpen ? null : idx)}
-                    className="w-full flex items-center justify-between p-4 text-left text-xs font-bold text-foreground hover:bg-accent/10 transition-colors"
+        <div className="space-y-4">
+          {FAQ_ITEMS.map((faq, idx) => (
+            <div 
+              key={idx} 
+              className="border border-white/5 bg-black/40 rounded-xl overflow-hidden transition-all duration-300"
+            >
+              <button
+                onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                className="w-full flex items-center justify-between p-5 text-left text-xs font-bold text-foreground hover:bg-white/5 focus-visible:outline-none"
+              >
+                <span>{faq.question}</span>
+                <Plus 
+                  className={`h-4 w-4 text-[#d4af37] transition-transform duration-300 ${
+                    activeFaq === idx ? "rotate-45" : ""
+                  }`} 
+                />
+              </button>
+              
+              <AnimatePresence initial={false}>
+                {activeFaq === idx && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
                   >
-                    <span>{faq.question}</span>
-                    <span className="p-0.5 rounded border border-border bg-background ml-4 shrink-0 transition-transform duration-200">
-                      <Plus className={`h-3 w-3 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`} />
-                    </span>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: "auto" }}
-                        exit={{ height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-card/25"
-                      >
-                        <p className="p-4 pt-0 text-[10px] text-muted-foreground leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="px-5 pb-5 pt-1 text-[11px] text-[#9a938a] leading-relaxed border-t border-white/5 bg-black/20">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Bottom Signup CTA */}
-      <section className="py-16 sm:py-24 bg-gradient-to-b from-transparent to-primary/5 text-center relative border-t border-border/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground leading-[1.1]">
-            Ready to upgrade your project planning?
-          </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed font-medium">
-            Join thousands of developers resolving sprints, tracking workloads, and analyzing stats in modern real-time layouts.
-          </p>
-          <div className="flex items-center justify-center gap-3">
+      {/* Bottom CTA Panel Section */}
+      <section className="cta py-24 px-6 text-center relative z-20" id="cta">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="cta-panel max-w-2xl mx-auto p-12 rounded-3xl glass-panel relative overflow-hidden"
+        >
+          {/* Inner ambient glow background */}
+          <div className="absolute inset-0 bg-radial from-[#d4af37]/5 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 space-y-8 flex flex-col items-center">
+            <h2 className="font-serif font-normal text-3xl sm:text-5xl text-foreground">See your first sprint board in minutes</h2>
+            <p className="text-[#9a938a] text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+              Start free, invite your team, and import your existing backlog. No credit card required.
+            </p>
             <Link to="/register">
-              <Button size="lg" className="h-10 px-6 font-bold shadow-md hover:scale-[1.01] transition-transform">
-                Sign Up for Free
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button size="lg" variant="outline" className="h-10 px-6 font-bold hover:bg-accent/40">
-                Contact Sales
-              </Button>
+              <button 
+                type="button"
+                className="px-8 py-3.5 text-[13px] font-bold tracking-[0.5px] rounded-full text-[#1a1206] cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                style={{
+                  background: "linear-gradient(135deg, #f3dfa0, #d4af37 60%, #8a6b1f)",
+                  boxShadow: "0 8px 24px rgba(212, 175, 55, 0.25)"
+                }}
+              >
+                Start free trial
+              </button>
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>
   );
 };
-export default HomePage;
