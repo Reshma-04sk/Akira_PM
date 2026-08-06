@@ -1,8 +1,12 @@
 import json
 import logging
 import sys
+from contextvars import ContextVar
 
 from src.core.settings import settings
+
+request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
+correlation_id_var: ContextVar[str | None] = ContextVar("correlation_id", default=None)
 
 
 class JSONFormatter(logging.Formatter):
@@ -16,6 +20,13 @@ class JSONFormatter(logging.Formatter):
             "filename": record.filename,
             "lineno": record.lineno,
         }
+        req_id = request_id_var.get()
+        corr_id = correlation_id_var.get()
+        if req_id:
+            log_entry["request_id"] = req_id
+        if corr_id:
+            log_entry["correlation_id"] = corr_id
+
         if record.exc_info:
             log_entry["exception"] = self.formatException(record.exc_info)
         return json.dumps(log_entry)

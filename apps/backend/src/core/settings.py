@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None
 
+    # Sentry & Email Configuration
+    SENTRY_DSN: str | None = None
+    RESEND_API_KEY: str | None = None
+
     # DB
     POSTGRES_USER: str = "saas_admin"
     POSTGRES_PASSWORD: str = "saas_password_dev"

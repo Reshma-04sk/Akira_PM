@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ COPY . .
 RUN uv sync --frozen --no-dev
 
 # --- Runner Stage ---
-FROM python:3.12-slim AS runner
+FROM python:3.13-slim AS runner
 
 WORKDIR /app
 
@@ -44,6 +44,9 @@ COPY . .
 # Run container as a dedicated non-root user
 RUN useradd -u 8888 appuser && chown -R appuser:appuser /app
 USER appuser
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')" || exit 1
 
 EXPOSE 8000
 

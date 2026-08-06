@@ -13,6 +13,7 @@ All responses conform to a unified wrapper structure to simplify parsing in clie
 * **JSON Payload**:
   ```json
   {
+    "success": true,
     "data": {
       "id": "c3abf156-6f97-41b1-b1f2-b6acc68570e8",
       "name": "Project Alpha",
@@ -25,10 +26,19 @@ All responses conform to a unified wrapper structure to simplify parsing in clie
 * **JSON Payload**:
   ```json
   {
-    "items": [...],
-    "total": 45,
-    "page": 1,
-    "page_size": 20
+    "success": true,
+    "data": [
+      {
+        "id": "c3abf156-6f97-41b1-b1f2-b6acc68570e8",
+        "name": "Project Alpha"
+      }
+    ],
+    "pagination": {
+      "total": 45,
+      "page": 1,
+      "size": 20,
+      "pages": 3
+    }
   }
   ```
 

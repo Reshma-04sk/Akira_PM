@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-08-06
+
+### Added
+- **Automated Cloud Deployments**: Created production and staging deployment pipelines via Vercel CLI and Render Deploy Hooks.
+- **Diagnostics and Tracking**: Integrated Sentry client and backend exception capturing.
+- **Request Tracing**: Configured HTTP middlewares to generate and propagate `X-Request-ID` and `X-Correlation-ID` context trace logs.
+- **Observability Metrics**: Added custom liveness, readiness, and Prometheus compatible `/metrics` tracking endpoints.
+- **Resend Email Service**: Built a lightweight email client using `httpx` for password resets and invites.
+- **Quality Gates**: Implemented preventative code quality verification scripts checking for debuggers, conflict markers, console.log statements, and lockfile duplicates.
+- **Repository Engineering**: Added `.gitattributes` normalization, `CODEOWNERS` boundaries, `dependabot.yml` updates, and deployment playbooks.
+
 ## [1.0.0] - 2026-08-03
 
 ### Added

@@ -1,0 +1,10 @@
+# Code Owners for Akira-PM
+
+# Default owners for all files
+* @Reshma-04sk
+
+# Team-specific folders
+/apps/backend/ @Reshma-04sk/backend-team
+/apps/frontend/ @Reshma-04sk/frontend-team
+/docs/ @Reshma-04sk/tech-writers
+.github/ @Reshma-04sk/devops-team

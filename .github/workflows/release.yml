@@ -1,0 +1,101 @@
+name: Enterprise Release Engineering
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag Name (e.g. v1.3.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  draft-release:
+    name: Generate Production Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Release Tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "RELEASE_TAG=${{ inputs.tag_name }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Install dependencies
+        run: |
+          cd apps/frontend
+          pnpm install --frozen-lockfile
+
+      - name: Build Frontend Application
+        env:
+          VITE_API_URL: https://api.akira-pm.com/api/v1
+        run: |
+          cd apps/frontend
+          pnpm build
+
+      - name: Package Frontend Artifact
+        run: |
+          cd apps/frontend/dist
+          zip -r ../../../frontend-dist.zip .
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Package Backend Source
+        run: |
+          cd apps/backend
+          zip -r ../../backend-source.zip src pyproject.toml uv.lock Dockerfile
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Akira-PM ${{ env.RELEASE_TAG }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            frontend-dist.zip
+            backend-source.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Release Summary
+        if: always()
+        run: |
+          echo "### Release Production Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Tag**: ${{ env.RELEASE_TAG }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Artifact (dist)**: Packaged and attached as `frontend-dist.zip`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Source**: Packaged and attached as `backend-source.zip`" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitHub Release status**: Active" >> $GITHUB_STEP_SUMMARY

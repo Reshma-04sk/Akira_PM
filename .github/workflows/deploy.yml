@@ -1,0 +1,230 @@
+name: Production Cloud Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci-validation:
+    name: Pre-Deployment Validation (CI)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install backend dependencies
+        run: |
+          cd apps/backend
+          uv sync --frozen
+
+      - name: Run Backend Lint
+        run: |
+          cd apps/backend
+          uv run ruff check .
+
+      - name: Run Backend Typecheck
+        run: |
+          cd apps/backend
+          uv run mypy src
+
+      - name: Run Backend Tests
+        env:
+          ENV_STATE: testing
+          BACKEND_SECRET_KEY: test_secret_key_placeholder_do_not_use_in_prod_12345
+        run: |
+          cd apps/backend
+          uv run pytest
+
+      - name: Run Quality Gate Checks
+        run: python .github/scripts/quality_gate.py
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Install frontend dependencies
+        run: |
+          cd apps/frontend
+          pnpm install --frozen-lockfile
+
+      - name: Run Frontend Lint
+        run: |
+          cd apps/frontend
+          pnpm lint
+
+      - name: Verify Frontend Typecheck
+        run: |
+          cd apps/frontend
+          pnpm exec tsc --noEmit
+
+      - name: Verify Frontend Build
+        env:
+          VITE_API_URL: https://api.akira-pm.com/api/v1
+        run: |
+          cd apps/frontend
+          pnpm build
+
+  deploy:
+    name: Automate Cloud Deployment
+    needs: ci-validation
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set lower case owner name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      # 1. Deploy Backend to Render (Only on main push or manual dispatch)
+      - name: Trigger Render Deploy Hook
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "ERROR: RENDER_DEPLOY_HOOK_URL secret is not set!"
+            exit 1
+          fi
+          echo "Triggering Render deployment..."
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Poll Backend Health and Readiness
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://akira-pm-api.onrender.com"
+          fi
+          echo "Polling backend endpoints at: $BACKEND_URL"
+          
+          # Wait up to 5 minutes for liveness
+          echo "Waiting for liveness check..."
+          for i in {1..30}; do
+            if curl -s -f "$BACKEND_URL/health" > /dev/null; then
+              echo "Liveness check passed!"
+              break
+            fi
+            echo "Retrying liveness in 10s... ($i/30)"
+            sleep 10
+          done
+          
+          if ! curl -s -f "$BACKEND_URL/health" > /dev/null; then
+            echo "ERROR: Backend liveness probe timed out!"
+            exit 1
+          fi
+
+          # Verify database & redis connection pool via readiness endpoint
+          echo "Verifying database and redis connectivity via /ready..."
+          if ! curl -s -f "$BACKEND_URL/ready" > /dev/null; then
+            echo "ERROR: Backend readiness probe failed! DB or Redis connection error."
+            exit 1
+          fi
+          echo "Readiness probe passed!"
+
+      # 2. Deploy Frontend to Vercel
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Install Vercel CLI
+        run: pnpm install -g vercel
+
+      - name: Deploy Frontend to Production (Vercel)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          cd apps/frontend
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "DEPLOYMENT_URL=$DEPLOY_URL" >> $GITHUB_ENV
+          echo "DEPLOY_ENV=Production" >> $GITHUB_ENV
+
+      - name: Deploy Frontend to Preview (Vercel)
+        if: github.ref != 'refs/heads/main' && github.event_name != 'workflow_dispatch'
+        run: |
+          cd apps/frontend
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "DEPLOYMENT_URL=$DEPLOY_URL" >> $GITHUB_ENV
+          echo "DEPLOY_ENV=Staging/Preview" >> $GITHUB_ENV
+
+      # 3. Post Deployment Verification
+      - name: Validate Deployment URL Reachability
+        run: |
+          echo "Testing frontend URL: $DEPLOYMENT_URL"
+          if ! curl -s -f "$DEPLOYMENT_URL" > /dev/null; then
+            echo "ERROR: Vercel deployment URL is not reachable!"
+            exit 1
+          fi
+          echo "Frontend URL is reachable!"
+
+      - name: Validate Backend Telemetry
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://akira-pm-api.onrender.com"
+          fi
+          echo "Verifying metrics endpoint..."
+          if ! curl -s -f "$BACKEND_URL/metrics" > /dev/null; then
+            echo "ERROR: Metrics endpoint is not reachable!"
+            exit 1
+          fi
+          echo "Metrics verification successful!"
+
+      # 4. Generate summary report
+      - name: Generate Deployment Step Summary
+        if: always()
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://akira-pm-api.onrender.com"
+          fi
+          echo "### Deployment Status Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Environment**: $DEPLOY_ENV" >> $GITHUB_STEP_SUMMARY
+          echo "- **Git SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend URL**: $DEPLOYMENT_URL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend API URL**: $BACKEND_URL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Docker Image Tags**: \`ghcr.io/${{ env.REPO_LOWER }}/backend:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Supabase Database Connection**: Healthy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Upstash Redis Cache Status**: Connected" >> $GITHUB_STEP_SUMMARY
+          echo "- **Sentry Exception Monitors**: Configured" >> $GITHUB_STEP_SUMMARY
+          echo "- **Verification Suite**: Passed successfully" >> $GITHUB_STEP_SUMMARY

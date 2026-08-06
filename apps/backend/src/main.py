@@ -1,23 +1,48 @@
+import logging
+import time
+import uuid
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse, Response
+from sqlalchemy import text
 
 from src.api.v1.router import api_router
+from src.core.database import async_session_maker
 from src.core.exceptions import AppException
 from src.core.handlers import (
     app_exception_handler,
     general_exception_handler,
     validation_exception_handler,
 )
-from src.core.logging import setup_logging
+from src.core.logging import correlation_id_var, request_id_var, setup_logging
 from src.core.redis import redis_cache
 from src.core.settings import settings
 
 # Initialize central logging configuration
 setup_logging()
+logger = logging.getLogger("saas_backend")
+
+# Initialize Sentry SDK
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        traces_sample_rate=1.0,
+        environment=settings.ENV_STATE,
+    )
+    logger.info("Sentry instrumentation initialized successfully.")
+
+# Metrics and tracing state
+START_TIME = time.time()
+METRICS = {
+    "requests_total": 0,
+    "requests_errors": 0,
+}
 
 
 @asynccontextmanager
@@ -55,6 +80,86 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Enable Gzip compression for response payloads above 1000 bytes
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+@app.middleware("http")
+async def request_id_and_metrics_middleware(request: Request, call_next):
+    req_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    corr_id = request.headers.get("X-Correlation-ID") or req_id
+    request_id_var.set(req_id)
+    correlation_id_var.set(corr_id)
+
+    is_infra_route = request.url.path in [
+        "/metrics",
+        "/health",
+        "/ready",
+        "/readiness",
+        "/live",
+        "/liveness",
+    ]
+    if not is_infra_route:
+        METRICS["requests_total"] += 1
+
+    try:
+        response = await call_next(request)
+        if not is_infra_route and response.status_code >= 400:
+            METRICS["requests_errors"] += 1
+        response.headers["X-Request-ID"] = req_id
+        response.headers["X-Correlation-ID"] = corr_id
+        return response
+    except Exception:
+        if not is_infra_route:
+            METRICS["requests_errors"] += 1
+        raise
+
+
+@app.get("/health", status_code=200)
+@app.get("/live", status_code=200)
+@app.get("/liveness", status_code=200)
+async def liveness_check():
+    return {"status": "ok"}
+
+
+@app.get("/ready", status_code=200)
+@app.get("/readiness", status_code=200)
+async def readiness_check():
+    try:
+        async with async_session_maker() as session:
+            await session.execute(text("SELECT 1"))
+    except Exception as e:
+        logger.error("Readiness check failed - Database connectivity issue: %s", str(e))
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unready", "details": {"database": "disconnected"}},
+        )
+
+    if redis_cache.redis_pool:
+        try:
+            async with await redis_cache.get_client() as client:
+                await client.ping()
+        except Exception as e:
+            logger.error("Readiness check failed - Redis connectivity issue: %s", str(e))
+            return JSONResponse(
+                status_code=503,
+                content={"status": "unready", "details": {"redis": "disconnected"}},
+            )
+
+    return {"status": "ready"}
+
+
+@app.get("/metrics")
+async def metrics_endpoint():
+    uptime = time.time() - START_TIME
+    lines = [
+        f"akira_pm_uptime_seconds {uptime}",
+        f"akira_pm_requests_total {METRICS['requests_total']}",
+        f"akira_pm_requests_errors {METRICS['requests_errors']}",
+    ]
+    return Response(content="\n".join(lines) + "\n", media_type="text/plain")
+
 
 # Protect against HTTP Host Header attacks in production
 if settings.ENV_STATE == "production":

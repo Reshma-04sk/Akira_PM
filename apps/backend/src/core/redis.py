@@ -25,6 +25,10 @@ class RedisCache:
             settings.REDIS_URL,
             max_connections=20,
             decode_responses=True,
+            socket_timeout=5.0,
+            socket_connect_timeout=2.0,
+            health_check_interval=30,
+            retry_on_timeout=True,
         )
         logger.info("Redis connection pool initialized successfully.")
 

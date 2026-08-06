@@ -30,7 +30,8 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.185.1",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@sentry/react": "^8.26.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

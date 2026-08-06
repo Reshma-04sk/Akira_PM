@@ -1,0 +1,19 @@
+# Normalize line endings to LF for all text files
+* text=auto eol=lf
+
+# Force specific file types to retain correct endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=lf
+
+# Binary files - do not attempt to normalize line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
