@@ -15,6 +15,10 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   draft-release:
     name: Generate Production Release
@@ -34,15 +38,17 @@ jobs:
             echo "RELEASE_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         run: |

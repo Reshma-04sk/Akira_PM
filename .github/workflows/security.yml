@@ -76,21 +76,23 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
 
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
+
       - name: Run Python Dependency Audit (pip-audit)
         run: |
           cd apps/backend
           uv pip compile pyproject.toml -o requirements.txt
-          uv run pip-audit -r requirements.txt --strict --desc on
+          uvx pip-audit -r requirements.txt --strict --desc on
 
       - name: Run Node Dependency Audit (pnpm audit)
         run: |
@@ -128,15 +130,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
 
       - name: Audit Frontend Licenses
         run: |

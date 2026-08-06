@@ -58,15 +58,17 @@ jobs:
       - name: Run Quality Gate Checks
         run: python .github/scripts/quality_gate.py
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
 
       - name: Install frontend dependencies
         run: |
@@ -153,15 +155,17 @@ jobs:
           echo "Readiness probe passed!"
 
       # 2. Deploy Frontend to Vercel
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.3
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
 
       - name: Install Vercel CLI
         run: pnpm install -g vercel
@@ -172,7 +176,7 @@ jobs:
           cd apps/frontend
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --stdout)
           echo "DEPLOYMENT_URL=$DEPLOY_URL" >> $GITHUB_ENV
           echo "DEPLOY_ENV=Production" >> $GITHUB_ENV
 
@@ -182,7 +186,7 @@ jobs:
           cd apps/frontend
           vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --stdout)
           echo "DEPLOYMENT_URL=$DEPLOY_URL" >> $GITHUB_ENV
           echo "DEPLOY_ENV=Staging/Preview" >> $GITHUB_ENV
 
