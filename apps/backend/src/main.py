@@ -141,7 +141,9 @@ async def readiness_check():
             async with await redis_cache.get_client() as client:
                 await client.ping()
         except Exception as e:
-            logger.error("Readiness check failed - Redis connectivity issue: %s", str(e))
+            logger.error(
+                "Readiness check failed - Redis connectivity issue: %s", str(e)
+            )
             return JSONResponse(
                 status_code=503,
                 content={"status": "unready", "details": {"redis": "disconnected"}},
