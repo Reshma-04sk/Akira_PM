@@ -8,6 +8,7 @@ import { RouteErrorBoundary } from "@/components/common/ErrorBoundary";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
 
 import { ProtectedRoute, PublicRoute } from "@/features/auth/auth-guards";
+import { AIProvider } from "@/context/AIContext";
 
 // Lazy load Auth UI Pages
 const LoginPage = lazy(() =>
@@ -135,7 +136,7 @@ export const router = createBrowserRouter([
   },
   // Protected routes (wrapped with ProtectedRoute)
   {
-    element: <ProtectedRoute><ProtectedLayout /></ProtectedRoute>,
+    element: <ProtectedRoute><AIProvider><ProtectedLayout /></AIProvider></ProtectedRoute>,
     errorElement: <RouteErrorBoundary />,
     children: [
       {
