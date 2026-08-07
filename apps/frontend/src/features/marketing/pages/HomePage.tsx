@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState, Suspense, lazy, memo } from "react";
+import React, { useRef, useEffect, useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence, useReducedMotion } from "framer-motion";
 import { KanbanBoard } from "../components/KanbanBoard";
-const AkiraScene = lazy(() => import("../components/scene/AkiraScene").then((m) => ({ default: m.AkiraScene })));
+import { AkiraScene } from "../components/scene/AkiraScene";
 
 /* ────────────────── helpers ────────────────── */
 
@@ -242,12 +242,13 @@ export const HomePage: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="relative bg-[#07060a] text-[#f3efe6] antialiased"
+      className="relative text-[#f3efe6] antialiased bg-transparent"
     >
+      {/* Fixed bottom background layer to avoid hiding the canvas */}
+      <div className="fixed inset-0 -z-20 bg-[#07060a]" />
+
       {/* ── Persistent R3F Canvas (fixed, behind everything) ── */}
-      <Suspense fallback={<div className="fixed inset-0 -z-10 bg-[#07060a]" />}>
-        <AkiraScene scrollProgress={scrollRef} mouseRef={mouseRef} />
-      </Suspense>
+      <AkiraScene scrollProgress={scrollRef} mouseRef={mouseRef} />
 
       {/* ── CSS Volumetric Fog (Ch1 only) ── */}
       <motion.div

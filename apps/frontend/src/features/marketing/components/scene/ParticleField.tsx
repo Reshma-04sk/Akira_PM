@@ -9,47 +9,75 @@ interface ParticleFieldProps {
 }
 
 export const ParticleField: React.FC<ParticleFieldProps> = ({
-  count = 200,
+  count = 1100,
   scrollProgress,
   mouseRef,
 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
+  // Set up 1000+ orbital particles
   const particleData = useMemo(() => {
     const data = [];
     for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 3.5 + Math.random() * 7;
+      const radius = 2.0 + Math.random() * 8.5; // Orbit radii
+      const angle = Math.random() * Math.PI * 2; // Initial angle
+      const speed = (0.02 + Math.random() * 0.08) * (Math.random() > 0.5 ? 1 : -1); // Orbit speed & direction
+      const baseHeight = (Math.random() - 0.5) * 6.5; // Elevation
+      const size = 0.008 + Math.random() * 0.022; // Tiny elegant stardust size
+      const verticalPhase = Math.random() * Math.PI * 2;
+      const verticalSpeed = 0.1 + Math.random() * 0.3;
+
       data.push({
-        x: r * Math.sin(phi) * Math.cos(theta),
-        y: r * Math.sin(phi) * Math.sin(theta) * 0.5,
-        z: r * Math.cos(phi),
-        speed: 0.1 + Math.random() * 0.3,
-        phase: Math.random() * Math.PI * 2,
-        orbitRadius: 0.02 + Math.random() * 0.08,
-        size: 0.015 + Math.random() * 0.035,
+        radius,
+        angle,
+        speed,
+        baseHeight,
+        size,
+        verticalPhase,
+        verticalSpeed,
       });
     }
     return data;
   }, [count]);
 
-  useFrame(({ clock }) => {
+  useFrame((state) => {
     if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
+    const t = state.clock.getElapsedTime();
     const scroll = scrollProgress.current;
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
 
+    // Split pushes particles outward
+    const splitProgress = Math.min(scroll / 0.4, 1);
+    const xPush = splitProgress * 3.0;
+
     for (let i = 0; i < count; i++) {
       const p = particleData[i];
-      const x = p.x + Math.sin(t * p.speed + p.phase) * p.orbitRadius + mx * 0.3;
-      const y = p.y + Math.cos(t * p.speed + p.phase) * p.orbitRadius * 0.5 - scroll * 3 + my * 0.2;
-      const z = p.z + Math.sin(t * p.speed * 0.5 + p.phase) * p.orbitRadius;
+      
+      // Calculate current orbital angle
+      const currentAngle = p.angle + t * p.speed;
+      
+      // Add slight mouse influence to position
+      let x = Math.cos(currentAngle) * p.radius + mx * 0.4;
+      const z = Math.sin(currentAngle) * p.radius + my * 0.4;
+      let y = p.baseHeight + Math.sin(t * p.verticalSpeed + p.verticalPhase) * 0.18 - scroll * 4.0;
+
+      // Apply horizontal split push based on which side they are on
+      if (x > 0) x += xPush;
+      else x -= xPush;
+
+      // Reposition / wrap-around vertically if they scroll too far down
+      if (y < -7.0) {
+        y += 14.0; // Wrap back to the top
+      }
 
       dummy.position.set(x, y, z);
-      dummy.scale.setScalar(p.size * (0.5 + 0.5 * Math.sin(t * p.speed + p.phase)));
+      
+      // Gentle twinkle effect
+      const twinkle = 0.4 + 0.6 * Math.sin(t * 3.0 + p.verticalPhase);
+      dummy.scale.setScalar(p.size * twinkle);
+      
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -60,11 +88,11 @@ export const ParticleField: React.FC<ParticleFieldProps> = ({
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
       <octahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
-        color="#d4af37"
-        metalness={0.8}
-        roughness={0.2}
-        emissive="#8a6b1f"
-        emissiveIntensity={0.4}
+        color="#ffe9a0"
+        metalness={0.9}
+        roughness={0.1}
+        emissive="#d4af37"
+        emissiveIntensity={1.0}
       />
     </instancedMesh>
   );

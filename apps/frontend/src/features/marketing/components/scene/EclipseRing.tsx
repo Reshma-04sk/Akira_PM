@@ -11,120 +11,173 @@ export const EclipseRing: React.FC<EclipseRingProps> = ({
   scrollProgress,
   mouseRef,
 }) => {
-  const outerRef = useRef<THREE.Mesh>(null);
-  const innerRef = useRef<THREE.Mesh>(null);
-  const haloRef = useRef<THREE.Mesh>(null);
-  const orbitGroup = useRef<THREE.Group>(null);
+  const leftGroupRef = useRef<THREE.Group>(null);
+  const rightGroupRef = useRef<THREE.Group>(null);
+  const leftInnerRef = useRef<THREE.Mesh>(null);
+  const rightInnerRef = useRef<THREE.Mesh>(null);
+  const leftOuterRef = useRef<THREE.Mesh>(null);
+  const rightOuterRef = useRef<THREE.Mesh>(null);
+  const leftHaloRef = useRef<THREE.Mesh>(null);
+  const rightHaloRef = useRef<THREE.Mesh>(null);
 
-  const orbitShards = Array.from({ length: 8 }, (_, i) => ({
-    angle: (i / 8) * Math.PI * 2,
-    radius: 2.6 + (i % 3) * 0.15,
-    speed: 0.08 + (i % 4) * 0.02,
+  // Orbiting shards
+  const orbitShards = Array.from({ length: 12 }, (_, i) => ({
+    angle: (i / 12) * Math.PI * 2,
+    radius: 2.8 + (i % 3) * 0.2,
+    speed: 0.05 + (i % 4) * 0.015,
+    phase: Math.random() * Math.PI * 2,
   }));
+  const shardRefs = useRef<(THREE.Mesh | null)[]>([]);
 
-  const orbitRefs = useRef<(THREE.Mesh | null)[]>([]);
-
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
     const scroll = scrollProgress.current;
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
 
-    // Eclipse scale driven by scroll: tiny → full → huge at CTA
-    const chapterProgress = Math.min(scroll / 0.15, 1);
-    const ctaProgress = Math.max((scroll - 0.93) / 0.07, 0);
-    const scale = 0.08 + chapterProgress * 1.15 + ctaProgress * 0.3;
+    // Split translation offset based on scroll
+    // Splits wide open (from x=0 to x=6.0) as scroll goes 0 -> 0.4
+    const splitProgress = Math.min(scroll / 0.4, 1);
+    const xOffset = splitProgress * 5.0;
 
-    if (outerRef.current) {
-      outerRef.current.scale.setScalar(scale);
-      outerRef.current.rotation.z = t * 0.06 + mx * 0.15;
-      outerRef.current.rotation.x = t * 0.03 + my * 0.1;
-    }
-    if (innerRef.current) {
-      innerRef.current.scale.setScalar(scale * 0.85);
-      innerRef.current.rotation.z = -t * 0.09 + mx * 0.12;
-      innerRef.current.rotation.x = t * 0.04;
-    }
-    if (haloRef.current) {
-      const haloOpacity = chapterProgress * 0.18 + ctaProgress * 0.3;
-      (haloRef.current.material as THREE.MeshStandardMaterial).opacity = haloOpacity;
-      haloRef.current.scale.setScalar(scale * 1.5);
+    // Scale logic: Starts at 1.15 in hero, grows slightly or bobs
+    const baseScale = 1.15 + Math.sin(t * 0.5) * 0.02;
+    // Shrinks slightly when fully split, then scales up at final CTA (scroll > 0.9)
+    const ctaProgress = Math.max((scroll - 0.9) / 0.1, 0);
+    const currentScale = baseScale * (1 - splitProgress * 0.15 + ctaProgress * 0.45);
+
+    // Mouse parallax rotation influence
+    const rotX = my * 0.08;
+    const rotY = mx * 0.08;
+
+    // Apply translations and rotations to the two halves
+    if (leftGroupRef.current) {
+      leftGroupRef.current.position.x = -xOffset;
+      leftGroupRef.current.scale.setScalar(currentScale);
+      leftGroupRef.current.rotation.y = t * 0.05 + rotY;
+      leftGroupRef.current.rotation.x = rotX;
+      leftGroupRef.current.rotation.z = t * 0.02;
     }
 
-    // Orbit shards
-    if (orbitGroup.current) {
-      orbitGroup.current.rotation.z = t * 0.05;
-      orbitGroup.current.rotation.y = t * 0.03 + mx * 0.2;
-      orbitGroup.current.rotation.x = my * 0.15;
-      orbitGroup.current.scale.setScalar(scale);
+    if (rightGroupRef.current) {
+      rightGroupRef.current.position.x = xOffset;
+      rightGroupRef.current.scale.setScalar(currentScale);
+      rightGroupRef.current.rotation.y = -t * 0.05 - rotY;
+      rightGroupRef.current.rotation.x = -rotX;
+      rightGroupRef.current.rotation.z = -t * 0.02;
     }
-    orbitRefs.current.forEach((mesh, i) => {
+
+    // Auto-reposition orbit shards if they drift out of camera range
+    shardRefs.current.forEach((mesh, i) => {
       if (!mesh) return;
       const shard = orbitShards[i];
       const a = shard.angle + t * shard.speed;
-      mesh.position.x = Math.cos(a) * shard.radius;
-      mesh.position.y = Math.sin(a) * shard.radius * 0.4;
-      mesh.rotation.z = t * 0.3 + i;
+      
+      // Calculate basic orbit position
+      let x = Math.cos(a) * shard.radius;
+      const y = Math.sin(a) * shard.radius * 0.5 + Math.sin(t + shard.phase) * 0.1;
+      const z = Math.sin(a) * shard.radius * 0.3;
+
+      // If split is active, push shards outwards
+      x += (x > 0 ? 1 : -1) * xOffset * 0.5;
+
+      mesh.position.set(x, y, z);
+      mesh.rotation.y = t * 0.4 + i;
+      mesh.rotation.x = t * 0.2;
     });
   });
 
+  const goldMaterial = (
+    <meshStandardMaterial
+      color="#d4af37"
+      metalness={1.0}
+      roughness={0.15}
+      emissive="#523d0a"
+      emissiveIntensity={0.5}
+    />
+  );
+
+  const goldThinnerMaterial = (
+    <meshStandardMaterial
+      color="#ffe9a0"
+      metalness={1.0}
+      roughness={0.08}
+      emissive="#ffe9a0"
+      emissiveIntensity={0.7}
+    />
+  );
+
+  const haloMaterial = (
+    <meshBasicMaterial
+      color="#d4af37"
+      transparent
+      opacity={0.25}
+      side={THREE.DoubleSide}
+    />
+  );
+
   return (
-    <>
-      {/* Outer eclipse ring */}
-      <mesh ref={outerRef}>
-        <torusGeometry args={[2.4, 0.06, 16, 128]} />
-        <meshStandardMaterial
-          color="#d4af37"
-          metalness={1.0}
-          roughness={0.18}
-          emissive="#8a6b1f"
-          emissiveIntensity={0.6}
-        />
-      </mesh>
+    <group>
+      {/* LEFT HALF OF THE ECLIPSE RING */}
+      <group ref={leftGroupRef}>
+        {/* Outer Ring */}
+        <mesh ref={leftOuterRef} rotation-z={Math.PI / 2}>
+          <torusGeometry args={[2.4, 0.07, 16, 64, Math.PI]} />
+          {goldMaterial}
+        </mesh>
 
-      {/* Inner thinner ring */}
-      <mesh ref={innerRef}>
-        <torusGeometry args={[2.4, 0.02, 8, 128]} />
-        <meshStandardMaterial
-          color="#f3dfa0"
-          metalness={1.0}
-          roughness={0.1}
-          emissive="#f3dfa0"
-          emissiveIntensity={0.8}
-        />
-      </mesh>
+        {/* Inner Ring */}
+        <mesh ref={leftInnerRef} rotation-z={Math.PI / 2}>
+          <torusGeometry args={[2.4, 0.025, 8, 64, Math.PI]} />
+          {goldThinnerMaterial}
+        </mesh>
 
-      {/* Soft glow halo disk */}
-      <mesh ref={haloRef} rotation-x={-Math.PI / 2}>
-        <ringGeometry args={[2.0, 3.0, 64]} />
-        <meshStandardMaterial
-          color="#d4af37"
-          transparent
-          opacity={0}
-          emissive="#d4af37"
-          emissiveIntensity={1.2}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* Orbiting shard group */}
-      <group ref={orbitGroup}>
-        {orbitShards.map((_, i) => (
-          <mesh
-            key={i}
-            ref={(el) => { orbitRefs.current[i] = el; }}
-          >
-            <octahedronGeometry args={[0.045 + (i % 3) * 0.02, 0]} />
-            <meshStandardMaterial
-              color="#f3dfa0"
-              metalness={1}
-              roughness={0.1}
-              emissive="#d4af37"
-              emissiveIntensity={0.5}
-            />
-          </mesh>
-        ))}
+        {/* Halo Glow */}
+        <mesh ref={leftHaloRef} rotation-x={-Math.PI / 2} rotation-z={Math.PI / 2}>
+          <ringGeometry args={[2.0, 3.2, 32, 1, 0, Math.PI]} />
+          {haloMaterial}
+        </mesh>
       </group>
-    </>
+
+      {/* RIGHT HALF OF THE ECLIPSE RING */}
+      <group ref={rightGroupRef}>
+        {/* Outer Ring */}
+        <mesh ref={rightOuterRef} rotation-z={-Math.PI / 2}>
+          <torusGeometry args={[2.4, 0.07, 16, 64, Math.PI]} />
+          {goldMaterial}
+        </mesh>
+
+        {/* Inner Ring */}
+        <mesh ref={rightInnerRef} rotation-z={-Math.PI / 2}>
+          <torusGeometry args={[2.4, 0.025, 8, 64, Math.PI]} />
+          {goldThinnerMaterial}
+        </mesh>
+
+        {/* Halo Glow */}
+        <mesh ref={rightHaloRef} rotation-x={-Math.PI / 2} rotation-z={-Math.PI / 2}>
+          <ringGeometry args={[2.0, 3.2, 32, 1, 0, Math.PI]} />
+          {haloMaterial}
+        </mesh>
+      </group>
+
+      {/* Orbiting Shards */}
+      {orbitShards.map((_, i) => (
+        <mesh
+          key={i}
+          ref={(el) => {
+            shardRefs.current[i] = el;
+          }}
+        >
+          <octahedronGeometry args={[0.06 + (i % 3) * 0.025, 0]} />
+          <meshStandardMaterial
+            color="#ffe9a0"
+            metalness={1.0}
+            roughness={0.1}
+            emissive="#d4af37"
+            emissiveIntensity={0.6}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 };
