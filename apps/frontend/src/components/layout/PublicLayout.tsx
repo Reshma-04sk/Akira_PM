@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import { AkiraLogo } from "../../features/marketing/components/experience/ui/AkiraLogo";
 
 export const PublicLayout: React.FC = () => {
   return (
@@ -14,15 +15,7 @@ export const PublicLayout: React.FC = () => {
               className="flex items-center gap-2.5 hover:opacity-90 transition-opacity focus-visible:outline-none"
             >
               {/* Brand Mark with Gold Gradient */}
-              <div 
-                className="w-[30px] h-[30px] rounded-lg flex items-center justify-center font-sans font-black text-sm text-[#1a1206]"
-                style={{
-                  background: "linear-gradient(135deg, #f3dfa0, #d4af37 60%, #8a6b1f)",
-                  boxShadow: "0 4px 14px rgba(212, 175, 55, 0.35)",
-                }}
-              >
-                A
-              </div>
+              <AkiraLogo size={32} />
               <span className="font-serif text-[19px] tracking-[1.5px] text-[#f3dfa0]">
                 Akira PM
               </span>
