@@ -4,10 +4,6 @@ import { Fog } from "../world/Fog";
 import { Environment } from "../world/Environment";
 import { Lighting } from "../world/Lighting";
 import { CameraRig } from "../world/CameraRig";
-import { Eclipse } from "../world/Eclipse";
-import { Monoliths } from "../Experience/Monoliths";
-import { AIEnergyCore } from "../Experience/AIEnergyCore";
-import { Particles } from "../effects/Particles";
 
 interface AkiraCanvasProps {
   scrollProgress: React.MutableRefObject<number>;
@@ -36,15 +32,18 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
         <Environment />
         <Lighting scrollProgress={scrollProgress} mouseRef={mouseRef} />
         
-        {/* Experience Objects */}
-        <Eclipse scrollProgress={scrollProgress} />
-        <Monoliths scrollProgress={scrollProgress} mouseRef={mouseRef} />
-        <AIEnergyCore scrollProgress={scrollProgress} />
+        {/* Simple golden reference sphere for Phase 1 testing */}
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[1.2, 32, 32]} />
+          <meshStandardMaterial
+            color="#d4af37"
+            metalness={1.0}
+            roughness={0.15}
+            emissive="#3a2b06"
+            emissiveIntensity={0.2}
+          />
+        </mesh>
         
-        {/* Instanced Effects */}
-        <Particles scrollProgress={scrollProgress} mouseRef={mouseRef} count={1200} />
-        
-        {/* Active camera rig */}
         <CameraRig scrollProgress={scrollProgress} mouseRef={mouseRef} />
       </Canvas>
     </div>
