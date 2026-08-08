@@ -20,7 +20,7 @@ export const HomePage: React.FC = () => {
       <AkiraCanvas scrollProgress={scrollRef} mouseRef={mouseRef} />
 
       {/* 3. HTML Hero Overlay (centered vertically to align with background eclipse centerpiece) */}
-      <div className="relative z-10 bg-transparent h-screen w-full flex flex-col items-center justify-center">
+      <div className="relative z-10 bg-transparent h-[calc(100vh-5rem)] w-full flex flex-col items-center justify-center">
         <IntroSequence />
       </div>
 
