@@ -19,8 +19,8 @@ export const HomePage: React.FC = () => {
       {/* 2. Persistent R3F Canvas Layer (renders gold eclipse + 300 stardust particles) */}
       <AkiraCanvas scrollProgress={scrollRef} mouseRef={mouseRef} />
 
-      {/* 3. HTML Hero Overlay (sits directly in front of the 3D eclipse centerpiece) */}
-      <div className="relative z-10 bg-transparent flex flex-col items-center">
+      {/* 3. HTML Hero Overlay (centered vertically to align with background eclipse centerpiece) */}
+      <div className="relative z-10 bg-transparent h-screen w-full flex flex-col items-center justify-center">
         <IntroSequence />
       </div>
 
