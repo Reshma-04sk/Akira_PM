@@ -8,119 +8,89 @@ export interface Keyframe {
   lightIntensity: number;
   lightColor: string;
   splitOffset: number; // 0 (closed) to 1 (wide split)
-  corePulse: number; // intensity multiplier for AI Core
+  corePulse: number;
 }
 
 export const TIMELINE_KEYFRAMES: Keyframe[] = [
   {
-    scroll: 0.0, // Ch 1: Arrival (Start of Hero)
-    cameraPos: [0, 0, 9.0],
+    scroll: 0.0, // Hero state: Eclipse centered, closed, calm
+    cameraPos: [0, 0, 8.5],
     cameraLookAt: [0, 0, 0],
     cameraFov: 35,
-    lightIntensity: 0.15,
-    lightColor: "#ffe2a3",
+    lightIntensity: 1.5,
+    lightColor: "#ffe9a0",
     splitOffset: 0.0,
     corePulse: 0.2,
   },
   {
-    scroll: 0.2, // Ch 1: Arrival End
-    cameraPos: [0, 0, 8.2],
+    scroll: 0.15, // Hero still dominant, camera about to push
+    cameraPos: [0, 0, 8.5],
     cameraLookAt: [0, 0, 0],
     cameraFov: 35,
-    lightIntensity: 0.3,
-    lightColor: "#ffe2a3",
+    lightIntensity: 1.6,
+    lightColor: "#ffe9a0",
+    splitOffset: 0.0,
+    corePulse: 0.2,
+  },
+  {
+    scroll: 0.30, // Camera pushes forward, entering Eclipse
+    cameraPos: [0, 0, 6.8],
+    cameraLookAt: [0, 0, 0],
+    cameraFov: 36,
+    lightIntensity: 2.2,
+    lightColor: "#ffe9a0",
     splitOffset: 0.0,
     corePulse: 0.4,
   },
   {
-    scroll: 0.3, // Ch 2: Intelligence (AI Core)
-    cameraPos: [0, 0, 7.5],
-    cameraLookAt: [0, 0, 0],
+    scroll: 0.45, // Eclipse separations horizontally, camera moves slightly lateral
+    cameraPos: [-0.6, 0.15, 6.8],
+    cameraLookAt: [0, 0.15, 0],
     cameraFov: 38,
-    lightIntensity: 2.8,
-    lightColor: "#ffbf3f",
-    splitOffset: 0.0,
-    corePulse: 1.5,
-  },
-  {
-    scroll: 0.4, // Ch 3: Creation (Workspace Assembly)
-    cameraPos: [0, -0.8, 7.0],
-    cameraLookAt: [0, -0.8, 0],
-    cameraFov: 42,
-    lightIntensity: 2.2,
+    lightIntensity: 2.6,
     lightColor: "#ffffff",
-    splitOffset: 0.5,
-    corePulse: 0.8,
-  },
-  {
-    scroll: 0.55, // Ch 4: Execution (Kanban)
-    cameraPos: [-2.5, 0, 5.8],
-    cameraLookAt: [-2.5, 0, 0],
-    cameraFov: 48,
-    lightIntensity: 2.5,
-    lightColor: "#ffffff",
-    splitOffset: 1.0,
-    corePulse: 0.5,
-  },
-  {
-    scroll: 0.65, // Ch 5: Insight (Analytics)
-    cameraPos: [2.5, -1.0, 5.8],
-    cameraLookAt: [2.5, -1.0, 0],
-    cameraFov: 48,
-    lightIntensity: 2.0,
-    lightColor: "#ffcf7a",
     splitOffset: 1.0,
     corePulse: 0.6,
   },
   {
-    scroll: 0.75, // Ch 6: Collaboration (Twinkle Node Field)
-    cameraPos: [0, 2.0, 6.2],
-    cameraLookAt: [0, 0, 0],
-    cameraFov: 42,
-    lightIntensity: 2.2,
-    lightColor: "#ffe2a3",
-    splitOffset: 0.0, // Re-joins for Signature Moment collapse!
-    corePulse: 2.2,
+    scroll: 0.60, // Workspace shell materializes
+    cameraPos: [0.2, 0.15, 6.8],
+    cameraLookAt: [0, 0.15, 0],
+    cameraFov: 38,
+    lightIntensity: 2.8,
+    lightColor: "#ffffff",
+    splitOffset: 1.0,
+    corePulse: 0.6,
   },
   {
-    scroll: 0.85, // Ch 7: Trust (Security vault)
-    cameraPos: [-3.0, 0.5, 7.0],
-    cameraLookAt: [0, 0, 0],
-    cameraFov: 45,
-    lightIntensity: 1.8,
-    lightColor: "#3b82f6", // Security Blue rim
-    splitOffset: 0.4,
+    scroll: 0.75, // Kanban columns assemble, headers fade in
+    cameraPos: [0.4, 0.15, 6.8],
+    cameraLookAt: [0.1, 0.15, 0],
+    cameraFov: 38,
+    lightIntensity: 3.0,
+    lightColor: "#ffffff",
+    splitOffset: 1.0,
     corePulse: 0.7,
   },
   {
-    scroll: 0.9, // Ch 8: Scale (Enterprise Node Graph)
-    cameraPos: [3.0, 1.2, 7.0],
-    cameraLookAt: [0, 0, 0],
-    cameraFov: 40,
-    lightIntensity: 2.4,
-    lightColor: "#ffe2a3",
-    splitOffset: 0.5,
-    corePulse: 1.0,
-  },
-  {
-    scroll: 0.95, // Ch 9: Investment (Pricing Plans)
-    cameraPos: [0, -2.6, 6.5],
-    cameraLookAt: [0, 0, 0],
-    cameraFov: 42,
-    lightIntensity: 2.6,
-    lightColor: "#ffb03a",
-    splitOffset: 0.3,
+    scroll: 0.90, // Cards animate, AI typing cursor fires
+    cameraPos: [0.0, 0.15, 6.8],
+    cameraLookAt: [0.0, 0.15, 0],
+    cameraFov: 36,
+    lightIntensity: 3.0,
+    lightColor: "#ffe9a0",
+    splitOffset: 1.0,
     corePulse: 0.8,
   },
   {
-    scroll: 1.0, // Ch 10: Beginning (CTA)
-    cameraPos: [0, 0, 8.5],
-    cameraLookAt: [0, 0, 0],
+    scroll: 1.0, // Stable interactive workspace state
+    cameraPos: [0.0, 0.15, 6.8],
+    cameraLookAt: [0.0, 0.15, 0],
     cameraFov: 35,
-    lightIntensity: 3.2,
+    lightIntensity: 3.0,
     lightColor: "#ffe9a0",
-    splitOffset: 0.0, // Re-joined for CTA halo reveal
-    corePulse: 1.8,
+    splitOffset: 1.0,
+    corePulse: 0.8,
   },
 ];
 

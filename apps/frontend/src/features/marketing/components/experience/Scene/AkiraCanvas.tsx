@@ -5,6 +5,7 @@ import { Fog } from "../world/Fog";
 import { Lighting } from "../world/Lighting";
 import { CameraRig } from "../world/CameraRig";
 import { Eclipse } from "../world/Eclipse";
+import { FloatingObjects } from "../world/FloatingObjects";
 import { Particles } from "../effects/Particles";
 
 interface AkiraCanvasProps {
@@ -91,6 +92,9 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
         
         {/* 250 Premium calm orbital particles */}
         <Particles scrollProgress={scrollProgress} mouseRef={mouseRef} />
+        
+        {/* Floating crystalline/metal shapes that scale/fade along with workspace */}
+        <FloatingObjects mouseRef={mouseRef} scrollProgress={scrollProgress} />
         
         <CameraRig scrollProgress={scrollProgress} mouseRef={mouseRef} />
       </Canvas>
