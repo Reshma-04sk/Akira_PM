@@ -1,116 +1,100 @@
 import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { getTimelineState } from "../../../timeline/ScrollTimeline";
 
 interface EclipseProps {
   scrollProgress: React.MutableRefObject<number>;
 }
 
-export const Eclipse: React.FC<EclipseProps> = ({ scrollProgress }) => {
-  const leftGroupRef = useRef<THREE.Group>(null);
-  const rightGroupRef = useRef<THREE.Group>(null);
-  const outerLeftRef = useRef<THREE.Mesh>(null);
-  const outerRightRef = useRef<THREE.Mesh>(null);
-  const innerLeftRef = useRef<THREE.Mesh>(null);
-  const innerRightRef = useRef<THREE.Mesh>(null);
-  const haloLeftRef = useRef<THREE.Mesh>(null);
-  const rightHaloRef = useRef<THREE.Mesh>(null);
+export const Eclipse: React.FC<EclipseProps> = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  const outerBezelRef = useRef<THREE.Mesh>(null);
+  const outerBevelRef = useRef<THREE.Mesh>(null);
+  const innerBevelRef = useRef<THREE.Mesh>(null);
+  const champagneCoreRef = useRef<THREE.Mesh>(null);
+  const haloRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    const scroll = scrollProgress.current;
 
-    // Get timeline properties
-    const timeline = getTimelineState(scroll);
-
-    // splitOffset ranges from 0 to 1
-    // We map it to translation X offsets: 0 -> 5.0
-    const xOffset = timeline.splitOffset * 5.0;
-
-    // Scale logic
-    const baseScale = 1.15 + Math.sin(t * 0.4) * 0.015;
-    // Shrinks slightly when fully split, grows during final CTA
-    const ctaProgress = Math.max((scroll - 0.9) / 0.1, 0);
-    const scale = baseScale * (1 - timeline.splitOffset * 0.15 + ctaProgress * 0.4);
-
-    if (leftGroupRef.current) {
-      leftGroupRef.current.position.x = -xOffset;
-      leftGroupRef.current.scale.setScalar(scale);
-      leftGroupRef.current.rotation.y = t * 0.04;
-      leftGroupRef.current.rotation.z = t * 0.02;
-    }
-
-    if (rightGroupRef.current) {
-      rightGroupRef.current.position.x = xOffset;
-      rightGroupRef.current.scale.setScalar(scale);
-      rightGroupRef.current.rotation.y = -t * 0.04;
-      rightGroupRef.current.rotation.z = -t * 0.02;
+    // 1. Slow, premium breathing animation (range: 1.00 to 1.02, frequency: 8 seconds)
+    // Formula: center = 1.01, amplitude = 0.01
+    const breathingFactor = 1.01 + 0.01 * Math.sin(t * (Math.PI * 2 / 8.0));
+    
+    if (groupRef.current) {
+      groupRef.current.scale.setScalar(breathingFactor);
+      
+      // 2. Very slow, subtle luxury watch-like rotation
+      groupRef.current.rotation.y = t * 0.018;
+      groupRef.current.rotation.z = t * 0.008;
+      groupRef.current.rotation.x = Math.sin(t * 0.25) * 0.02;
     }
   });
 
-  const goldMat = (
+  // Brushed gold material configuration (metallic surface, subtle reflections)
+  const brushedGoldMaterial = (
     <meshStandardMaterial
       color="#d4af37"
       metalness={1.0}
-      roughness={0.15}
-      emissive="#403008"
-      emissiveIntensity={0.5}
+      roughness={0.24}
+      emissive="#2d2105"
+      emissiveIntensity={0.35}
     />
   );
 
-  const goldThinMat = (
+  // Highly polished champagne gold ring (bright, thin core)
+  const polishedChampagneMaterial = (
     <meshStandardMaterial
       color="#ffe9a0"
       metalness={1.0}
       roughness={0.08}
-      emissive="#ffe9a0"
-      emissiveIntensity={0.6}
+      emissive="#4d3e1a"
+      emissiveIntensity={0.5}
     />
   );
 
-  const haloMat = (
+  // Soft, subtle halo basic material
+  const subtleHaloMaterial = (
     <meshBasicMaterial
       color="#d4af37"
       transparent
-      opacity={0.2}
+      opacity={0.16}
       side={THREE.DoubleSide}
     />
   );
 
   return (
-    <group>
-      {/* LEFT HALF OF THE ECLIPSE */}
-      <group ref={leftGroupRef}>
-        <mesh ref={outerLeftRef} rotation-z={Math.PI / 2}>
-          <torusGeometry args={[2.4, 0.07, 16, 64, Math.PI]} />
-          {goldMat}
-        </mesh>
-        <mesh ref={innerLeftRef} rotation-z={Math.PI / 2}>
-          <torusGeometry args={[2.4, 0.025, 8, 64, Math.PI]} />
-          {goldThinMat}
-        </mesh>
-        <mesh ref={haloLeftRef} rotation-x={-Math.PI / 2} rotation-z={Math.PI / 2}>
-          <ringGeometry args={[2.0, 3.2, 32, 1, 0, Math.PI]} />
-          {haloMat}
-        </mesh>
-      </group>
+    // Single consolidated watch centerpiece group
+    <group ref={groupRef}>
+      {/* 1. Main Outer Bezel Ring (Thicker Gold Torus) */}
+      <mesh ref={outerBezelRef}>
+        <torusGeometry args={[2.4, 0.08, 16, 128]} />
+        {brushedGoldMaterial}
+      </mesh>
 
-      {/* RIGHT HALF OF THE ECLIPSE */}
-      <group ref={rightGroupRef}>
-        <mesh ref={outerRightRef} rotation-z={-Math.PI / 2}>
-          <torusGeometry args={[2.4, 0.07, 16, 64, Math.PI]} />
-          {goldMat}
-        </mesh>
-        <mesh ref={innerRightRef} rotation-z={-Math.PI / 2}>
-          <torusGeometry args={[2.4, 0.025, 8, 64, Math.PI]} />
-          {goldThinMat}
-        </mesh>
-        <mesh ref={rightHaloRef} rotation-x={-Math.PI / 2} rotation-z={-Math.PI / 2}>
-          <ringGeometry args={[2.0, 3.2, 32, 1, 0, Math.PI]} />
-          {haloMat}
-        </mesh>
-      </group>
+      {/* 2. Outer Bevel Rim (Thin Gold Bezel Edge, slightly pushed back) */}
+      <mesh ref={outerBevelRef} position={[0, 0, -0.04]}>
+        <torusGeometry args={[2.52, 0.02, 12, 128]} />
+        {brushedGoldMaterial}
+      </mesh>
+
+      {/* 3. Inner Bevel Rim (Thin Gold Ridge, slightly pushed forward) */}
+      <mesh ref={innerBevelRef} position={[0, 0, 0.04]}>
+        <torusGeometry args={[2.28, 0.02, 12, 128]} />
+        {brushedGoldMaterial}
+      </mesh>
+
+      {/* 4. Champagne Core Ring (Thinner Polished Torus) */}
+      <mesh ref={champagneCoreRef}>
+        <torusGeometry args={[1.96, 0.016, 8, 128]} />
+        {polishedChampagneMaterial}
+      </mesh>
+
+      {/* 5. Soft Glow Bezel Halo (Subtle Ring disk) */}
+      <mesh ref={haloRef} position={[0, 0, -0.08]}>
+        <ringGeometry args={[1.8, 2.6, 64]} />
+        {subtleHaloMaterial}
+      </mesh>
     </group>
   );
 };
