@@ -23,7 +23,7 @@ interface ParticleItem {
 export const Particles: React.FC<ParticlesProps> = ({
   scrollProgress,
   mouseRef,
-  count = 300,
+  count = 250, // Reduced to 250 to ensure typography readability and prevent visual clutter
 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -32,47 +32,52 @@ export const Particles: React.FC<ParticlesProps> = ({
   const particleData = useMemo(() => {
     const data: ParticleItem[] = [];
 
-    // Layer 1: 80 tiny close particles (orbiting inside the ring hole, radius < 1.7)
-    for (let i = 0; i < 80; i++) {
+    // Proportions: ~12% Layer 1, ~56% Layer 2, ~32% Layer 3
+    const count1 = Math.round(count * 0.12);
+    const count2 = Math.round(count * 0.56);
+    const count3 = count - count1 - count2;
+
+    // Layer 1: close particles inside the ring hole
+    for (let i = 0; i < count1; i++) {
       const radius = 0.2 + Math.random() * 1.5;
       const angle = Math.random() * Math.PI * 2;
       const speed = (0.015 + Math.random() * 0.025) * (Math.random() > 0.5 ? 1 : -1);
       const baseHeight = (Math.random() - 0.5) * 3.5;
-      const size = 0.005 + Math.random() * 0.007;
+      const size = 0.004 + Math.random() * 0.006;
       const verticalPhase = Math.random() * Math.PI * 2;
       const verticalSpeed = 0.06 + Math.random() * 0.12;
       const zOffset = (Math.random() - 0.5) * 0.8;
       data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 1 });
     }
 
-    // Layer 2: 120 medium particles (orbiting outside the ring bounds, radius > 2.8)
-    for (let i = 0; i < 120; i++) {
+    // Layer 2: medium particles outside torus bounds
+    for (let i = 0; i < count2; i++) {
       const radius = 2.8 + Math.random() * 2.2;
       const angle = Math.random() * Math.PI * 2;
       const speed = (0.006 + Math.random() * 0.014) * (Math.random() > 0.5 ? 1 : -1);
       const baseHeight = (Math.random() - 0.5) * 5.0;
-      const size = 0.012 + Math.random() * 0.01;
+      const size = 0.01 + Math.random() * 0.008;
       const verticalPhase = Math.random() * Math.PI * 2;
       const verticalSpeed = 0.03 + Math.random() * 0.06;
       const zOffset = (Math.random() - 0.5) * 1.5;
       data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 2 });
     }
 
-    // Layer 3: 100 distant particles (deep background fields, radius > 5.4)
-    for (let i = 0; i < 100; i++) {
+    // Layer 3: distant background particles
+    for (let i = 0; i < count3; i++) {
       const radius = 5.4 + Math.random() * 3.6;
       const angle = Math.random() * Math.PI * 2;
       const speed = (0.002 + Math.random() * 0.007) * (Math.random() > 0.5 ? 1 : -1);
       const baseHeight = (Math.random() - 0.5) * 7.5;
-      const size = 0.02 + Math.random() * 0.014;
+      const size = 0.016 + Math.random() * 0.012;
       const verticalPhase = Math.random() * Math.PI * 2;
       const verticalSpeed = 0.01 + Math.random() * 0.03;
-      const zOffset = -2.5 - Math.random() * 3.5; // Pushed deep behind the main elements
+      const zOffset = -2.5 - Math.random() * 3.5;
       data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 3 });
     }
 
     return data;
-  }, []);
+  }, [count]);
 
   // 2. Precompute instanced colors based on layers
   const colors = useMemo(() => {
@@ -81,9 +86,12 @@ export const Particles: React.FC<ParticlesProps> = ({
     const colorMedium = new THREE.Color("#d4af37"); // Classic Gold
     const colorDistant = new THREE.Color("#806018"); // Amber/Muted Gold
 
+    const count1 = Math.round(count * 0.12);
+    const count2 = Math.round(count * 0.56);
+
     for (let i = 0; i < count; i++) {
-      if (i < 80) list.push(colorBright);
-      else if (i < 200) list.push(colorMedium);
+      if (i < count1) list.push(colorBright);
+      else if (i < count1 + count2) list.push(colorMedium);
       else list.push(colorDistant);
     }
     return list;

@@ -89,8 +89,8 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
         {/* Layered Golden Eclipse centerpiece (sits directly behind title) */}
         <Eclipse scrollProgress={scrollProgress} />
         
-        {/* 300 Premium calm orbital particles */}
-        <Particles scrollProgress={scrollProgress} mouseRef={mouseRef} count={300} />
+        {/* 250 Premium calm orbital particles */}
+        <Particles scrollProgress={scrollProgress} mouseRef={mouseRef} />
         
         <CameraRig scrollProgress={scrollProgress} mouseRef={mouseRef} />
       </Canvas>

@@ -15,36 +15,36 @@ export const Eclipse: React.FC<EclipseProps> = () => {
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    // 1. Premium 8-second breathing animation (range: 1.00 to 1.015 relative to base)
-    // base scale = 0.86 (sit comfortably behind title without viewport edge collision)
-    const baseScale = 0.86;
-    const breathingFactor = baseScale * (1.0075 + 0.0075 * Math.sin(t * (Math.PI * 2 / 8.0)));
+    // 1. Premium 9-second breathing animation (range: 1.000 to 1.012 relative to base)
+    // baseScale = 0.74 (sit comfortably behind title framing it perfectly)
+    const baseScale = 0.74;
+    const breathingFactor = baseScale * (1.006 + 0.006 * Math.sin(t * (Math.PI * 2 / 9.0)));
     
     if (groupRef.current) {
       groupRef.current.scale.setScalar(breathingFactor);
       
       // 2. Almost imperceptible slow luxury watch rotation
-      groupRef.current.rotation.y = t * 0.008;
-      groupRef.current.rotation.z = t * 0.003;
-      groupRef.current.rotation.x = Math.sin(t * 0.15) * 0.005;
+      groupRef.current.rotation.y = t * 0.005;
+      groupRef.current.rotation.z = t * 0.002;
+      groupRef.current.rotation.x = Math.sin(t * 0.12) * 0.004;
     }
   });
 
-  // Layer 1 Bezel Material: Premium metallic gold with zero emissive glow to catch studio highlights
+  // Layer 1 Bezel Material: Machined gold with zero emissive glow to catch direct studio spotlights
   const metallicGoldMaterial = (
     <meshStandardMaterial
-      color="#ccaa5c" // Restrained warm champagne watch gold
+      color="#cba358" // Executive champagne gold
       metalness={1.0}
-      roughness={0.24}
+      roughness={0.26}
     />
   );
 
   // Layer 2 Precision Ring Material: Polished thin champagne ring
   const polishedChampagneMaterial = (
     <meshStandardMaterial
-      color="#fcedc7" // Champagne white specular shine
+      color="#f7ead2" // Champagne white specular shine
       metalness={1.0}
-      roughness={0.12}
+      roughness={0.20}
     />
   );
 
@@ -53,7 +53,7 @@ export const Eclipse: React.FC<EclipseProps> = () => {
     <meshBasicMaterial
       color="#d4af37"
       transparent
-      opacity={0.06} // Keep opacity very low
+      opacity={0.04} // Lowered to 4% opacity to remain barely noticeable
       side={THREE.DoubleSide}
     />
   );
@@ -67,15 +67,15 @@ export const Eclipse: React.FC<EclipseProps> = () => {
         {metallicGoldMaterial}
       </mesh>
 
-      {/* Layer 2 — Inner Precision Ring (Extremely thin champagne ring, pushed slightly forward) */}
-      <mesh ref={precisionRingRef} position={[0, 0, 0.04]}>
-        <torusGeometry args={[2.05, 0.012, 16, 96]} />
+      {/* Layer 2 — Inner Precision Ring (Extremely thin champagne ring detail, pushed slightly forward) */}
+      <mesh ref={precisionRingRef} position={[0, 0, 0.03]}>
+        <torusGeometry args={[2.04, 0.007, 16, 96]} />
         {polishedChampagneMaterial}
       </mesh>
 
-      {/* Layer 3 — Atmospheric Halo (Subtle soft backing glow disk, pushed backward) */}
+      {/* Layer 3 — Atmospheric Halo (Subtle soft backing glow disk, positioned outside center view) */}
       <mesh ref={haloRef} position={[0, 0, -0.06]}>
-        <ringGeometry args={[1.8, 2.6, 64]} />
+        <ringGeometry args={[2.3, 2.6, 64]} />
         {subtleHaloMaterial}
       </mesh>
     </group>
