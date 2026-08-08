@@ -14,16 +14,16 @@ export const IntroSequence: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2.0, delay: 0.3 }}
-        className="space-y-10 my-auto"
+        className="space-y-12 my-auto"
       >
         {/* Subtle premium gold branding eyebrow */}
         <motion.div
-          initial={{ opacity: 0, letterSpacing: "0.5em" }}
-          animate={{ opacity: 1, letterSpacing: "0.4em" }}
+          initial={{ opacity: 0, letterSpacing: "0.55em" }}
+          animate={{ opacity: 1, letterSpacing: "0.45em" }}
           transition={{ duration: 1.8, delay: 0.6 }}
-          className="text-[11px] font-bold uppercase text-[#d4af37] tracking-[0.4em]"
+          className="text-[12px] font-bold uppercase text-[#d4af37] tracking-[0.45em]"
         >
-          Akira PM
+          AKIRA PM
         </motion.div>
 
         {/* Large, elegant serif headline centered exactly in front of the Eclipse */}
@@ -31,19 +31,19 @@ export const IntroSequence: React.FC = () => {
           initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif font-normal text-6xl sm:text-8xl leading-[0.96] tracking-[-2px] mx-auto max-w-4xl"
+          className="font-serif font-normal text-6xl sm:text-8xl leading-[0.98] tracking-[-3px] mx-auto max-w-4xl"
         >
           <GradientText>Project Management,</GradientText>
           <br />
           <GradientText>Refined.</GradientText>
         </motion.h1>
 
-        {/* Minimal subtitle description */}
+        {/* Minimal subtitle description - capped at 600px width */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, delay: 1.5 }}
-          className="text-[#9a938a] text-sm sm:text-base max-w-lg mx-auto leading-relaxed tracking-wide font-normal"
+          className="text-[#9a938a] text-sm sm:text-base max-w-[600px] mx-auto leading-relaxed tracking-wide font-normal mt-6"
         >
           The operating system for modern engineering teams.
           <br className="hidden sm:block" />
@@ -56,17 +56,26 @@ export const IntroSequence: React.FC = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1.9 }}
-        className="flex items-center justify-center gap-6"
+        className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
       >
+        {/* Primary Gold CTA */}
         <MagneticButton
           to="/register"
-          className="px-9 py-4 text-[13px] font-bold tracking-wide rounded-full text-[#1a1206]"
+          className="px-10 py-4.5 text-[13px] font-bold tracking-wider rounded-full text-[#1a1206]"
           style={{
             background: "linear-gradient(135deg, #ffe9a0, #d4af37 60%, #8a6b1f)",
-            boxShadow: "0 8px 30px rgba(212, 175, 55, 0.25)",
+            boxShadow: "0 10px 40px rgba(212, 175, 55, 0.2)",
           }}
         >
           Start Building →
+        </MagneticButton>
+
+        {/* Secondary Ghost CTA */}
+        <MagneticButton
+          to="/contact"
+          className="px-10 py-4.5 text-[13px] font-bold tracking-wider rounded-full border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-all backdrop-blur-md cursor-pointer"
+        >
+          Book Demo
         </MagneticButton>
       </motion.div>
     </div>
