@@ -68,25 +68,25 @@ export const Eclipse: React.FC<EclipseProps> = () => {
     <group ref={groupRef}>
       {/* 1. Main Outer Bezel Ring (Thicker Gold Torus) */}
       <mesh ref={outerBezelRef}>
-        <torusGeometry args={[2.4, 0.08, 16, 128]} />
+        <torusGeometry args={[2.4, 0.08, 12, 48]} />
         {brushedGoldMaterial}
       </mesh>
 
       {/* 2. Outer Bevel Rim (Thin Gold Bezel Edge, slightly pushed back) */}
       <mesh ref={outerBevelRef} position={[0, 0, -0.04]}>
-        <torusGeometry args={[2.52, 0.02, 12, 128]} />
+        <torusGeometry args={[2.52, 0.02, 8, 48]} />
         {brushedGoldMaterial}
       </mesh>
 
       {/* 3. Inner Bevel Rim (Thin Gold Ridge, slightly pushed forward) */}
       <mesh ref={innerBevelRef} position={[0, 0, 0.04]}>
-        <torusGeometry args={[2.28, 0.02, 12, 128]} />
+        <torusGeometry args={[2.28, 0.02, 8, 48]} />
         {brushedGoldMaterial}
       </mesh>
 
       {/* 4. Champagne Core Ring (Thinner Polished Torus) */}
       <mesh ref={champagneCoreRef}>
-        <torusGeometry args={[1.96, 0.016, 8, 128]} />
+        <torusGeometry args={[1.96, 0.016, 6, 48]} />
         {polishedChampagneMaterial}
       </mesh>
 

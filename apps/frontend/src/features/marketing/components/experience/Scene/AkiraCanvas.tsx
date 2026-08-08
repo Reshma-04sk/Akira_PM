@@ -1,7 +1,6 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { Fog } from "../world/Fog";
-import { Environment } from "../world/Environment";
 import { Lighting } from "../world/Lighting";
 import { CameraRig } from "../world/CameraRig";
 import { Eclipse } from "../world/Eclipse";
@@ -21,7 +20,7 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
       <Canvas
         camera={{ position: [0, 0, 9.0], fov: 35 }}
         gl={{
-          antialias: true,
+          antialias: false,
           alpha: true,
           powerPreference: "high-performance",
           stencil: false,
@@ -29,9 +28,15 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
         }}
         dpr={[1, 1.5]}
         performance={{ min: 0.5 }}
+        onCreated={(state) => {
+          const canvasEl = state.gl.domElement;
+          canvasEl.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+            console.warn("WebGL Context Lost detected. Restoring renderer state...");
+          }, false);
+        }}
       >
         <Fog />
-        <Environment />
         <Lighting scrollProgress={scrollProgress} mouseRef={mouseRef} />
         
         {/* Layered Golden Eclipse centerpiece (sits directly behind title) */}

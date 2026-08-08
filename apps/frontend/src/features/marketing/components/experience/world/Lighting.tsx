@@ -50,9 +50,6 @@ export const Lighting: React.FC<LightingProps> = ({ scrollProgress, mouseRef }) 
         ref={dirLightRef}
         position={[4, 8, 6]}
         intensity={2.5}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
       />
 
       <pointLight
