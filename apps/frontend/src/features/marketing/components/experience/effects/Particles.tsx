@@ -1,7 +1,6 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { getTimelineState } from "../../../timeline/ScrollTimeline";
 
 interface ParticlesProps {
   scrollProgress: React.MutableRefObject<number>;
@@ -9,39 +8,100 @@ interface ParticlesProps {
   count?: number;
 }
 
+interface ParticleItem {
+  radius: number;
+  angle: number;
+  speed: number;
+  baseHeight: number;
+  size: number;
+  verticalPhase: number;
+  verticalSpeed: number;
+  zOffset: number;
+  layer: 1 | 2 | 3;
+}
+
 export const Particles: React.FC<ParticlesProps> = ({
   scrollProgress,
   mouseRef,
-  count = 1200,
+  count = 300,
 }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  // Compute initial stardust orbital parameters
+  // 1. Compute orbital parameters for 3 premium visual layers
   const particleData = useMemo(() => {
-    const data = [];
-    for (let i = 0; i < count; i++) {
-      const radius = 1.8 + Math.random() * 8.5;
-      const angle = Math.random() * Math.PI * 2;
-      const speed = (0.02 + Math.random() * 0.08) * (Math.random() > 0.5 ? 1 : -1);
-      const baseHeight = (Math.random() - 0.5) * 6.5;
-      const size = 0.006 + Math.random() * 0.022;
-      const verticalPhase = Math.random() * Math.PI * 2;
-      const verticalSpeed = 0.1 + Math.random() * 0.3;
+    const data: ParticleItem[] = [];
 
-      data.push({
-        radius,
-        angle,
-        speed,
-        baseHeight,
-        size,
-        verticalPhase,
-        verticalSpeed,
-      });
+    // Layer 1: 80 tiny close particles (orbiting inside the ring hole, radius < 1.7)
+    for (let i = 0; i < 80; i++) {
+      const radius = 0.2 + Math.random() * 1.5;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (0.015 + Math.random() * 0.025) * (Math.random() > 0.5 ? 1 : -1);
+      const baseHeight = (Math.random() - 0.5) * 3.5;
+      const size = 0.005 + Math.random() * 0.007;
+      const verticalPhase = Math.random() * Math.PI * 2;
+      const verticalSpeed = 0.06 + Math.random() * 0.12;
+      const zOffset = (Math.random() - 0.5) * 0.8;
+      data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 1 });
     }
+
+    // Layer 2: 120 medium particles (orbiting outside the ring bounds, radius > 2.8)
+    for (let i = 0; i < 120; i++) {
+      const radius = 2.8 + Math.random() * 2.2;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (0.006 + Math.random() * 0.014) * (Math.random() > 0.5 ? 1 : -1);
+      const baseHeight = (Math.random() - 0.5) * 5.0;
+      const size = 0.012 + Math.random() * 0.01;
+      const verticalPhase = Math.random() * Math.PI * 2;
+      const verticalSpeed = 0.03 + Math.random() * 0.06;
+      const zOffset = (Math.random() - 0.5) * 1.5;
+      data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 2 });
+    }
+
+    // Layer 3: 100 distant particles (deep background fields, radius > 5.4)
+    for (let i = 0; i < 100; i++) {
+      const radius = 5.4 + Math.random() * 3.6;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (0.002 + Math.random() * 0.007) * (Math.random() > 0.5 ? 1 : -1);
+      const baseHeight = (Math.random() - 0.5) * 7.5;
+      const size = 0.02 + Math.random() * 0.014;
+      const verticalPhase = Math.random() * Math.PI * 2;
+      const verticalSpeed = 0.01 + Math.random() * 0.03;
+      const zOffset = -2.5 - Math.random() * 3.5; // Pushed deep behind the main elements
+      data.push({ radius, angle, speed, baseHeight, size, verticalPhase, verticalSpeed, zOffset, layer: 3 });
+    }
+
     return data;
+  }, []);
+
+  // 2. Precompute instanced colors based on layers
+  const colors = useMemo(() => {
+    const list: THREE.Color[] = [];
+    const colorBright = new THREE.Color("#ffe9a0"); // Bright Champagne Gold
+    const colorMedium = new THREE.Color("#d4af37"); // Classic Gold
+    const colorDistant = new THREE.Color("#806018"); // Amber/Muted Gold
+
+    for (let i = 0; i < count; i++) {
+      if (i < 80) list.push(colorBright);
+      else if (i < 200) list.push(colorMedium);
+      else list.push(colorDistant);
+    }
+    return list;
   }, [count]);
 
+  // Bind colors on initialization
+  useEffect(() => {
+    if (meshRef.current) {
+      for (let i = 0; i < count; i++) {
+        meshRef.current.setColorAt(i, colors[i]);
+      }
+      if (meshRef.current.instanceColor) {
+        meshRef.current.instanceColor.needsUpdate = true;
+      }
+    }
+  }, [colors, count]);
+
+  // 3. Render frame loop for premium orbital drift and soft twinkle fades
   useFrame((state) => {
     if (!meshRef.current) return;
     const t = state.clock.getElapsedTime();
@@ -49,34 +109,31 @@ export const Particles: React.FC<ParticlesProps> = ({
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
 
-    const timeline = getTimelineState(scroll);
-    // Push particles out when the split sequence is active
-    const xPush = timeline.splitOffset * 3.0;
-
     for (let i = 0; i < count; i++) {
       const p = particleData[i];
 
+      // Slow orbital calculation
       const currentAngle = p.angle + t * p.speed;
-      let x = Math.cos(currentAngle) * p.radius + mx * 0.35;
-      const z = Math.sin(currentAngle) * p.radius + my * 0.35;
-      let y = p.baseHeight + Math.sin(t * p.verticalSpeed + p.verticalPhase) * 0.15 - scroll * 4.0;
+      const x = Math.cos(currentAngle) * p.radius + mx * 0.22;
+      const z = Math.sin(currentAngle) * p.radius + p.zOffset + my * 0.22;
+      
+      // Vertical breathing drift, adjusting slightly on scroll
+      let y = p.baseHeight + Math.sin(t * p.verticalSpeed + p.verticalPhase) * 0.18 - scroll * 1.5;
 
-      // Apply horizontal split push
-      if (x > 0) x += xPush;
-      else x -= xPush;
-
-      // Reposition / wrap-around vertically if they scroll too far down
-      if (y < -7.0) {
-        y += 14.0;
+      // Wrap around screen boundaries for a continuous loop
+      if (y < -8.0) {
+        y += 16.0;
       }
 
       dummy.position.set(x, y, z);
 
-      // Simple twinkle effect
-      const twinkle = 0.3 + 0.7 * Math.sin(t * 3.0 + p.verticalPhase);
-      dummy.scale.setScalar(p.size * twinkle);
+      // Layer-specific slow twinkle fade-in/out multiplier
+      const twinkleFreq = p.layer === 1 ? 1.6 : p.layer === 2 ? 0.9 : 0.35;
+      const twinkle = 0.22 + 0.78 * Math.sin(t * twinkleFreq + p.verticalPhase);
 
+      dummy.scale.setScalar(p.size * twinkle);
       dummy.updateMatrix();
+      
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
@@ -84,13 +141,13 @@ export const Particles: React.FC<ParticlesProps> = ({
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      {/* Tiny clean octahedrons mapping dust facets */}
       <octahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
-        color="#ffe9a0"
         metalness={0.9}
-        roughness={0.1}
-        emissive="#d4af37"
-        emissiveIntensity={0.8}
+        roughness={0.12}
+        emissive="#ffe9a0"
+        emissiveIntensity={0.25}
       />
     </instancedMesh>
   );
