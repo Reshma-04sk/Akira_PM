@@ -47,6 +47,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = memo(({
       onMouseLeave={handleMouseLeave}
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.98 }}
+      transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
       style={{
         transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         ...style,

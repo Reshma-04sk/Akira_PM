@@ -13,14 +13,14 @@ export const IntroSequence: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 2.0, delay: 0.3 }}
+        transition={{ duration: 2.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="space-y-12 my-auto"
       >
         {/* Subtle premium gold branding eyebrow */}
         <motion.div
-          initial={{ opacity: 0, letterSpacing: "0.55em" }}
-          animate={{ opacity: 1, letterSpacing: "0.45em" }}
-          transition={{ duration: 1.8, delay: 0.6 }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="text-[12px] font-bold uppercase text-[#d4af37] tracking-[0.45em]"
         >
           AKIRA PM
@@ -28,9 +28,9 @@ export const IntroSequence: React.FC = () => {
 
         {/* Large, elegant serif headline centered exactly in front of the Eclipse */}
         <motion.h1
-          initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
+          initial={{ opacity: 0, y: 35, filter: "blur(12px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.2, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="font-serif font-normal text-6xl sm:text-8xl leading-[0.98] tracking-[-3px] mx-auto max-w-4xl"
         >
           <GradientText>Project Management,</GradientText>
@@ -42,7 +42,7 @@ export const IntroSequence: React.FC = () => {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.0, delay: 1.5 }}
+          transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
           className="text-[#9a938a] text-sm sm:text-base max-w-[600px] mx-auto leading-relaxed tracking-wide font-normal mt-6"
         >
           The operating system for modern engineering teams.
@@ -55,7 +55,7 @@ export const IntroSequence: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.9 }}
+        transition={{ duration: 1.0, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
         className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
       >
         {/* Primary Gold CTA */}
