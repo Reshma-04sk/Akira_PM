@@ -21,13 +21,13 @@ export const AkiraCanvas: React.FC<AkiraCanvasProps> = ({
       <Canvas
         camera={{ position: [0, 0, 9.0], fov: 35 }}
         gl={{
-          antialias: false,
+          antialias: true,
           alpha: true,
           powerPreference: "high-performance",
           stencil: false,
           depth: true,
         }}
-        dpr={[1, 1.5]}
+        dpr={[1, 2]}
         performance={{ min: 0.5 }}
         onCreated={(state) => {
           const canvasEl = state.gl.domElement;

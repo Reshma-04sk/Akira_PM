@@ -8,57 +8,52 @@ interface EclipseProps {
 
 export const Eclipse: React.FC<EclipseProps> = () => {
   const groupRef = useRef<THREE.Group>(null);
-  const outerBezelRef = useRef<THREE.Mesh>(null);
-  const outerBevelRef = useRef<THREE.Mesh>(null);
-  const innerBevelRef = useRef<THREE.Mesh>(null);
-  const champagneCoreRef = useRef<THREE.Mesh>(null);
+  const bezelRef = useRef<THREE.Mesh>(null);
+  const precisionRingRef = useRef<THREE.Mesh>(null);
   const haloRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    // 1. Slow, premium breathing animation (range: 1.00 to 1.02, frequency: 8 seconds)
-    // Formula: center = 1.01, amplitude = 0.01
-    const breathingFactor = 1.01 + 0.01 * Math.sin(t * (Math.PI * 2 / 8.0));
+    // 1. Premium 8-second breathing animation (range: 1.00 to 1.015 relative to base)
+    // base scale = 0.86 (sit comfortably behind title without viewport edge collision)
+    const baseScale = 0.86;
+    const breathingFactor = baseScale * (1.0075 + 0.0075 * Math.sin(t * (Math.PI * 2 / 8.0)));
     
     if (groupRef.current) {
       groupRef.current.scale.setScalar(breathingFactor);
       
-      // 2. Very slow, subtle luxury watch-like rotation
-      groupRef.current.rotation.y = t * 0.018;
-      groupRef.current.rotation.z = t * 0.008;
-      groupRef.current.rotation.x = Math.sin(t * 0.25) * 0.02;
+      // 2. Almost imperceptible slow luxury watch rotation
+      groupRef.current.rotation.y = t * 0.008;
+      groupRef.current.rotation.z = t * 0.003;
+      groupRef.current.rotation.x = Math.sin(t * 0.15) * 0.005;
     }
   });
 
-  // Brushed gold material configuration (metallic surface, subtle reflections)
-  const brushedGoldMaterial = (
+  // Layer 1 Bezel Material: Premium metallic gold with zero emissive glow to catch studio highlights
+  const metallicGoldMaterial = (
     <meshStandardMaterial
-      color="#d4af37"
+      color="#ccaa5c" // Restrained warm champagne watch gold
       metalness={1.0}
       roughness={0.24}
-      emissive="#2d2105"
-      emissiveIntensity={0.35}
     />
   );
 
-  // Highly polished champagne gold ring (bright, thin core)
+  // Layer 2 Precision Ring Material: Polished thin champagne ring
   const polishedChampagneMaterial = (
     <meshStandardMaterial
-      color="#ffe9a0"
+      color="#fcedc7" // Champagne white specular shine
       metalness={1.0}
-      roughness={0.08}
-      emissive="#4d3e1a"
-      emissiveIntensity={0.5}
+      roughness={0.12}
     />
   );
 
-  // Soft, subtle halo basic material
+  // Layer 3 Atmospheric Halo Material: Extremely subtle backward shadow backing
   const subtleHaloMaterial = (
     <meshBasicMaterial
       color="#d4af37"
       transparent
-      opacity={0.16}
+      opacity={0.06} // Keep opacity very low
       side={THREE.DoubleSide}
     />
   );
@@ -66,32 +61,20 @@ export const Eclipse: React.FC<EclipseProps> = () => {
   return (
     // Single consolidated watch centerpiece group
     <group ref={groupRef}>
-      {/* 1. Main Outer Bezel Ring (Thicker Gold Torus) */}
-      <mesh ref={outerBezelRef}>
-        <torusGeometry args={[2.4, 0.08, 12, 48]} />
-        {brushedGoldMaterial}
+      {/* Layer 1 — Primary Bezel (Thick Metallic Torus, high segments for perfect circle silhouette) */}
+      <mesh ref={bezelRef}>
+        <torusGeometry args={[2.4, 0.085, 32, 128]} />
+        {metallicGoldMaterial}
       </mesh>
 
-      {/* 2. Outer Bevel Rim (Thin Gold Bezel Edge, slightly pushed back) */}
-      <mesh ref={outerBevelRef} position={[0, 0, -0.04]}>
-        <torusGeometry args={[2.52, 0.02, 8, 48]} />
-        {brushedGoldMaterial}
-      </mesh>
-
-      {/* 3. Inner Bevel Rim (Thin Gold Ridge, slightly pushed forward) */}
-      <mesh ref={innerBevelRef} position={[0, 0, 0.04]}>
-        <torusGeometry args={[2.28, 0.02, 8, 48]} />
-        {brushedGoldMaterial}
-      </mesh>
-
-      {/* 4. Champagne Core Ring (Thinner Polished Torus) */}
-      <mesh ref={champagneCoreRef}>
-        <torusGeometry args={[1.96, 0.016, 6, 48]} />
+      {/* Layer 2 — Inner Precision Ring (Extremely thin champagne ring, pushed slightly forward) */}
+      <mesh ref={precisionRingRef} position={[0, 0, 0.04]}>
+        <torusGeometry args={[2.05, 0.012, 16, 96]} />
         {polishedChampagneMaterial}
       </mesh>
 
-      {/* 5. Soft Glow Bezel Halo (Subtle Ring disk) */}
-      <mesh ref={haloRef} position={[0, 0, -0.08]}>
+      {/* Layer 3 — Atmospheric Halo (Subtle soft backing glow disk, pushed backward) */}
+      <mesh ref={haloRef} position={[0, 0, -0.06]}>
         <ringGeometry args={[1.8, 2.6, 64]} />
         {subtleHaloMaterial}
       </mesh>
