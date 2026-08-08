@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { getTimelineState } from "../../../timeline/ScrollTimeline";
@@ -9,47 +9,53 @@ interface CameraRigProps {
 }
 
 export const CameraRig: React.FC<CameraRigProps> = ({ scrollProgress, mouseRef }) => {
-  const currentPos = new THREE.Vector3();
-  const currentLookAt = new THREE.Vector3();
+  // Use refs to store camera state and prevent recreation between frames
+  const currentPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 9.0));
+  const currentLookAtRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
   useFrame((state) => {
     const scroll = scrollProgress.current;
-    const mx = mouseRef.current.x;
-    const my = mouseRef.current.y;
+    const mx = mouseRef.current.x; // Ranges -1 to 1
+    const my = mouseRef.current.y; // Ranges -1 to 1
     const t = state.clock.getElapsedTime();
 
-    // Get interpolated target vectors from ScrollTimeline
+    // 1. Get baseline target coordinates from the scroll timeline
     const timeline = getTimelineState(scroll);
 
-    // 1. Handheld cinematic breathing (subtle noise)
-    const breathX = Math.sin(t * 0.4) * 0.035;
-    const breathY = Math.cos(t * 0.5) * 0.035;
-    const breathZ = Math.sin(t * 0.3) * 0.02;
+    // 2. Heavy cinema camera idle breathing (extremely slow, fluid noise waves)
+    const breathX = Math.sin(t * 0.22) * 0.012;
+    const breathY = Math.cos(t * 0.18) * 0.012;
+    const breathZ = Math.sin(t * 0.14) * 0.008;
 
-    // 2. Mouse Parallax shift
-    const parallaxX = mx * 0.45;
-    const parallaxY = -my * 0.35;
+    // 3. Tiny orbital pan (subconscious circular drift)
+    const orbitX = Math.cos(t * 0.06) * 0.04;
+    const orbitY = Math.sin(t * 0.05) * 0.03;
 
-    // Calculate final target positions
+    // 4. Subtle mouse parallax (strictly restricted to <= 3% coordinate shift)
+    // At z=9, offset of 0.20 units represents roughly ~2% camera translation offset
+    const parallaxX = mx * 0.18;
+    const parallaxY = -my * 0.15;
+
+    // 5. Consolidate target vectors
     const targetPos = timeline.cameraPos.clone().add(
-      new THREE.Vector3(parallaxX + breathX, parallaxY + breathY, breathZ)
+      new THREE.Vector3(parallaxX + breathX + orbitX, parallaxY + breathY + orbitY, breathZ)
     );
     const targetLookAt = timeline.cameraLookAt.clone().add(
-      new THREE.Vector3(parallaxX * 0.5, parallaxY * 0.5, 0)
+      new THREE.Vector3(parallaxX * 0.4, parallaxY * 0.4, 0)
     );
 
-    // 3. Smooth dampening (lerp) toward target
-    currentPos.lerp(targetPos, 0.05);
-    currentLookAt.lerp(targetLookAt, 0.05);
+    // 6. Hydraulic/Heavy-dolly damping (low lerp value for ultra-smooth momentum)
+    currentPosRef.current.lerp(targetPos, 0.025);
+    currentLookAtRef.current.lerp(targetLookAt, 0.025);
 
-    // Apply to ThreeJS Camera
+    // 7. Apply parameters to perspective camera
     const cam = state.camera as THREE.PerspectiveCamera;
-    cam.position.copy(currentPos);
-    cam.lookAt(currentLookAt);
+    cam.position.copy(currentPosRef.current);
+    cam.lookAt(currentLookAtRef.current);
 
-    // Adjust lens field of view (FOV)
+    // Smoothly update lens field of view (FOV)
     if (cam.fov !== undefined && Math.abs(cam.fov - timeline.cameraFov) > 0.01) {
-      cam.fov = THREE.MathUtils.lerp(cam.fov, timeline.cameraFov, 0.05);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, timeline.cameraFov, 0.025);
       cam.updateProjectionMatrix();
     }
   });
