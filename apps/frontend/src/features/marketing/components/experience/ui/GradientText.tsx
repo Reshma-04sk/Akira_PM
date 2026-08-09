@@ -12,7 +12,8 @@ export const GradientText: React.FC<GradientTextProps> = ({
   return (
     <span
       style={{
-        background: "linear-gradient(180deg, #ffffff 0%, #f3dfa0 65%, #d4af37 100%)",
+        // Premium editorial silver gradient (soft white -> slate gray -> cool silver)
+        background: "linear-gradient(180deg, #f4f7fa 0%, #cbd5e1 55%, #8b95a5 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
       }}

@@ -5,7 +5,7 @@ import { GradientText } from "../ui/GradientText";
 
 export const IntroSequence: React.FC = () => {
   return (
-    <div className="h-[75vh] w-full max-w-5xl mx-auto px-6 relative z-10 flex flex-col items-center justify-between text-center select-none">
+    <div className="h-[68vh] w-full max-w-4xl mx-auto px-6 relative z-10 flex flex-col items-center justify-between text-center select-none">
       {/* Top spacing to offset center element layout */}
       <div className="h-4" />
 
@@ -14,24 +14,24 @@ export const IntroSequence: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="space-y-12 my-auto"
+        className="space-y-8 my-auto"
       >
-        {/* Subtle premium gold branding eyebrow */}
+        {/* Subtle premium gold/indigo branding eyebrow */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[12px] font-bold uppercase text-[#d4af37] tracking-[0.45em]"
+          className="text-[11px] font-bold uppercase text-[#7c8cff] tracking-[0.45em]"
         >
           AKIRA PM
         </motion.div>
 
-        {/* Large, elegant serif headline centered exactly in front of the Eclipse */}
+        {/* Large, elegant serif headline with editorial sizing (breathing room) */}
         <motion.h1
-          initial={{ opacity: 0, y: 35, filter: "blur(12px)" }}
+          initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif font-normal text-6xl sm:text-8xl leading-[0.98] tracking-[-3px] mx-auto max-w-4xl"
+          className="font-serif font-normal text-5xl sm:text-7xl leading-[1.05] tracking-[-2px] mx-auto max-w-3xl"
         >
           <GradientText>Project Management,</GradientText>
           <br />
@@ -40,10 +40,10 @@ export const IntroSequence: React.FC = () => {
 
         {/* Minimal subtitle description - capped at 600px width */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[#9a938a] text-sm sm:text-base max-w-[600px] mx-auto leading-relaxed tracking-wide font-normal mt-6"
+          className="text-[#8b95a5] text-xs sm:text-sm max-w-[520px] mx-auto leading-relaxed tracking-wide font-normal mt-4"
         >
           The operating system for modern engineering teams.
           <br className="hidden sm:block" />
@@ -51,31 +51,31 @@ export const IntroSequence: React.FC = () => {
         </motion.p>
       </motion.div>
 
-      {/* CTA Buttons positioned cleanly below the headline area */}
+      {/* CTA Buttons styled in Linear/Vercel-class product controls */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.0, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full"
+        transition={{ duration: 1.0, delay: 1.6, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full"
       >
-        {/* Primary Gold CTA */}
+        {/* Primary Dark-to-Indigo CTA */}
         <MagneticButton
           to="/register"
-          className="px-10 py-4.5 text-[13px] font-bold tracking-wider rounded-full text-[#1a1206]"
+          className="px-9 py-4.0 text-[12px] font-bold tracking-wider rounded-lg text-white border border-[#7c8cff]/20 hover:border-[#7c8cff]/40 transition-all duration-300"
           style={{
-            background: "linear-gradient(135deg, #ffe9a0, #d4af37 60%, #8a6b1f)",
-            boxShadow: "0 10px 40px rgba(212, 175, 55, 0.2)",
+            background: "linear-gradient(135deg, #0e1222 0%, #161d36 60%, #2b396a 100%)",
+            boxShadow: "0 6px 24px rgba(124, 140, 255, 0.12)",
           }}
         >
-          Start Building →
+          Start Building &rarr;
         </MagneticButton>
 
-        {/* Secondary Ghost CTA */}
+        {/* Secondary transparent graphite glass CTA */}
         <MagneticButton
           to="/contact"
-          className="px-10 py-4.5 text-[13px] font-bold tracking-wider rounded-full border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white/90 hover:text-white transition-all backdrop-blur-md cursor-pointer"
+          className="px-9 py-4.0 text-[12px] font-bold tracking-wider rounded-lg border border-white/5 hover:border-white/15 bg-white/4 hover:bg-white/8 text-[#8b95a5] hover:text-[#f4f7fa] transition-all backdrop-blur-md cursor-pointer"
         >
-          Book Demo
+          Explore the Platform
         </MagneticButton>
       </motion.div>
     </div>

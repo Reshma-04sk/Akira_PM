@@ -13,7 +13,7 @@ export interface Keyframe {
 
 export const TIMELINE_KEYFRAMES: Keyframe[] = [
   {
-    scroll: 0.0, // Hero state: Eclipse centered, closed, calm
+    scroll: 0.0, // Hero State
     cameraPos: [0, 0, 8.5],
     cameraLookAt: [0, 0, 0],
     cameraFov: 35,
@@ -23,29 +23,29 @@ export const TIMELINE_KEYFRAMES: Keyframe[] = [
     corePulse: 0.2,
   },
   {
-    scroll: 0.15, // Hero still dominant, camera about to push
-    cameraPos: [0, 0, 8.5],
+    scroll: 0.15, // Awakening begins
+    cameraPos: [0, 0, 8.4],
     cameraLookAt: [0, 0, 0],
     cameraFov: 35,
-    lightIntensity: 1.6,
+    lightIntensity: 1.8,
     lightColor: "#ffe9a0",
     splitOffset: 0.0,
-    corePulse: 0.2,
+    corePulse: 0.3,
   },
   {
-    scroll: 0.30, // Camera pushes forward, entering Eclipse
-    cameraPos: [0, 0, 6.8],
+    scroll: 0.30, // Core awakening state
+    cameraPos: [0, 0, 8.0],
     cameraLookAt: [0, 0, 0],
-    cameraFov: 36,
+    cameraFov: 35,
     lightIntensity: 2.2,
     lightColor: "#ffe9a0",
     splitOffset: 0.0,
     corePulse: 0.4,
   },
   {
-    scroll: 0.45, // Eclipse separations horizontally, camera moves slightly lateral
-    cameraPos: [-0.6, 0.15, 6.8],
-    cameraLookAt: [0, 0.15, 0],
+    scroll: 0.50, // Core deconstruction transition
+    cameraPos: [-1.0, 0.1, 7.0],
+    cameraLookAt: [-0.2, 0.1, 0],
     cameraFov: 38,
     lightIntensity: 2.6,
     lightColor: "#ffffff",
@@ -53,39 +53,19 @@ export const TIMELINE_KEYFRAMES: Keyframe[] = [
     corePulse: 0.6,
   },
   {
-    scroll: 0.60, // Workspace shell materializes
-    cameraPos: [0.2, 0.15, 6.8],
-    cameraLookAt: [0, 0.15, 0],
+    scroll: 0.70, // Kanban assembly sequence
+    cameraPos: [-0.5, 0.1, 6.5],
+    cameraLookAt: [-0.1, 0.1, 0],
     cameraFov: 38,
     lightIntensity: 2.8,
-    lightColor: "#ffffff",
-    splitOffset: 1.0,
-    corePulse: 0.6,
-  },
-  {
-    scroll: 0.75, // Kanban columns assemble, headers fade in
-    cameraPos: [0.4, 0.15, 6.8],
-    cameraLookAt: [0.1, 0.15, 0],
-    cameraFov: 38,
-    lightIntensity: 3.0,
     lightColor: "#ffffff",
     splitOffset: 1.0,
     corePulse: 0.7,
   },
   {
-    scroll: 0.90, // Cards animate, AI typing cursor fires
-    cameraPos: [0.0, 0.15, 6.8],
-    cameraLookAt: [0.0, 0.15, 0],
-    cameraFov: 36,
-    lightIntensity: 3.0,
-    lightColor: "#ffe9a0",
-    splitOffset: 1.0,
-    corePulse: 0.8,
-  },
-  {
-    scroll: 1.0, // Stable interactive workspace state
-    cameraPos: [0.0, 0.15, 6.8],
-    cameraLookAt: [0.0, 0.15, 0],
+    scroll: 1.0, // Stable interactive product workspace
+    cameraPos: [0, 0.1, 6.8],
+    cameraLookAt: [0, 0.1, 0],
     cameraFov: 35,
     lightIntensity: 3.0,
     lightColor: "#ffe9a0",
