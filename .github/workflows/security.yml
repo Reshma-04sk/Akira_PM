@@ -86,7 +86,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: apps/frontend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Run Python Dependency Audit (pip-audit)
         run: |
@@ -140,7 +140,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: apps/frontend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Audit Frontend Licenses
         run: |
