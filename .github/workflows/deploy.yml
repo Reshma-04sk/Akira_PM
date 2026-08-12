@@ -1,12 +1,7 @@
 name: Production Cloud Deployment
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
@@ -14,87 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci-validation:
-    name: Pre-Deployment Validation (CI)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-
-      - name: Install backend dependencies
-        run: |
-          cd apps/backend
-          uv sync --frozen
-
-      - name: Run Backend Lint
-        run: |
-          cd apps/backend
-          uv run ruff check .
-
-      - name: Run Backend Typecheck
-        run: |
-          cd apps/backend
-          uv run mypy src
-
-      - name: Run Backend Tests
-        env:
-          ENV_STATE: testing
-          BACKEND_SECRET_KEY: test_secret_key_placeholder_do_not_use_in_prod_12345
-        run: |
-          cd apps/backend
-          uv run pytest
-
-      - name: Run Quality Gate Checks
-        run: python .github/scripts/quality_gate.py
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-          cache-dependency-path: apps/frontend/pnpm-lock.yaml
-
-      - name: Install frontend dependencies
-        run: |
-          cd apps/frontend
-          pnpm install --frozen-lockfile
-
-      - name: Run Frontend Lint
-        run: |
-          cd apps/frontend
-          pnpm lint
-
-      - name: Verify Frontend Typecheck
-        run: |
-          cd apps/frontend
-          pnpm exec tsc --noEmit
-
-      - name: Verify Frontend Build
-        env:
-          VITE_API_URL: https://api.akira-pm.com/api/v1
-        run: |
-          cd apps/frontend
-          pnpm build
-
   deploy:
     name: Automate Cloud Deployment
-    needs: ci-validation
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}
@@ -158,7 +74,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.3
+          version: 11.15.0
 
       - name: Set up Node
         uses: actions/setup-node@v4
