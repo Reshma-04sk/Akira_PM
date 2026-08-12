@@ -10,12 +10,12 @@ Akira-PM is a production-ready, enterprise-grade project management application 
 
 We maintain comprehensive specifications detailing the platform's components, designs, and schemas:
 
-- 📊 **[High-Level Design (HLD)](file:///home/cholan0415/Documents/Akira_PM/docs/hld/HLD.md)** — Architectural diagrams, request boundaries, and multi-tenant isolation flows.
-- ⚙️ **[Low-Level Design (LLD)](file:///home/cholan0415/Documents/Akira_PM/docs/lld/LLD.md)** — Relational SQL databases structures, Axios client classes, and React Query key caches.
-- 🎨 **[Design System Documentation](file:///home/cholan0415/Documents/Akira_PM/docs/DesignSystem.md)** — Core luxury color tokens, typography guides, micro-interactions, and glass assets.
-- 🔌 **[API Documentation](file:///home/cholan0415/Documents/Akira_PM/docs/API.md)** — FastAPI REST endpoints, JSON payloads, and response validators.
-- 🗄️ **[Database Blueprint](file:///home/cholan0415/Documents/Akira_PM/docs/Database.md)** — Alembic schema blueprints, indexes, and constraint triggers.
-- 🚀 **[Deployment Guidelines](file:///home/cholan0415/Documents/Akira_PM/docs/DEPLOYMENT.md)** — Single command setups with Docker Compose or standalone packages.
+- 📊 **[High-Level Design (HLD)](docs/hld/HLD.md)** — Architectural diagrams, request boundaries, and multi-tenant isolation flows.
+- ⚙️ **[Low-Level Design (LLD)](docs/lld/LLD.md)** — Relational SQL databases structures, Axios client classes, and React Query key caches.
+- 🎨 **[Design System Documentation](docs/DesignSystem.md)** — Core luxury color tokens, typography guides, micro-interactions, and glass assets.
+- 🔌 **[API Documentation](docs/API.md)** — FastAPI REST endpoints, JSON payloads, and response validators.
+- 🗄️ **[Database Blueprint](docs/Database.md)** — Alembic schema blueprints, indexes, and constraint triggers.
+- 🚀 **[Deployment Guidelines](docs/DEPLOYMENT.md)** — Single command setups with Docker Compose or standalone packages.
 
 ---
 
