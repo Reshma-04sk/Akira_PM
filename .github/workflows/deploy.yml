@@ -72,7 +72,7 @@ jobs:
 
       # 2. Deploy Frontend to Vercel
       - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11.15.0
 
