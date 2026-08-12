@@ -49,19 +49,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
 
   return (
     <>
-      <header className="h-16 glass-navbar flex items-center justify-between px-4 sm:px-6 select-none shrink-0 z-30">
-        {/* Left side: Mobile trigger & Workspace Selector */}
+      <header className="h-16 bg-card border-b border-border text-foreground flex items-center justify-between px-4 sm:px-6 select-none shrink-0 z-30 transition-colors">
+        {/* Left side: Mobile trigger, Workspace Selector & Breadcrumb */}
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg border border-white/5 bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-1 focus:ring-[#d4af37] md:hidden"
+            className="p-2 rounded-lg border border-border bg-secondary text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring md:hidden"
             aria-label="Toggle Navigation Drawer"
           >
             <Menu className="h-4 w-4" />
           </button>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <WorkspaceSwitcher />
+            <div className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+              <span className="text-border">/</span>
+              <span className="font-bold text-foreground tracking-wide uppercase text-[10px]">Command Console</span>
+            </div>
           </div>
         </div>
 
@@ -76,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
               variant="secondary"
               size="sm"
               onClick={() => setIsInviteOpen(true)}
-              className="h-8 text-[10px] gap-1.5 px-3 font-bold border-white/5 hover:border-[#d4af37]/30 text-white cursor-pointer"
+              className="h-8 text-[10px] gap-1.5 px-3 font-bold border-border hover:border-accent text-foreground cursor-pointer"
             >
               <UserPlus className="h-3.5 w-3.5" />
               Invite
@@ -86,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           <ThemeToggle />
           <NotificationButton />
           
-          <div className="h-7 w-px bg-white/10 shrink-0" />
+          <div className="h-7 w-px bg-border shrink-0" />
           <ProfileDropdown />
         </div>
       </header>
@@ -122,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value)}
                 disabled={inviteMutation.isPending}
-                className="w-full pl-9 bg-[#050505] border border-white/10 hover:border-white/20 rounded-xl text-xs py-2 px-3 text-foreground focus:outline-none transition-all cursor-pointer shadow-sm focus:ring-1 focus:ring-[#d4af37]"
+                className="w-full pl-9 bg-[#050505] border border-white/10 hover:border-white/20 rounded-xl text-xs py-2 px-3 text-foreground focus:outline-none transition-all cursor-pointer shadow-sm focus:ring-1 focus:ring-white/40"
               >
                 <option value="admin">Admin (Full write, workspace control)</option>
                 <option value="manager">Manager (Create projects & edit tasks)</option>

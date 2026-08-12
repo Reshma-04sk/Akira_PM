@@ -32,3 +32,15 @@ class DashboardMyTasksResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class SprintVelocityPoint(BaseModel):
+    label: str
+    tasks_shipped: int
+    total_tasks: int
+
+
+class DashboardAnalyticsResponse(BaseModel):
+    velocity_history: list[SprintVelocityPoint]
+    avg_cycle_time_days: float | None
+    completion_rate_percent: float

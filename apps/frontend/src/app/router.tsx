@@ -71,16 +71,24 @@ const PrivacyPage = lazy(() => import("@/features/marketing/pages/PrivacyPage"))
 const TermsPage = lazy(() => import("@/features/marketing/pages/TermsPage"));
 
 export const router = createBrowserRouter([
-  // Public marketing routes
+  // Scoped landing experience inside isolated BlankLayout (Phase 1.2 visual polish)
   {
     path: "/",
-    element: <PublicLayout />,
+    element: <BlankLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
       {
         index: true,
         element: <Suspense fallback={null}><HomePage /></Suspense>,
       },
+    ],
+  },
+  // Public subpages marketing routes inside standard PublicLayout
+  {
+    path: "/",
+    element: <PublicLayout />,
+    errorElement: <RouteErrorBoundary />,
+    children: [
       {
         path: "features",
         element: <Suspense fallback={null}><FeaturesPage /></Suspense>,

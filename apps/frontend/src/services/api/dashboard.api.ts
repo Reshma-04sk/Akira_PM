@@ -34,9 +34,25 @@ export interface DashboardMyTasks {
   page_size: number;
 }
 
+export interface SprintVelocityPoint {
+  label: string;
+  tasks_shipped: number;
+  total_tasks: number;
+}
+
+export interface DashboardAnalytics {
+  velocity_history: SprintVelocityPoint[];
+  avg_cycle_time_days: number | null;
+  completion_rate_percent: number;
+}
+
 export const dashboardApi = {
   getOverview(config?: RequestConfig): Promise<ApiResponse<DashboardOverview>> {
     return apiClient.get<DashboardOverview>(ENDPOINTS.DASHBOARD.OVERVIEW, config);
+  },
+
+  getAnalytics(config?: RequestConfig): Promise<ApiResponse<DashboardAnalytics>> {
+    return apiClient.get<DashboardAnalytics>(ENDPOINTS.DASHBOARD.ANALYTICS, config);
   },
 
   getProjectStats(projectId: string, config?: RequestConfig): Promise<ApiResponse<DashboardProjectOverview>> {

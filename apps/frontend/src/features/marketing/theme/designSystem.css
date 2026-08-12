@@ -1,0 +1,65 @@
+/**
+ * Akira PM Marketing Design System — Source of Truth from landing.html
+ * Enforces strict dark cinematic theme for the landing page regardless of workspace theme.
+ */
+
+.marketing-theme {
+  --bg: #0a0a0b !important;
+  --surface: #131316 !important;
+  --surface-2: #1b1b1f !important;
+  --border: #26262b !important;
+  --text: #f3f1ec !important;
+  --muted: #8b8a90 !important;
+  --accent: #ff4d2e !important;
+  --accent-dim: rgba(255, 77, 46, 0.14) !important;
+
+  --m-bg: #0a0a0b !important;
+  --m-surface-shell: #131316 !important;
+  --m-surface-card: #1b1b1f !important;
+  --m-text-primary: #f3f1ec !important;
+  --m-text-secondary: #8b8a90 !important;
+  --m-border: #26262b !important;
+  --m-accent: #ff4d2e !important;
+  --m-accent-dim: rgba(255, 77, 46, 0.14) !important;
+
+  background-color: #0a0a0b !important;
+  color: #f3f1ec !important;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Fraunces Editorial Display Typography */
+.font-fraunces {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* JetBrains Mono Typography */
+.font-jetbrains {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Inter UI Typography */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Reveal-on-scroll animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

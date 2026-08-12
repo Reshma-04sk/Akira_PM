@@ -48,6 +48,7 @@ export const ENDPOINTS = {
   },
   DASHBOARD: {
     OVERVIEW: "/dashboard/overview",
+    ANALYTICS: "/dashboard/analytics",
     ACTIVITY: "/dashboard/activity",
     MY_TASKS: "/dashboard/my-tasks",
     PROJECT: (id: string) => `/dashboard/project/${id}`,

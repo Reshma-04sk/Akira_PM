@@ -22,7 +22,7 @@ export const SearchInput: React.FC = () => {
         placeholder="Search project..."
         onFocus={handleClick}
         readOnly
-        className="w-full pl-9 pr-12 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg placeholder-muted-foreground/60 hover:bg-white/10 hover:border-[#d4af37]/30 transition-all cursor-pointer"
+        className="w-full pl-9 pr-12 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg placeholder-muted-foreground/60 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
         aria-label="Search"
       />
       <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground bg-[#0a0a0a] border border-white/10 rounded pointer-events-none select-none">

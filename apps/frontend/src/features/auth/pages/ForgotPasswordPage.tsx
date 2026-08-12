@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField, FormLabel } from "@/components/ui/form";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/data-display";
 import { toast } from "@/components/ui/feedback";
 import { authApi } from "@/services/api/auth.api";
 
@@ -45,34 +44,39 @@ export const ForgotPasswordPage: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.2 }}
-      className="w-full max-w-sm"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="w-full max-w-sm space-y-8"
     >
-      <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Forgot Password?</CardTitle>
-          <CardDescription>
-            Enter your email to receive recovery instructions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      {/* Akira Branding */}
+      <div className="text-center space-y-2">
+        <h1 className="font-['Instrument_Serif'] italic text-3xl text-[#f5f5f3] tracking-tight">
+          Forgot password?
+        </h1>
+        <p className="text-[11px] text-[#707070] font-mono uppercase tracking-widest">
+          AKIRA PM — Account Recovery
+        </p>
+      </div>
+
+      {/* Auth Card */}
+      <div className="rounded-xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md shadow-2xl overflow-hidden">
+        <div className="p-6 sm:p-8">
           {success ? (
             <div className="text-center space-y-4 py-4">
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-[#a3a3a3] leading-relaxed">
                 An email containing password reset instructions has been sent. Please check your inbox and spam folders.
               </p>
               <Link
                 to="/login"
-                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-colors focus:outline-none"
+                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-[#f5f5f3] text-black text-xs font-semibold hover:bg-white transition-colors focus:outline-none"
               >
                 Return to sign in
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <FormField error={errors.email?.message}>
                 <FormLabel>Email Address</FormLabel>
                 <Input
@@ -89,18 +93,18 @@ export const ForgotPasswordPage: React.FC = () => {
               </Button>
             </form>
           )}
-        </CardContent>
+        </div>
         {!success && (
-          <CardFooter className="flex justify-center text-center pb-6">
+          <div className="flex justify-center text-center py-4 border-t border-white/5">
             <Link
               to="/login"
-              className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors focus:outline-none"
+              className="text-xs font-semibold text-white/50 hover:text-white transition-colors focus:outline-none"
             >
               Return to sign in
             </Link>
-          </CardFooter>
+          </div>
         )}
-      </Card>
+      </div>
     </motion.div>
   );
 };

@@ -1,275 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 0%;
-    --foreground: 45 10% 96%;
-    
-    --card: 0 0% 3%;
-    --card-foreground: 45 10% 96%;
-    
-    --popover: 0 0% 3%;
-    --popover-foreground: 45 10% 96%;
-    
-    --primary: 43 80% 54%;
-    --primary-foreground: 0 0% 0%;
-    
-    --secondary: 45 15% 12%;
-    --secondary-foreground: 43 80% 54%;
-    
-    --muted: 0 0% 8%;
-    --muted-foreground: 45 10% 65%;
-    
-    --accent: 43 80% 54%;
-    --accent-foreground: 0 0% 0%;
-    
+  :root, [data-theme="dark"], .dark {
+    --workspace-bg: #0A0A0B;
+    --workspace-sidebar: #101012;
+    --workspace-surface: #141416;
+    --workspace-card: #18181B;
+    --workspace-elevated: #1D1D20;
+    --workspace-text: #F3F1EC;
+    --workspace-secondary: #A3A0A0;
+    --workspace-muted: #6F6C72;
+    --workspace-border: rgba(255, 255, 255, 0.08);
+    --workspace-border-strong: rgba(255, 255, 255, 0.14);
+    --workspace-accent: #FF4D2E;
+    --workspace-accent-dim: rgba(255, 77, 46, 0.12);
+    --workspace-active-nav-bg: rgba(255, 77, 46, 0.12);
+
+    /* Tailwind Standard Tokens (Dark) */
+    --background: 240 5% 4%; /* #0a0a0b */
+    --foreground: 40 18% 94%; /* #f3f1ec */
+    --card: 240 6% 10%; /* #18181B */
+    --card-foreground: 40 18% 94%;
+    --popover: 240 6% 9%; /* #141416 */
+    --popover-foreground: 40 18% 94%;
+    --primary: 40 18% 94%;
+    --primary-foreground: 240 5% 4%;
+    --secondary: 240 6% 9%; /* #141416 */
+    --secondary-foreground: 40 18% 94%;
+    --muted: 240 5% 12%; /* #1D1D20 */
+    --muted-foreground: 260 3% 44%; /* #6F6C72 */
+    --accent: 10 100% 59%; /* #FF4D2E */
+    --accent-foreground: 10 60% 7%;
     --destructive: 343 80% 45%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 45 20% 12%;
-    --input: 45 20% 12%;
-    --ring: 43 80% 54%;
-    
+    --border: 0 0% 100% / 0.08;
+    --input: 0 0% 100% / 0.08;
+    --ring: 10 100% 59%;
     --radius: 0.75rem;
-
-    /* Semantic Tokens */
-    --surface: #050505;
-    --surface-secondary: #0d0d0d;
-    --glass: rgba(10, 10, 10, 0.65);
-    --gold: 43 80% 54%;
-    --gold-light: 45 90% 70%;
-    --gold-dark: 36 70% 40%;
   }
 
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 45 10% 96%;
-    
-    --card: 0 0% 3%;
-    --card-foreground: 45 10% 96%;
-    
-    --popover: 0 0% 3%;
-    --popover-foreground: 45 10% 96%;
-    
-    --primary: 43 80% 54%;
-    --primary-foreground: 0 0% 0%;
-    
-    --secondary: 45 15% 12%;
-    --secondary-foreground: 43 80% 54%;
-    
-    --muted: 0 0% 8%;
-    --muted-foreground: 45 10% 65%;
-    
-    --accent: 43 80% 54%;
-    --accent-foreground: 0 0% 0%;
-    
-    --destructive: 343 80% 45%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 45 20% 12%;
-    --input: 45 20% 12%;
-    --ring: 43 80% 54%;
-  }
-}
+  [data-theme="light"], .light {
+    --workspace-bg: #F2F0EB; /* Warm Paper */
+    --workspace-sidebar: #E8E5DF; /* Warm Stone Sidebar */
+    --workspace-surface: #F5F3EF;
+    --workspace-card: #FCFAF6; /* Warm Ivory Card */
+    --workspace-elevated: #FFFFFF;
+    --workspace-text: #181716; /* Graphite Ink */
+    --workspace-secondary: #5E5A56;
+    --workspace-muted: #8C8781;
+    --workspace-border: rgba(24, 23, 22, 0.10);
+    --workspace-border-strong: rgba(24, 23, 22, 0.16);
+    --workspace-accent: #E8442B;
+    --workspace-accent-dim: rgba(232, 68, 43, 0.09);
+    --workspace-active-nav-bg: rgba(232, 68, 43, 0.09);
 
-html {
-  scroll-behavior: smooth;
-  background-color: #000000;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #000000;
-  color: #f7f7f7;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.02em;
-  line-height: 1.6;
-}
-
-/* Premium Gold Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #ab8836;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
-}
-
-@layer utilities {
-  /* Glassmorphism Containers */
-  .glass-panel {
-    background: rgba(10, 10, 10, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(212, 175, 55, 0.12);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.80);
+    /* Tailwind Standard Tokens (Warm Editorial Light) */
+    --background: 43 14% 93%; /* #F2F0EB */
+    --foreground: 30 4% 9%; /* #181716 */
+    --card: 40 33% 97%; /* #FCFAF6 */
+    --card-foreground: 30 4% 9%; /* #181716 */
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 30 4% 9%;
+    --primary: 30 4% 9%; /* #181716 */
+    --primary-foreground: 40 33% 97%;
+    --secondary: 40 18% 95%; /* #F5F3EF */
+    --secondary-foreground: 30 4% 9%;
+    --muted: 40 18% 95%;
+    --muted-foreground: 35 4% 53%; /* #8C8781 */
+    --accent: 10 79% 54%; /* #E8442B */
+    --accent-foreground: 0 0% 100%;
+    --border: 30 4% 9% / 0.10;
+    --input: 30 4% 9% / 0.10;
+    --ring: 10 79% 54%;
   }
 
-  .glass-card {
-    background: rgba(12, 12, 12, 0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(212, 175, 55, 0.12);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .glass-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(212, 175, 55, 0.25);
-    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.08), 0 0 15px rgba(212, 175, 55, 0.04);
-  }
-
-  .glass-navbar {
-    background: rgba(7, 6, 10, 0.45);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .glass-sidebar {
-    background: rgba(5, 5, 5, 0.65);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(212, 175, 55, 0.12);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.8);
-  }
-
-  .glass-modal {
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
-  }
-
-  .accent-gold {
-    color: #d4af37;
-  }
-  
-  .bg-gold {
-    background-color: #d4af37;
-  }
-
-  .border-gold {
-    border-color: rgba(212, 175, 55, 0.15);
-  }
-
-  .glow-gold {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-  }
-
-  .text-gold-gradient {
-    background: linear-gradient(135deg, #f5d061 0%, #d4af37 50%, #ab8836 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .shimmer {
-    background: linear-gradient(90deg, rgba(20, 20, 20, 0.5) 25%, rgba(40, 40, 40, 0.7) 50%, rgba(20, 20, 20, 0.5) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.6s infinite linear;
-    border-radius: 6px;
-  }
-
-  .glass-navbar {
-    background: rgba(7, 6, 10, 0.45);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-
-  .glass-button {
-    background: transparent;
-    color: #f3efe6;
-    border: 1px solid rgba(243, 239, 230, 0.3);
-    transition: border-color 0.25s, background 0.25s;
-  }
-  
-  .glass-button:hover {
-    border-color: #d4af37;
-    background: rgba(212, 175, 55, 0.06);
-  }
-
-  .glass-footer {
-    background: #07060a;
-    border-top: 1px solid rgba(212, 175, 55, 0.12);
+  body {
+    background-color: var(--workspace-bg);
+    color: var(--workspace-text);
+    font-family: 'Inter', sans-serif;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
   }
 }
 
-/* Sonner Luxury Glass Toast Overrides */
-[data-sonner-toast] {
-  background: rgba(10, 10, 10, 0.85) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95) !important;
-  color: #ffffff !important;
-  font-family: 'Inter', -apple-system, sans-serif !important;
-  padding: 12px 16px !important;
+/* Master Typography Helper Classes */
+.font-serif {
+  font-family: 'Instrument Serif', 'Fraunces', serif;
+  font-style: italic;
 }
 
-[data-sonner-toast][data-type="success"] {
-  border: 1px solid rgba(212, 175, 55, 0.35) !important;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.1) !important;
-}
-[data-sonner-toast][data-type="success"] [data-icon] {
-  color: #d4af37 !important;
+.font-sans {
+  font-family: 'Inter', sans-serif;
 }
 
-[data-sonner-toast][data-type="error"] {
-  border: 1px solid rgba(225, 29, 72, 0.35) !important;
-  box-shadow: 0 0 15px rgba(225, 29, 72, 0.1) !important;
-}
-[data-sonner-toast][data-type="error"] [data-icon] {
-  color: #fb7185 !important;
+.font-mono {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
 }
 
-[data-sonner-toast][data-type="warning"] {
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-[data-sonner-toast][data-type="warning"] [data-icon] {
-  color: #fbbf24 !important;
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
 }
-
-[data-sonner-toast][data-type="info"] {
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--workspace-border);
+  border-radius: 9999px;
 }
-[data-sonner-toast][data-type="info"] [data-icon] {
-  color: #60a5fa !important;
-}
-
-[data-sonner-toast] [data-title] {
-  font-weight: 700 !important;
-  font-size: 11px !important;
-  color: #ffffff !important;
-}
-
-[data-sonner-toast] [data-description] {
-  font-size: 9px !important;
-  color: #a3a3a3 !important;
-}
-

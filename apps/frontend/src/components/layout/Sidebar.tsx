@@ -6,7 +6,7 @@ import {
   FolderGit2,
   CheckSquare,
   Calendar,
-  BarChart3,
+  TrendingUp,
   Users,
   Settings,
   ArrowLeftRight,
@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={cn(
-        "shrink-0 flex flex-col justify-between transition-all duration-300 relative select-none glass-sidebar border-[#d4af37]/15",
+        "shrink-0 flex flex-col justify-between transition-all duration-300 relative select-none bg-[var(--workspace-sidebar)] border-r border-[var(--workspace-border)] text-foreground",
         isCollapsed ? "w-16" : "w-64",
         className
       )}
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Toggle button overlay */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-5 h-6 w-6 rounded-full border border-white/10 bg-black flex items-center justify-center text-muted-foreground hover:text-[#d4af37] hover:border-[#d4af37]/35 shadow-[0_0_10px_rgba(212,175,55,0.15)] transition-all focus:outline-none focus:ring-1 focus:ring-[#d4af37] z-10 cursor-pointer hidden md:flex"
+        className="absolute -right-3 top-5 h-6 w-6 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-accent shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-ring z-10 cursor-pointer hidden md:flex"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <ArrowLeftRight className="h-3 w-3" />
@@ -49,9 +49,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Top Section */}
       <div className="flex flex-col flex-1 gap-6 overflow-y-auto p-3">
         {/* Workspace selector */}
-        <div className="h-12 flex items-center justify-center overflow-hidden border-b border-white/5 pb-2">
+        <div className="h-12 flex items-center justify-center overflow-hidden border-b border-border pb-2">
           {isCollapsed ? (
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#ab8836] to-[#f5d061] text-black flex items-center justify-center font-bold text-sm shadow-[0_0_10px_rgba(212,175,55,0.3)] shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-accent text-accent-foreground flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
               A
             </div>
           ) : (
@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <SidebarItem
               to="/reports"
               label="Reports"
-              icon={BarChart3}
+              icon={TrendingUp}
               isCollapsed={isCollapsed}
             />
             <SidebarItem
@@ -107,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/* Footer Section */}
+      {/* Footer User Info */}
       <SidebarFooter isCollapsed={isCollapsed} />
     </aside>
   );
@@ -121,21 +121,19 @@ interface SidebarGroupProps {
   children: React.ReactNode;
 }
 
-export const SidebarGroup: React.FC<SidebarGroupProps> = ({
+const SidebarGroup: React.FC<SidebarGroupProps> = ({
   label,
   isCollapsed,
   children,
 }) => {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       {!isCollapsed && (
-        <span className="px-3 text-[9px] font-black text-[#d4af37]/65 uppercase tracking-[0.15em] block mb-1">
+        <h3 className="px-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest font-mono select-none py-1">
           {label}
-        </span>
+        </h3>
       )}
-      <ul className="space-y-1" role="list">
-        {children}
-      </ul>
+      <ul className="space-y-1">{children}</ul>
     </div>
   );
 };
@@ -175,7 +173,7 @@ const prefetchRoute = (to: string) => {
   }
 };
 
-export const SidebarItem: React.FC<SidebarItemProps> = ({
+const SidebarItem: React.FC<SidebarItemProps> = ({
   to,
   label,
   icon: Icon,
@@ -189,7 +187,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       {isActive && (
         <motion.div
           layoutId="active-indicator"
-          className="absolute left-0 w-0.75 h-5 rounded-r bg-[#d4af37] shadow-[0_0_8px_#d4af37] z-10"
+          className="absolute left-0 w-0.75 h-5 rounded-r bg-[var(--workspace-accent)] shadow-sm z-10"
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
@@ -198,14 +196,14 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
         onMouseEnter={() => prefetchRoute(to)}
         onFocus={() => prefetchRoute(to)}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold rounded-lg transition-all select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4af37] leading-none hover:text-white hover:bg-white/5 w-full",
+          "flex items-center gap-3 px-3 py-2.5 text-xs font-semibold rounded-lg transition-all select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-none hover:text-foreground hover:bg-muted/60 w-full",
           isActive
-            ? "bg-[#d4af37]/8 text-[#d4af37] font-bold border-l-2 border-transparent"
+            ? "bg-[var(--workspace-active-nav-bg)] text-[var(--workspace-accent)] font-bold"
             : "text-muted-foreground"
         )}
         aria-current={isActive ? "page" : undefined}
       >
-        <Icon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-[#d4af37]" : "text-muted-foreground/80")} />
+        <Icon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-[var(--workspace-accent)]" : "text-muted-foreground")} />
         {!isCollapsed && (
           <motion.span
             initial={{ opacity: 0 }}
@@ -235,15 +233,15 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ isCollapsed }) => 
     : "U";
 
   return (
-    <div className="p-3 border-t border-white/5 bg-[#080808]/40 space-y-2">
+    <div className="p-3 border-t border-border bg-card space-y-2">
       {/* Settings Link */}
       <Link
         to="/settings"
         onMouseEnter={() => prefetchRoute("/settings")}
         onFocus={() => prefetchRoute("/settings")}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4af37] leading-none hover:text-white hover:bg-white/5 w-full",
-          isSettingsActive ? "bg-[#d4af37]/8 text-[#d4af37] font-bold" : "text-muted-foreground"
+          "flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-none hover:text-foreground hover:bg-muted w-full",
+          isSettingsActive ? "bg-accent/10 text-foreground font-bold" : "text-muted-foreground"
         )}
       >
         <Settings className="h-4 w-4 shrink-0" />
@@ -251,12 +249,12 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ isCollapsed }) => 
       </Link>
 
       {/* User Info Block */}
-      <div className={cn("flex items-center gap-2 px-1.5 py-1.5 rounded-xl bg-white/5 border border-white/5", isCollapsed ? "justify-center" : "justify-between")}>
+      <div className={cn("flex items-center gap-2 px-2 py-1.5 rounded-xl bg-secondary border border-border", isCollapsed ? "justify-center" : "justify-between")}>
         <div className="flex items-center gap-2 min-w-0">
           <Avatar
             fallback={initials}
             src={user?.avatar_url || undefined}
-            className="h-7 w-7 border-white/10 bg-gradient-to-br from-[#ab8836]/20 to-[#f5d061]/20 text-[#d4af37] shrink-0 text-[10px]"
+            className="h-7 w-7 border-border bg-muted text-foreground shrink-0 text-[10px]"
           />
           {!isCollapsed && (
             <div className="flex flex-col min-w-0 leading-tight">
@@ -276,7 +274,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({ isCollapsed }) => 
                 logout();
               }
             }}
-            className="p-1 rounded-md text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
+            className="p-1 rounded-md text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
             aria-label="Sign out"
           >
             <LogOut className="h-3.5 w-3.5" />

@@ -849,15 +849,15 @@ export const TasksListPage: React.FC = () => {
                 className={cn(
                   "flex flex-col rounded-2xl p-4 w-72 min-w-[290px] shrink-0 transition-all duration-200 min-h-[500px]",
                   isHovered 
-                    ? "border border-[#d4af37]/35 bg-[#d4af37]/5 shadow-[0_0_20px_rgba(212,175,55,0.08)]" 
-                    : "border border-white/5 bg-[#0a0a0a]/50 backdrop-blur-md"
+                    ? "border border-accent/40 bg-accent/5 shadow-md" 
+                    : "border border-border bg-muted/40 backdrop-blur-md"
                 )}
                 aria-label={`Column ${col.label}`}
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3 shrink-0">
+                <div className="flex items-center justify-between pb-3 border-b border-border mb-3 shrink-0">
                   <h3 className="font-extrabold text-[10px] tracking-[0.12em] uppercase text-foreground">{col.label}</h3>
-                  <span className="text-[9px] font-black text-[#d4af37] bg-[#d4af37]/10 border border-[#d4af37]/20 px-2 py-0.5 rounded-full select-none">
+                  <span className="text-[9px] font-black text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full select-none">
                     {colTasks.length}
                   </span>
                 </div>
@@ -865,8 +865,8 @@ export const TasksListPage: React.FC = () => {
                 {/* Task Cards Stack */}
                 <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-0.5 scrollbar-thin">
                   {colTasks.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 min-h-[140px] text-center bg-[#070707]/30">
-                      <span className="text-[10px] font-medium text-muted-foreground/60 italic">No tasks in stage</span>
+                    <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-border rounded-2xl p-6 min-h-[140px] text-center bg-card/40">
+                      <span className="text-[10px] font-medium text-muted-foreground italic">No tasks in stage</span>
                     </div>
                   ) : (
                     colTasks.map((task) => {
@@ -884,7 +884,7 @@ export const TasksListPage: React.FC = () => {
                             setSelectedTask(task);
                             setIsDrawerOpen(true);
                           }}
-                          className="group relative flex flex-col gap-3.5 p-4 rounded-xl border border-white/5 bg-[#0d0d0d]/80 hover:bg-[#121212]/90 hover:border-[#d4af37]/30 hover:shadow-[0_4px_20px_rgba(212,175,55,0.06)] cursor-grab active:cursor-grabbing transition-all duration-200"
+                          className="group relative flex flex-col gap-3.5 p-4 rounded-xl border border-border bg-card hover:border-accent/40 shadow-sm cursor-grab active:cursor-grabbing transition-all duration-200"
                           draggable={true}
                           onDragStart={(e: any) => {
                             e.dataTransfer.setData("text/plain", task.id);
@@ -892,7 +892,7 @@ export const TasksListPage: React.FC = () => {
                           aria-label={`Task card ${task.title}`}
                         >
                           {/* Left Glow Active Indicator Accent */}
-                          <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-r bg-[#d4af37] opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute left-0 top-3 bottom-3 w-[2px] rounded-r bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                           {/* Checkbox & Title */}
                           <div className="flex items-start gap-2.5">
@@ -909,10 +909,10 @@ export const TasksListPage: React.FC = () => {
                                 setSelectedTaskIds(newSet);
                               }}
                               onClick={(e) => e.stopPropagation()}
-                              className="rounded border-white/10 bg-black cursor-pointer mt-0.5 accent-[#d4af37] focus:ring-1 focus:ring-[#d4af37]"
+                              className="rounded border-border bg-background cursor-pointer mt-0.5 accent-accent focus:ring-1 focus:ring-ring"
                               aria-label={`Select task ${task.title}`}
                             />
-                            <h4 className="font-bold text-xs leading-relaxed text-foreground group-hover:text-[#d4af37] transition-colors flex-1 select-none">
+                            <h4 className="font-bold text-xs leading-relaxed text-foreground group-hover:text-accent transition-colors flex-1 select-none">
                               {task.title}
                             </h4>
                           </div>
@@ -923,7 +923,7 @@ export const TasksListPage: React.FC = () => {
                               {tags.map((tag, tIdx) => (
                                 <span 
                                   key={tIdx} 
-                                  className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground/90 uppercase tracking-wider"
+                                  className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground uppercase tracking-wider"
                                 >
                                   {tag}
                                 </span>
@@ -932,32 +932,32 @@ export const TasksListPage: React.FC = () => {
                           )}
 
                           {/* Middle row: Priority, Due Date */}
-                          <div className="flex items-center justify-between border-t border-white/5 pt-3 text-[10px]">
+                          <div className="flex items-center justify-between border-t border-border pt-3 text-[10px]">
                             <span className={cn(
                               "font-black text-[9px] uppercase px-2 py-0.5 rounded border tracking-wider",
-                              task.priority === "critical" ? "bg-rose-950/30 text-rose-400 border-rose-900/30" :
-                              task.priority === "high" ? "bg-amber-950/20 text-amber-400 border-amber-900/20" :
-                              task.priority === "medium" ? "bg-blue-950/20 text-blue-400 border-blue-900/20" :
-                              "bg-zinc-900/30 text-zinc-400 border-zinc-800/30"
+                              task.priority === "critical" ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" :
+                              task.priority === "high" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" :
+                              task.priority === "medium" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" :
+                              "bg-muted text-muted-foreground border-border"
                             )}>
                               {task.priority}
                             </span>
                             
                             {task.due_date && (
-                              <span className="text-muted-foreground/80 flex items-center gap-1 shrink-0 font-medium text-[9px]">
-                                <Calendar className="h-3 w-3 text-[#d4af37]/80" />
+                              <span className="text-muted-foreground flex items-center gap-1 shrink-0 font-medium text-[9px]">
+                                <Calendar className="h-3 w-3 text-accent" />
                                 {formatDate(task.due_date)}
                               </span>
                             )}
                           </div>
 
                           {/* Footer row: Assignee, Comments/Attachments */}
-                          <div className="flex items-center justify-between text-[10px] text-muted-foreground border-t border-white/5 pt-3">
+                          <div className="flex items-center justify-between text-[10px] text-muted-foreground border-t border-border pt-3">
                             <div className="flex items-center gap-2 min-w-0">
                               <Avatar
                                 fallback={assigneeInitials}
                                 src={task.assignee?.avatar_url || undefined}
-                                className="h-5 w-5 text-[8px] border border-white/10 bg-gradient-to-br from-[#ab8836]/20 to-[#f5d061]/20 text-[#d4af37]"
+                                className="h-5 w-5 text-[8px] border border-border bg-muted text-foreground"
                               />
                               <span className="truncate text-[10px] font-semibold text-foreground">
                                 {task.assignee ? task.assignee.full_name || task.assignee.email.split("@")[0] : "Unassigned"}

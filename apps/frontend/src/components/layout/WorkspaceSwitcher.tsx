@@ -47,10 +47,10 @@ export const WorkspaceSwitcher: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-[#d4af37]/15 bg-black/45 hover:bg-[#d4af37]/5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37]"
+        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg border border-white/8 bg-black/45 hover:bg-white/5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <div className="h-6 w-6 rounded bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-bold text-xs shrink-0">
+          <div className="h-6 w-6 rounded bg-white/10 text-white flex items-center justify-center font-bold text-xs shrink-0">
             {selected.name.charAt(0)}
           </div>
           <div className="flex flex-col overflow-hidden leading-none gap-0.5">
@@ -72,10 +72,10 @@ export const WorkspaceSwitcher: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className="absolute left-0 z-50 mt-1 w-56 bg-black border border-[#d4af37]/20 rounded-lg shadow-2xl py-1 text-sm overflow-hidden backdrop-blur-xl"
+            className="absolute left-0 z-50 mt-1 w-56 bg-black border border-white/8 rounded-lg shadow-2xl py-1 text-sm overflow-hidden backdrop-blur-xl"
             role="listbox"
           >
-            <div className="px-3 py-1.5 text-xs font-medium text-[#d4af37]/75 border-b border-border mb-1">
+            <div className="px-3 py-1.5 text-xs font-medium text-gray-400 border-b border-border mb-1">
               Workspaces
             </div>
             {mockWorkspaces.map((workspace) => (
@@ -87,12 +87,12 @@ export const WorkspaceSwitcher: React.FC = () => {
                   setSelected(workspace);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[#d4af37]/10 hover:text-[#d4af37] transition-colors ${
-                  selected.id === workspace.id ? "bg-[#d4af37]/5 font-semibold text-[#d4af37]" : ""
+                className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-white/5 hover:text-white transition-colors ${
+                  selected.id === workspace.id ? "bg-white/5 font-semibold text-white" : ""
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 rounded bg-[#d4af37]/10 text-[#d4af37] flex items-center justify-center font-bold text-[10px]">
+                  <div className="h-5 w-5 rounded bg-white/10 text-white flex items-center justify-center font-bold text-[10px]">
                     {workspace.name.charAt(0)}
                   </div>
                   <div className="flex flex-col leading-none">
@@ -108,14 +108,14 @@ export const WorkspaceSwitcher: React.FC = () => {
             <div className="border-t border-border mt-1 pt-1">
               <button
                 onClick={() => toast.info("Coming soon", "Workspace creation will be available in the next release.")}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Create Workspace
               </button>
               <button
                 onClick={() => toast.info("Feature preview", "Upgrade plan to Pro is in test mode.")}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/5 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-white hover:bg-white/5 transition-colors"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 Upgrade to Pro

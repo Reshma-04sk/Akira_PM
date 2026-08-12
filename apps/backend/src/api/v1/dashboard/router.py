@@ -12,6 +12,7 @@ from src.repositories.project_repository import ProjectRepository
 from src.repositories.task_repository import TaskRepository
 from src.schemas.dashboard import (
     DashboardActivityResponse,
+    DashboardAnalyticsResponse,
     DashboardMyTasksResponse,
     DashboardOverviewResponse,
     DashboardProjectOverviewResponse,
@@ -42,6 +43,18 @@ async def get_overview(
     """
     overview = await service.get_overview(current_user.id)
     return APIResponse(data=overview)
+
+
+@router.get("/analytics", response_model=APIResponse[DashboardAnalyticsResponse])
+async def get_analytics(
+    current_user: User = Depends(get_current_active_user),  # noqa: B008
+    service: DashboardService = Depends(get_dashboard_service),  # noqa: B008
+) -> APIResponse[DashboardAnalyticsResponse]:
+    """
+    Retrieves velocity analytics, average cycle time, and completion rate.
+    """
+    analytics = await service.get_analytics(current_user.id)
+    return APIResponse(data=analytics)
 
 
 @router.get("/activity", response_model=APIResponse[DashboardActivityResponse])

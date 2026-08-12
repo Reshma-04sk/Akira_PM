@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/data-display";
 import { toast } from "@/components/ui/feedback";
 import { authApi } from "@/services/api/auth.api";
 
@@ -33,34 +32,41 @@ export const EmailVerificationPage: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.2 }}
-      className="w-full max-w-sm"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="w-full max-w-sm space-y-8"
     >
-      <Card className="border border-border/80 shadow-md bg-card/60 backdrop-blur-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Email Verification</CardTitle>
-          <CardDescription>Verifying your email address details</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-6 text-center">
+      {/* Akira Branding */}
+      <div className="text-center space-y-2">
+        <h1 className="font-['Instrument_Serif'] italic text-3xl text-[#f5f5f3] tracking-tight">
+          Email Verification
+        </h1>
+        <p className="text-[11px] text-[#707070] font-mono uppercase tracking-widest">
+          AKIRA PM — Identity Confirmation
+        </p>
+      </div>
+
+      {/* Auth Card */}
+      <div className="rounded-xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md shadow-2xl overflow-hidden">
+        <div className="p-6 sm:p-8 flex flex-col items-center justify-center text-center">
           {status === "verifying" && (
-            <div className="space-y-4">
-              <Loader2 className="h-10 w-10 text-primary animate-spin mx-auto" />
-              <p className="text-xs text-muted-foreground">Checking token parameters, please wait...</p>
+            <div className="space-y-4 py-4">
+              <Loader2 className="h-8 w-8 text-white/80 animate-spin mx-auto" />
+              <p className="text-xs text-[#a3a3a3]">Checking token parameters, please wait...</p>
             </div>
           )}
 
           {status === "success" && (
-            <div className="space-y-4">
-              <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
+            <div className="space-y-4 py-2 w-full">
+              <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
+              <p className="text-xs text-[#a3a3a3] leading-relaxed">
                 Thank you! Your email address has been successfully verified.
               </p>
               <Link
                 to="/login"
-                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-colors focus:outline-none"
+                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-[#f5f5f3] text-black text-xs font-semibold hover:bg-white transition-colors focus:outline-none"
               >
                 Sign In to Workspace
               </Link>
@@ -68,31 +74,33 @@ export const EmailVerificationPage: React.FC = () => {
           )}
 
           {status === "error" && (
-            <div className="space-y-4">
-              <XCircle className="h-12 w-12 text-destructive mx-auto" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
+            <div className="space-y-4 py-2 w-full">
+              <XCircle className="h-10 w-10 text-rose-500 mx-auto" />
+              <p className="text-xs text-[#a3a3a3] leading-relaxed">
                 The verification token is missing or has expired. Please check the link or request a new one.
               </p>
               <Link
                 to="/register"
-                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-colors focus:outline-none"
+                className="inline-flex w-full items-center justify-center h-9 px-4 rounded-lg bg-[#f5f5f3] text-black text-xs font-semibold hover:bg-white transition-colors focus:outline-none"
               >
                 Return to sign up
               </Link>
             </div>
           )}
-        </CardContent>
+        </div>
         {status !== "success" && (
-          <CardFooter className="flex justify-center text-center pb-6">
+          <div className="flex justify-center text-center py-4 border-t border-white/5">
             <Link
               to="/login"
-              className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors focus:outline-none"
+              className="text-xs font-semibold text-white/50 hover:text-white transition-colors focus:outline-none"
             >
               Return to sign in
             </Link>
-          </CardFooter>
+          </div>
         )}
-      </Card>
+      </div>
     </motion.div>
   );
 };
+
+export default EmailVerificationPage;

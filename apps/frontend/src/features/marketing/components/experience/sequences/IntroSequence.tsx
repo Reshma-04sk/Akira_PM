@@ -1,83 +1,49 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { MagneticButton } from "../ui/MagneticButton";
-import { GradientText } from "../ui/GradientText";
+import { Link } from "react-router-dom";
 
 export const IntroSequence: React.FC = () => {
   return (
-    <div className="h-[68vh] w-full max-w-4xl mx-auto px-6 relative z-10 flex flex-col items-center justify-between text-center select-none">
-      {/* Top spacing to offset center element layout */}
-      <div className="h-4" />
+    <div className="w-full max-w-[1400px] mx-auto min-h-[85vh] flex flex-col justify-center items-center px-6 lg:px-12 py-16 text-center relative z-20 select-none">
+      {/* Eyebrow */}
+      <div className="font-mono text-xs text-[#8b8a90] tracking-[4px] uppercase mb-8">
+        Akira PM — the operating system for engineering teams
+      </div>
 
-      {/* Main centerpiece title and description */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 2.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="space-y-8 my-auto"
-      >
-        {/* Subtle premium gold/indigo branding eyebrow */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[11px] font-bold uppercase text-[#7c8cff] tracking-[0.45em]"
-        >
-          AKIRA PM
-        </motion.div>
+      {/* Main Editorial Headline */}
+      <h1 className="font-serif italic font-normal text-6xl sm:text-7xl md:text-8xl lg:text-[110px] text-[#f3f1ec] leading-[1.02] tracking-tight max-w-5xl">
+        Work, in <span className="text-[#ff4d2e] relative">motion</span>.
+      </h1>
 
-        {/* Large, elegant serif headline with editorial sizing (breathing room) */}
-        <motion.h1
-          initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif font-normal text-5xl sm:text-7xl leading-[1.05] tracking-[-2px] mx-auto max-w-3xl"
-        >
-          <GradientText>Project Management,</GradientText>
-          <br />
-          <GradientText>Refined.</GradientText>
-        </motion.h1>
+      {/* Subtitle */}
+      <p className="max-w-[560px] mx-auto mt-8 text-[#8b8a90] text-base md:text-lg leading-relaxed font-sans">
+        Every ticket, sprint, and shipped release — moving in one place. Built for teams who'd rather build than manage the board.
+      </p>
 
-        {/* Minimal subtitle description - capped at 600px width */}
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[#8b95a5] text-xs sm:text-sm max-w-[520px] mx-auto leading-relaxed tracking-wide font-normal mt-4"
-        >
-          The operating system for modern engineering teams.
-          <br className="hidden sm:block" />
-          Built for speed. Designed for clarity.
-        </motion.p>
-      </motion.div>
-
-      {/* CTA Buttons styled in Linear/Vercel-class product controls */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.0, delay: 1.6, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full"
-      >
-        {/* Primary Dark-to-Indigo CTA */}
-        <MagneticButton
+      {/* CTAs */}
+      <div className="flex items-center justify-center gap-4 mt-10">
+        <Link
           to="/register"
-          className="px-9 py-4.0 text-[12px] font-bold tracking-wider rounded-lg text-white border border-[#7c8cff]/20 hover:border-[#7c8cff]/40 transition-all duration-300"
-          style={{
-            background: "linear-gradient(135deg, #0e1222 0%, #161d36 60%, #2b396a 100%)",
-            boxShadow: "0 6px 24px rgba(124, 140, 255, 0.12)",
-          }}
+          className="bg-[#f3f1ec] text-[#0a0a0b] hover:bg-[#ff4d2e] hover:text-[#1a0a06] px-6 py-3 rounded-md text-sm font-semibold transition-all active:scale-97 cursor-pointer"
         >
-          Start Building &rarr;
-        </MagneticButton>
+          Start building →
+        </Link>
+        <a
+          href="#board"
+          className="bg-transparent text-[#f3f1ec] border border-[#26262b] hover:border-[#8b8a90] px-6 py-3 rounded-md text-sm font-medium transition-colors"
+        >
+          Explore the platform
+        </a>
+      </div>
 
-        {/* Secondary transparent graphite glass CTA */}
-        <MagneticButton
-          to="/contact"
-          className="px-9 py-4.0 text-[12px] font-bold tracking-wider rounded-lg border border-white/5 hover:border-white/15 bg-white/4 hover:bg-white/8 text-[#8b95a5] hover:text-[#f4f7fa] transition-all backdrop-blur-md cursor-pointer"
-        >
-          Explore the Platform
-        </MagneticButton>
-      </motion.div>
+      {/* Scroll Cue with dropping animation line */}
+      <div className="flex flex-col items-center gap-2.5 mt-20 opacity-70">
+        <span className="font-mono text-[11px] text-[#8b8a90] tracking-[2px] uppercase">
+          scroll
+        </span>
+        <div className="w-[1px] h-[40px] bg-gradient-to-b from-[#8b8a90] to-transparent relative overflow-hidden">
+          <div className="absolute top-[-100%] left-0 w-full h-full bg-[#ff4d2e] animate-[cue-drop_1.8s_ease-in-out_infinite]" />
+        </div>
+      </div>
     </div>
   );
 };

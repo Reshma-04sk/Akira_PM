@@ -12,9 +12,11 @@ from src.repositories.task_repository import TaskRepository
 from src.schemas.audit_log import AuditLogResponse
 from src.schemas.dashboard import (
     DashboardActivityResponse,
+    DashboardAnalyticsResponse,
     DashboardMyTasksResponse,
     DashboardOverviewResponse,
     DashboardProjectOverviewResponse,
+    SprintVelocityPoint,
 )
 from src.schemas.task import TaskResponse
 
@@ -65,6 +67,19 @@ class DashboardService:
         )
         await set_cached_val(cache_key, response.model_dump(), expire_seconds=120)
         return response
+
+    async def get_analytics(self, user_id: UUID) -> DashboardAnalyticsResponse:
+        project_ids = await self.project_repository.get_user_involved_project_ids(
+            user_id
+        )
+        data = await self.task_repository.get_analytics_data(project_ids)
+        return DashboardAnalyticsResponse(
+            velocity_history=[
+                SprintVelocityPoint.model_validate(p) for p in data["velocity_history"]
+            ],
+            avg_cycle_time_days=data["avg_cycle_time_days"],
+            completion_rate_percent=data["completion_rate_percent"],
+        )
 
     async def get_activity(
         self, user_id: UUID, limit: int = 10

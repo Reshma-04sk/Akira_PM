@@ -32,12 +32,12 @@ export class ErrorBoundary extends Component<Props, State> {
       const message = this.state.error?.message || "An unexpected error occurred.";
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-foreground p-6 select-none font-sans">
-          <div className="w-full max-w-md p-8 rounded-2xl border border-[#d4af37]/15 glass-modal text-center space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
-            <div className="h-16 w-16 mx-auto rounded-full bg-[#d4af37]/10 border border-[#d4af37]/25 flex items-center justify-center text-[#d4af37]">
+          <div className="w-full max-w-md p-8 rounded-2xl border border-white/15 glass-modal text-center space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
+            <div className="h-16 w-16 mx-auto rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-white/60">
               <AlertTriangle className="h-7 w-7" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-lg font-extrabold tracking-tight text-gold-gradient uppercase">
+              <h1 className="text-lg font-extrabold tracking-tight text-[#f5f5f3] uppercase">
                 Render Failure
               </h1>
               <p className="text-xs text-muted-foreground/80 leading-relaxed">
@@ -118,12 +118,12 @@ export const RouteErrorBoundary: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-foreground p-6 select-none font-sans">
-      <div className="w-full max-w-md p-8 rounded-2xl border border-[#d4af37]/15 glass-modal text-center space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
-        <div className="h-16 w-16 mx-auto rounded-full bg-[#d4af37]/10 border border-[#d4af37]/25 flex items-center justify-center text-[#d4af37]">
+      <div className="w-full max-w-md p-8 rounded-2xl border border-white/15 glass-modal text-center space-y-6 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
+        <div className="h-16 w-16 mx-auto rounded-full bg-white/5 border border-white/15 flex items-center justify-center text-white/60">
           <Icon className="h-7 w-7" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-lg font-extrabold tracking-tight text-gold-gradient uppercase">
+          <h1 className="text-lg font-extrabold tracking-tight text-[#f5f5f3] uppercase">
             {title}
           </h1>
           <p className="text-xs text-muted-foreground/80 leading-relaxed">

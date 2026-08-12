@@ -1,16 +1,23 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useMemo } from "react";
 import { useReducedMotion } from "../../../hooks/useReducedMotion";
 
-interface ExperienceContextType {
-  scrollProgress: number; // Reactive state for HTML
-  scrollProgressRef: React.MutableRefObject<number>; // High-performance ref for WebGL
-  mouseX: number; // Reactive state
-  mouseY: number; // Reactive state
-  mouseRef: React.MutableRefObject<{ x: number; y: number }>; // High-performance ref
+// 1. Reactive State Context (For DOM elements that reactively render on scroll/mouse changes)
+interface ExperienceStateType {
+  scrollProgress: number;
+  mouseX: number;
+  mouseY: number;
+}
+
+const ExperienceStateContext = createContext<ExperienceStateType | null>(null);
+
+// 2. High-Performance Refs Context (For R3F WebGL elements to avoid React re-renders)
+interface ExperienceRefType {
+  scrollProgressRef: React.MutableRefObject<number>;
+  mouseRef: React.MutableRefObject<{ x: number; y: number }>;
   prefersReducedMotion: boolean;
 }
 
-const ExperienceContext = createContext<ExperienceContextType | null>(null);
+const ExperienceRefContext = createContext<ExperienceRefType | null>(null);
 
 export const ExperienceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const prefersReducedMotion = useReducedMotion();
@@ -21,23 +28,21 @@ export const ExperienceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    let currentScroll = 0;
-    let targetScroll = 0;
-
     const currentMouse = { x: 0, y: 0 };
     let targetMouse = { x: 0, y: 0 };
 
     let frameId: number;
 
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const clientHeight = window.innerHeight;
-      const maxScroll = scrollHeight - clientHeight;
-      targetScroll = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const totalHeroRange = window.innerHeight * 2.0;
+      const progress = Math.min(1, Math.max(0, scrollY / totalHeroRange));
+      
+      scrollProgressRef.current = progress;
+      setScrollProgress(progress);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      // Normalize mouse coordinates to -1 to 1 range
       targetMouse = {
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1,
@@ -45,18 +50,14 @@ export const ExperienceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
 
     const update = () => {
-      // Smooth damping (0.07) for buttery cinematic transition
-      currentScroll += (targetScroll - currentScroll) * 0.07;
-      
       currentMouse.x += (targetMouse.x - currentMouse.x) * 0.07;
       currentMouse.y += (targetMouse.y - currentMouse.y) * 0.07;
 
-      // Update WebGL high-performance refs directly
-      scrollProgressRef.current = currentScroll;
-      mouseRef.current = { x: currentMouse.x, y: currentMouse.y };
+      // Update WebGL high-performance refs directly (does not trigger re-renders)
+      mouseRef.current.x = currentMouse.x;
+      mouseRef.current.y = currentMouse.y;
 
       // Update state for DOM elements
-      setScrollProgress(currentScroll);
       setMouse({ x: currentMouse.x, y: currentMouse.y });
 
       frameId = requestAnimationFrame(update);
@@ -75,26 +76,50 @@ export const ExperienceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, []);
 
+  // Stable Refs Context value object reference
+  const refsValue = useMemo(() => ({
+    scrollProgressRef,
+    mouseRef,
+    prefersReducedMotion
+  }), [prefersReducedMotion]);
+
+  // Reactive State Context value object reference
+  const stateValue = useMemo(() => ({
+    scrollProgress,
+    mouseX: mouse.x,
+    mouseY: mouse.y
+  }), [scrollProgress, mouse.x, mouse.y]);
+
   return (
-    <ExperienceContext.Provider
-      value={{
-        scrollProgress,
-        scrollProgressRef,
-        mouseX: mouse.x,
-        mouseY: mouse.y,
-        mouseRef,
-        prefersReducedMotion,
-      }}
-    >
-      {children}
-    </ExperienceContext.Provider>
+    <ExperienceRefContext.Provider value={refsValue}>
+      <ExperienceStateContext.Provider value={stateValue}>
+        {children}
+      </ExperienceStateContext.Provider>
+    </ExperienceRefContext.Provider>
   );
 };
 
-export const useExperience = () => {
-  const ctx = useContext(ExperienceContext);
-  if (!ctx) throw new Error("useExperience must be used within ExperienceProvider");
+// Hook for HTML elements that need scroll/mouse state triggers
+export const useExperienceState = () => {
+  const ctx = useContext(ExperienceStateContext);
+  if (!ctx) throw new Error("useExperienceState must be used within ExperienceProvider");
   return ctx;
 };
 
-export default ExperienceContext;
+// Hook for 3D R3F components that execute entirely inside useFrame loops
+export const useExperienceRefs = () => {
+  const ctx = useContext(ExperienceRefContext);
+  if (!ctx) throw new Error("useExperienceRefs must be used within ExperienceProvider");
+  return ctx;
+};
+
+// Maintain fallback useExperience for backwards compatibility
+export const useExperience = () => {
+  const stateCtx = useContext(ExperienceStateContext);
+  const refCtx = useContext(ExperienceRefContext);
+  if (!stateCtx || !refCtx) throw new Error("useExperience must be used within ExperienceProvider");
+  return {
+    ...stateCtx,
+    ...refCtx
+  };
+};

@@ -44,3 +44,5 @@ alembic.log
 *.swp
 .DS_Store
 Thumbs.db
+apps/backend/uploads/
+landing.html

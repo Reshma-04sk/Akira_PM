@@ -423,17 +423,17 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
       onClick={onClick}
       className={`search-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
         isActive 
-          ? "search-item-active bg-primary text-primary-foreground" 
+          ? "search-item-active bg-[#ff4d2e]/14 text-[#ff4d2e] border border-[#ff4d2e]/30" 
           : "hover:bg-muted/40 text-foreground"
       }`}
     >
-      <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground"}`} />
+      <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#ff4d2e]" : "text-muted-foreground"}`} />
       <div className="flex-grow text-xs truncate leading-normal">
         {displayNode}
       </div>
       {isActive && (
-        <span className="text-[9px] px-1 bg-primary-foreground/20 rounded font-medium select-none">
-          Open
+        <span className="text-[9px] px-1.5 py-0.5 bg-[#ff4d2e] text-[#1a0a06] font-mono rounded font-bold uppercase select-none">
+          Select
         </span>
       )}
     </div>

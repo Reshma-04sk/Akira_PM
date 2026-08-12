@@ -118,9 +118,9 @@ export const Drawer: React.FC<DrawerProps> = ({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={cn(
               "absolute glass-panel flex flex-col p-6",
-              position === "left" && "border-r border-[#d4af37]/10",
-              position === "right" && "border-l border-[#d4af37]/10",
-              position === "bottom" && "border-t border-[#d4af37]/10 rounded-t-2xl",
+              position === "left" && "border-r border-white/8",
+              position === "right" && "border-l border-white/8",
+              position === "bottom" && "border-t border-white/8 rounded-t-2xl",
               positioning,
               className
             )}
