@@ -53,6 +53,7 @@ jobs:
       - name: Run Pytest with Coverage
         env:
           ENV_STATE: testing
+          PYTHONPATH: .
           BACKEND_SECRET_KEY: test_secret_key_placeholder_do_not_use_in_prod_12345
         run: uv run pytest --cov=src --cov-report=xml --cov-report=term --junitxml=junit.xml
 
@@ -98,7 +99,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: apps/frontend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
