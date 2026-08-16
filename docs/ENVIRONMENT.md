@@ -77,6 +77,6 @@ BACKEND_ACCESS_TOKEN_EXPIRE_MINUTES=30
 DATABASE_URL=postgresql+asyncpg://postgres.ref:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
 REDIS_URL=rediss://default:token@us1-example-redis.upstash.io:32456
 
-CORS_ALLOWED_ORIGINS=https://akira-pm.vercel.app
-ALLOWED_HOSTS=akira-pm-backend.onrender.com
+CORS_ALLOWED_ORIGINS=https://akira-pm-frontend.vercel.app
+ALLOWED_HOSTS=akira-pm.onrender.com
 ```

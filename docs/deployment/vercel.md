@@ -22,7 +22,7 @@ Configure build-time and runtime environment variables:
 
 | Key | Value | Description |
 |:---|:---|:---|
-| `VITE_API_URL` | `https://akira-pm-api.onrender.com/api/v1` | Public API endpoint (FastAPI backend url). |
+| `VITE_API_URL` | `https://akira-pm.onrender.com/api/v1` | Public API endpoint (FastAPI backend url). |
 | `VITE_SENTRY_DSN` | *[Optional DSN]* | Sentry DSN endpoint for browser tracking. |
 
 ### 3. Retrieve Vercel IDs

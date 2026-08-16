@@ -16,7 +16,7 @@ Configure the following secrets in your repository settings under **Settings** -
 | `SUPABASE_ANON_KEY` | Integration | Client anon token. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Integration | Service role key. |
 | `JWT_SECRET` | Authentication | Cryptographic key signature for signups/auth. |
-| `RESEND_API_KEY` | Delivery | Resend API key for custom transactional emails. |
+| `RESEND_API_KEY` | Delivery | Email delivery is currently mocked/simulated; the configuration contains a provider key placeholder for future integration. |
 | `SENTRY_DSN` | Diagnostics | Backend diagnostics endpoint. |
 | `VITE_SENTRY_DSN` | Diagnostics | Frontend diagnostics endpoint. |
 
@@ -28,7 +28,7 @@ Configure the following secrets in your repository settings under **Settings** -
 | `VERCEL_ORG_ID` | Automation | Organization identifier found in `.vercel/project.json`. |
 | `VERCEL_PROJECT_ID` | Automation | Project identifier found in `.vercel/project.json`. |
 | `RENDER_DEPLOY_HOOK_URL` | Automation | HTTP hook copied from Render Web Service settings page. |
-| `BACKEND_URL` | Verification | The live URL endpoint of the Render service (e.g. `https://akira-pm-api.onrender.com`). |
+| `BACKEND_URL` | Verification | The live URL endpoint of the Render service (e.g. `https://akira-pm.onrender.com`). |
 
 ---
 

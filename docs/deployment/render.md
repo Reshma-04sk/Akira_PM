@@ -32,10 +32,10 @@ Under the **Environment** tab, configure the following variables:
 | `GEMINI_API_KEY` | *[Optional API Key]* | Gemini client token. |
 | `OPENAI_API_KEY` | *[Optional API Key]* | OpenAI client token. |
 | `ANTHROPIC_API_KEY` | *[Optional API Key]* | Anthropic client token. |
-| `RESEND_API_KEY` | *[Optional API Key]* | Resend API key for custom transactional emails. |
+| `RESEND_API_KEY` | *[Optional API Key]* | Email delivery is currently mocked/simulated; the configuration contains a provider key placeholder for future integration. |
 | `SENTRY_DSN` | *[Optional DSN]* | Sentry DSN endpoint for exception tracking. |
-| `CORS_ALLOWED_ORIGINS` | `https://akira-pm.vercel.app` | Production origin address. |
-| `ALLOWED_HOSTS` | `akira-pm-api.onrender.com` | Production hostname binding. |
+| `CORS_ALLOWED_ORIGINS` | `https://akira-pm-frontend.vercel.app` | Production origin address. |
+| `ALLOWED_HOSTS` | `akira-pm.onrender.com` | Production hostname binding. |
 
 ### 3. Deploy Hook Setup
 To trigger deployments automatically from our GitHub Action pipeline:
