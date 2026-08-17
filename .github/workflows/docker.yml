@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & Cache Backend Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./apps/backend
           file: ./apps/backend/Dockerfile
@@ -57,7 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build & Cache Frontend Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./apps/frontend
           file: ./apps/frontend/Dockerfile
